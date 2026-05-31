@@ -1,0 +1,45 @@
+{
+	"name": "tasknotes-workflows",
+	"version": "0.1.0",
+	"description": "Markdown-defined workflow automation for TaskNotes.",
+	"type": "module",
+	"main": "main.js",
+	"scripts": {
+		"build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+		"build:test": "npm run build && node copy-files.mjs",
+		"copy-files": "node copy-files.mjs",
+		"dev": "node esbuild.config.mjs",
+		"lint": "eslint . --max-warnings=0",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
+	},
+	"keywords": [
+		"obsidian",
+		"tasknotes",
+		"workflow",
+		"automation",
+		"tasks"
+	],
+	"author": "Callum Alpass",
+	"license": "MIT",
+	"dependencies": {
+		"yaml": "^2.8.1"
+	},
+	"devDependencies": {
+		"@codemirror/state": "^6.5.0",
+		"@codemirror/view": "^6.38.6",
+		"@eslint/js": "^9.39.4",
+		"@types/node": "^24.3.0",
+		"@typescript-eslint/eslint-plugin": "^8.59.3",
+		"@typescript-eslint/parser": "^8.59.3",
+		"esbuild": "^0.25.9",
+		"eslint": "^9.39.4",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-obsidianmd": "^0.3.0",
+		"globals": "^16.5.0",
+		"obsidian": "^1.12.3",
+		"obsidian-typings": "^4.49.0",
+		"typescript": "^5.9.2",
+		"vitest": "^4.0.13"
+	}
+}

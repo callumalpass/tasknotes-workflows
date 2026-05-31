@@ -1,0 +1,101 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  build:
+    name: Build Obsidian Plugin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate release metadata
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+
+          const manifest = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
+          const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const versions = JSON.parse(fs.readFileSync("versions.json", "utf8"));
+
+          const failures = [];
+          const semverPattern = /^\d+\.\d+\.\d+$/u;
+
+          if (!semverPattern.test(manifest.version)) {
+            failures.push(`manifest version must use x.y.z: ${manifest.version}`);
+          }
+
+          if (packageJson.version !== manifest.version) {
+            failures.push(`package.json version ${packageJson.version} does not match manifest ${manifest.version}`);
+          }
+
+          if (versions[manifest.version] !== manifest.minAppVersion) {
+            failures.push(`versions.json must map ${manifest.version} to ${manifest.minAppVersion}`);
+          }
+
+          for (const file of ["main.js", "manifest.json", "styles.css"]) {
+            if (!fs.existsSync(file) || fs.statSync(file).size === 0) {
+              failures.push(`missing or empty release asset: ${file}`);
+            }
+          }
+
+          if (failures.length > 0) {
+            console.error(failures.join("\n"));
+            process.exit(1);
+          }
+          NODE
+
+      - name: Generate artifact attestations
+        if: github.event_name != 'pull_request'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
+
+      - name: Upload Obsidian plugin assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: tasknotes-workflows-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            main.js
+            manifest.json
+            styles.css
+

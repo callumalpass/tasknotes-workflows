@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"target": "ES2021",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"lib": ["DOM", "ES2021"],
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitOverride": true,
+		"types": ["node", "obsidian", "obsidian-typings"]
+	},
+	"include": ["main.ts", "src/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["node_modules", "main.js"]
+}
+

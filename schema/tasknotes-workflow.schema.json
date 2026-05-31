@@ -1,0 +1,123 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://tasknotes.dev/schemas/tasknotes-workflow.schema.json",
+	"title": "TaskNotes Workflow",
+	"type": "object",
+	"additionalProperties": true,
+	"required": ["type", "schemaVersion", "id", "name", "enabled", "triggers", "steps", "run"],
+	"properties": {
+		"type": { "const": "tasknotes-workflow" },
+		"schemaVersion": { "const": 1 },
+		"id": {
+			"type": "string",
+			"pattern": "^[a-z][a-z0-9._-]*$"
+		},
+		"name": { "type": "string", "minLength": 1 },
+		"description": { "type": "string" },
+		"enabled": { "type": "boolean" },
+		"triggers": {
+			"type": "array",
+			"minItems": 1,
+			"items": { "$ref": "#/$defs/trigger" }
+		},
+		"conditions": {
+			"type": "array",
+			"items": { "$ref": "#/$defs/condition" }
+		},
+		"steps": {
+			"type": "array",
+			"minItems": 1,
+			"items": { "$ref": "#/$defs/step" }
+		},
+		"run": { "$ref": "#/$defs/runPolicy" }
+	},
+	"$defs": {
+		"trigger": {
+			"type": "object",
+			"required": ["id", "type"],
+			"properties": {
+				"id": { "type": "string" },
+				"type": {
+					"enum": [
+						"tasknotes.event",
+						"task.event",
+						"cron",
+						"interval",
+						"manual",
+						"obsidian.vault",
+						"obsidian.metadata",
+						"obsidian.workspace"
+					]
+				},
+				"event": { "type": "string" },
+				"schedule": { "type": "string" },
+				"every": { "type": "string" },
+				"timezone": { "type": "string" },
+				"from": {},
+				"to": {},
+				"path": { "$ref": "#/$defs/pathFilter" },
+				"allowSelfTrigger": { "type": "boolean" }
+			}
+		},
+		"pathFilter": {
+			"type": "object",
+			"properties": {
+				"glob": { "type": "string" },
+				"extension": { "type": "string" }
+			}
+		},
+		"condition": {
+			"type": "object",
+			"required": ["field", "operator"],
+			"properties": {
+				"id": { "type": "string" },
+				"field": { "type": "string" },
+				"operator": {
+					"enum": [
+						"is",
+						"isNot",
+						"in",
+						"notIn",
+						"exists",
+						"missing",
+						"contains",
+						"startsWith",
+						"before",
+						"after",
+						"onOrBefore",
+						"onOrAfter"
+					]
+				},
+				"value": {}
+			}
+		},
+		"step": {
+			"type": "object",
+			"required": ["id", "type"],
+			"properties": {
+				"id": { "type": "string" },
+				"type": { "type": "string" },
+				"input": { "type": "object" },
+				"if": {
+					"oneOf": [
+						{ "$ref": "#/$defs/condition" },
+						{ "type": "array", "items": { "$ref": "#/$defs/condition" } }
+					]
+				},
+				"forEach": { "type": "string" }
+			}
+		},
+		"runPolicy": {
+			"type": "object",
+			"required": ["mode", "noOverlap", "source", "onError"],
+			"properties": {
+				"mode": { "const": "sequential" },
+				"noOverlap": { "type": "boolean" },
+				"source": { "type": "string" },
+				"maxTasks": { "type": "number" },
+				"onError": { "enum": ["stop", "continue"] },
+				"timeout": { "type": "string" }
+			}
+		}
+	}
+}

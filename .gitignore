@@ -1,0 +1,11 @@
+node_modules/
+main.js
+*.js.map
+coverage/
+.copy-files.local
+.env
+dist/
+.DS_Store
+*.log
+*.tsbuildinfo
+*.png
