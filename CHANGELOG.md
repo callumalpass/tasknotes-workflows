@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+## [0.1.1] - 2026-06-01
+
 ### Changed
+
+- Enabled TaskNotes-style CSS linting and removed review-warning CSS patterns.
 
 ## [0.1.0] - 2026-06-01
 

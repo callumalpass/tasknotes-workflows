@@ -554,7 +554,7 @@ export class WorkflowEditModal extends Modal {
 		const details = parent.createEl("details", { cls: "tnw-output-fields tnw-trigger-output-fields" });
 		renderDisclosureSummary(details, this.t("editor.triggers.valuesAvailable", { count: outputs.length }));
 		for (const output of outputs) {
-			const row = details.createDiv({ cls: "tnw-output-row" });
+			const row = details.createDiv({ cls: output.description ? "tnw-output-row" : "tnw-output-row is-compact" });
 			row.createSpan({ cls: "tnw-output-key", text: `{{trigger.${output.key}}}` });
 			row.createSpan({ cls: "tnw-output-type", text: output.type });
 			if (output.description) row.createSpan({ cls: "tnw-output-description", text: output.description });
@@ -1130,7 +1130,7 @@ export class WorkflowEditModal extends Modal {
 		const details = parent.createEl("details", { cls: "tnw-output-fields" });
 		renderDisclosureSummary(details, this.t("editor.steps.outputsAvailable", { count: definition.outputFields.length }));
 		for (const output of definition.outputFields) {
-			const row = details.createDiv({ cls: "tnw-output-row" });
+			const row = details.createDiv({ cls: output.description ? "tnw-output-row" : "tnw-output-row is-compact" });
 			row.createSpan({ cls: "tnw-output-key", text: `{{steps.${step.id}.${output.key}}}` });
 			row.createSpan({ cls: "tnw-output-type", text: output.type });
 			if (output.description) row.createSpan({ cls: "tnw-output-description", text: output.description });
