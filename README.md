@@ -12,7 +12,7 @@ Default workflow files are created disabled. They include starter examples for t
 
 ## Status
 
-This plugin expects TaskNotes to expose its JavaScript runtime API. Without TaskNotes, the Base view can still load and validate workflow files, but task-mutating steps cannot run.
+This plugin expects TaskNotes to expose its JavaScript runtime API. With the richer runtime API available, the editor reads TaskNotes catalogs for status and priority options, task event definitions, and canonical runtime query support. Without TaskNotes, the Base view can still load and validate workflow files, but TaskNotes read/write steps cannot run.
 
 ## Workflow Shape
 
@@ -56,7 +56,7 @@ See [Workflow Schema](docs/workflow-schema.md) and [AI Agent Authoring Script](d
 
 ## Editing
 
-Use the workflow Base as the primary UI. Workflow cards open a modal editor for definition fields, triggers, steps, and run policy. The modal renders typed fields from the step catalog, including TaskNotes status and priority options when the TaskNotes runtime API is available, plus selected Obsidian file, workspace, and frontmatter actions.
+Use the workflow Base as the primary UI. Workflow cards open a modal editor for definition fields, triggers, steps, and run policy. The modal renders typed fields from the step catalog, including TaskNotes catalog-backed status and priority options, a visual builder for canonical TaskNotes runtime task queries, and selected Obsidian file, workspace, and frontmatter actions.
 
 The underlying note remains the source of truth. Use the card's note action when direct YAML editing is useful. Workflow notes also show a compact workflow card in reading mode.
 

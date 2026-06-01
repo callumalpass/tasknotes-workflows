@@ -1,6 +1,7 @@
 import { normalizePath, Notice, TFile } from "obsidian";
 import { conditionMatches, conditionsMatch } from "./conditions";
 import { DEFAULT_SOURCE } from "./constants";
+import { defaultRuntimeTaskQuery } from "./taskQuery";
 import { resolveTemplateValue } from "./template";
 import type { App, PaneType } from "obsidian";
 import type {
@@ -8,6 +9,9 @@ import type {
 	StepExecutionContext,
 	TaskNotesMutationContext,
 	TaskNotesRuntimeApi,
+	TaskNotesRuntimeTaskQuery,
+	TaskNotesRuntimeTaskQueryResult,
+	TaskNotesRuntimeQueryGroup,
 	WorkflowInputField,
 	WorkflowOutputField,
 	WorkflowObsidianContext,
@@ -202,27 +206,34 @@ function createDefaultSteps(): StepDefinition[] {
 		{
 			type: "task.query",
 			label: "Query tasks",
-			description: "Selects tasks with a compact workflow query.",
+			description: "Selects tasks with the TaskNotes runtime query API.",
 			category: "TaskNotes",
 			inputFields: [
 				{
 					key: "query",
 					label: "Query",
-					type: "json",
+					type: "taskQuery",
 					required: true,
 					wide: true,
-					description: "Object keyed by task fields. Values may be literals or { operator, value } filters.",
-					defaultValue: { status: { operator: "isNot", value: "done" } },
+					description: "Runtime task query using TaskNotes fields, operators, sort, grouping, and limit.",
+					defaultValue: defaultRuntimeTaskQuery(),
 				},
 			],
 			outputFields: [
 				{ key: "tasks", label: "Tasks", type: "TaskInfo[]", description: "The matching TaskNotes tasks." },
-				{ key: "count", label: "Count", type: "number", description: "Number of matching tasks." },
+				{ key: "count", label: "Count", type: "number", description: "Number of returned tasks." },
+				{ key: "total", label: "Total", type: "number", description: "Total tasks before filtering." },
+				{ key: "matched", label: "Matched", type: "number", description: "Tasks matching the query before offset and limit." },
+				{ key: "returned", label: "Returned", type: "number", description: "Tasks returned after offset and limit." },
+				{ key: "groups", label: "Groups", type: "TaskQueryGroup[]", description: "TaskNotes query group details." },
+				{ key: "groupPaths", label: "Group paths", type: "object", description: "Task paths keyed by group key." },
+				{ key: "query", label: "Query", type: "object", description: "The normalized TaskNotes runtime query." },
+				{ key: "warnings", label: "Warnings", type: "object[]", description: "Non-fatal TaskNotes query warnings." },
 			],
 			examples: [
 				{
 					label: "Open tasks",
-					input: { query: { status: { operator: "isNot", value: "done" } } },
+					input: { query: defaultRuntimeTaskQuery() },
 				},
 			],
 			mutatesTasks: false,
@@ -230,10 +241,14 @@ function createDefaultSteps(): StepDefinition[] {
 			supportsForEach: false,
 			run: async (input, context) => {
 				const api = requireTaskNotes(context.tasknotes);
+				if (!api.query?.tasks) {
+					throw new Error("TaskNotes runtime query API is unavailable.");
+				}
 				const queryInput = asRecord(input);
-				const allTasks = await api.tasks.list();
-				const tasks = filterTasks(allTasks, asRecord(queryInput.query));
-				return { tasks, count: tasks.length };
+				const query = queryInput.query;
+				if (!isRuntimeTaskQuery(query)) throw new Error("task.query requires a TaskNotes runtime query object.");
+				const result = await api.query.tasks(query);
+				return taskQueryOutput(result);
 			},
 		},
 		taskRelationshipListStep(
@@ -983,48 +998,34 @@ export function createStepExecutionContext(
 	};
 }
 
-function filterTasks(
-	tasks: Record<string, unknown>[],
-	query: Record<string, unknown>
-): Record<string, unknown>[] {
-	if (Object.keys(query).length === 0) return tasks;
-	return tasks.filter((task) =>
-		Object.entries(query).every(([field, criterion]) => matchesCriterion(task[field], criterion))
+function taskQueryOutput(result: TaskNotesRuntimeTaskQueryResult): Record<string, unknown> {
+	return {
+		tasks: result.tasks,
+		count: result.returned,
+		total: result.total,
+		matched: result.matched,
+		returned: result.returned,
+		groups: result.groups ?? [],
+		groupPaths: groupPathsByKey(result.groups ?? []),
+		query: result.query,
+		warnings: result.warnings ?? [],
+	};
+}
+
+function groupPathsByKey(groups: readonly TaskNotesRuntimeQueryGroup[]): Record<string, string[]> {
+	return Object.fromEntries(groups.map((group) => [group.key, [...group.taskPaths]]));
+}
+
+function isRuntimeTaskQuery(value: unknown): value is TaskNotesRuntimeTaskQuery {
+	if (!isRecord(value)) return false;
+	return Object.keys(value).every((key) =>
+		key === "where" ||
+		key === "sort" ||
+		key === "limit" ||
+		key === "offset" ||
+		key === "group" ||
+		key === "scope"
 	);
-}
-
-function matchesCriterion(value: unknown, criterion: unknown): boolean {
-	if (!isRecord(criterion) || !("operator" in criterion)) return Object.is(value, criterion);
-	const operator = String(criterion.operator);
-	const expected = criterion.value;
-	if (operator === "is") return stringifyScalar(value) === stringifyScalar(expected);
-	if (operator === "isNot") return stringifyScalar(value) !== stringifyScalar(expected);
-	if (operator === "in") return Array.isArray(expected) && expected.includes(value);
-	if (operator === "notIn") return !Array.isArray(expected) || !expected.includes(value);
-	if (operator === "exists") return value !== null && typeof value !== "undefined" && value !== "";
-	if (operator === "missing") return value === null || typeof value === "undefined" || value === "";
-	if (operator === "contains") return containsValue(value, expected);
-	if (operator === "startsWith") return stringifyScalar(value).startsWith(stringifyScalar(expected));
-	if (operator === "before") return new Date(String(value)).getTime() < dateValue(expected);
-	if (operator === "after") return new Date(String(value)).getTime() > dateValue(expected);
-	if (operator === "onOrBefore") return new Date(String(value)).getTime() <= dateValue(expected);
-	if (operator === "onOrAfter") return new Date(String(value)).getTime() >= dateValue(expected);
-	return false;
-}
-
-function containsValue(actual: unknown, expected: unknown): boolean {
-	if (Array.isArray(actual)) {
-		return actual.some((item) => stringifyScalar(item) === stringifyScalar(expected));
-	}
-	return stringifyScalar(actual).includes(stringifyScalar(expected));
-}
-
-function dateValue(value: unknown): number {
-	if (value === "today") {
-		const now = new Date();
-		return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-	}
-	return new Date(stringifyScalar(value)).getTime();
 }
 
 function requiredString(input: unknown, field: string): string {
@@ -1059,13 +1060,4 @@ function asRecord(input: unknown): Record<string, unknown> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function stringifyScalar(value: unknown): string {
-	if (value === null || typeof value === "undefined") return "";
-	if (typeof value === "string") return value;
-	if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
-		return String(value);
-	}
-	return JSON.stringify(value);
 }

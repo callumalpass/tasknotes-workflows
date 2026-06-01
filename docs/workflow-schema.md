@@ -157,9 +157,22 @@ steps:
     type: task.query
     input:
       query:
-        due:
-          operator: before
-          value: today
+        where:
+          all:
+            - field: task.due
+              op: lt
+              value:
+                fn: today
+            - field: task.status
+              op: notIn
+              value:
+                - done
+                - cancelled
+        sort:
+          - field: task.due
+            direction: asc
+        scope:
+          includeArchived: false
 
   - id: mark-high
     type: task.patch
@@ -169,6 +182,57 @@ steps:
       patch:
         priority: high
 ```
+
+`task.query` accepts the canonical TaskNotes runtime task query DTO and delegates to `api.query.tasks()`. The workflow editor provides a visual builder for simple `all`/`any` condition lists, sort, group, limit, and archived scope; use the advanced JSON field for nested predicates, negation, date math, folder scopes, and offsets.
+
+```yaml
+steps:
+  - id: active
+    type: task.query
+    input:
+      query:
+        where:
+          field: task.status
+          op: eq
+          value: active
+        group:
+          - field: task.status
+        limit: 25
+```
+
+The output is available as `tasks`, `count`, `total`, `matched`, `returned`, `groups`, `groupPaths`, `query`, and `warnings`.
+
+Runtime task queries use this shape:
+
+```yaml
+query:
+  where:
+    all:
+      - field: task.status
+        op: ne
+        value: done
+      - any:
+          - field: task.due
+            op: lte
+            value:
+              fn: today
+          - field: task.priority
+            op: eq
+            value: high
+  sort:
+    - field: task.due
+      direction: asc
+  group:
+    - field: task.status
+  limit: 25
+  offset: 0
+  scope:
+    includeArchived: false
+    folders:
+      - Tasks
+```
+
+`where` can be a condition (`field`, `op`, optional `value`) or a nested `all`, `any`, or `not` predicate. Operators are `eq`, `ne`, `contains`, `notContains`, `in`, `notIn`, `exists`, `missing`, `lt`, `lte`, `gt`, `gte`, `isTrue`, and `isFalse`. Common fields include `task.status`, `task.priority`, `task.due`, `task.scheduled`, `task.projects`, `task.contexts`, `task.tags`, `task.isBlocked`, and `file.path`. Date values can use `{ fn: today }`, `{ fn: now }`, `{ fn: date, value: "2026-06-01" }`, or `{ fn: dateAdd, value: { fn: today }, amount: 1, unit: day }`.
 
 ## Run Policy
 
@@ -182,6 +246,8 @@ run:
 ```
 
 Run logs are stored under the plugin's Obsidian config folder by default. Workflow notes are not modified when workflows run.
+
+When TaskNotes exposes typed runtime API errors, failed task steps store the API error code, status, and details in the run detail alongside the readable error message.
 
 ## Step Catalog
 

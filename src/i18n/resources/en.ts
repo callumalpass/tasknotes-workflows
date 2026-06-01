@@ -527,6 +527,40 @@ export const en: TranslationTree = {
 			positiveNumber: "Use a positive number.",
 			jsonObject: "Step input must be a JSON object.",
 		},
+		query: {
+			preview: "Preview",
+			previewUnavailable: "TaskNotes query preview is unavailable.",
+			previewResult: "Query matches {matched} of {total} tasks and returns {returned}.",
+			runtimeUnavailable: "Load TaskNotes to edit query fields from the runtime catalog.",
+			advancedOnly: "This query uses nesting or negation. Edit the JSON directly.",
+			valid: "TaskNotes accepts this query.",
+			invalid: "TaskNotes query is invalid.",
+			match: "Match",
+			matchAll: "All conditions",
+			matchAny: "Any condition",
+			addCondition: "Add condition",
+			removeCondition: "Remove condition",
+			noConditions: "No conditions. The query will match all tasks in scope.",
+			field: "Field",
+			operator: "Operator",
+			value: "Value",
+			noValue: "No value",
+			true: "True",
+			false: "False",
+			options: "Sort, group, and scope",
+			optionsDescription: "Optional result controls for this task query.",
+			sortField: "Sort by",
+			sortDirection: "Direction",
+			ascending: "Ascending",
+			descending: "Descending",
+			groupField: "Group by",
+			limit: "Limit",
+			includeArchived: "Include archived tasks",
+			none: "None",
+			jsonTitle: "Advanced JSON",
+			jsonDescription: "Use this for nested groups, negation, date math, folders, offsets, or exact API input.",
+			jsonLabel: "Runtime query JSON",
+		},
 	},
 	steps: {
 		categories: {
@@ -567,11 +601,11 @@ export const en: TranslationTree = {
 				},
 				query: {
 					label: "Query tasks",
-					description: "Selects tasks with a compact workflow query.",
+					description: "Selects tasks with the TaskNotes runtime query API.",
 					input: {
 						query: {
 							label: "Query",
-							description: "Object keyed by task fields. Values may be literals or { operator, value } filters.",
+							description: "Runtime task query using TaskNotes fields, operators, sort, grouping, and limit.",
 						},
 					},
 					output: {
@@ -581,7 +615,35 @@ export const en: TranslationTree = {
 						},
 						count: {
 							label: "Count",
-							description: "Number of matching tasks.",
+							description: "Number of returned tasks.",
+						},
+						total: {
+							label: "Total",
+							description: "Total tasks before filtering.",
+						},
+						matched: {
+							label: "Matched",
+							description: "Tasks matching the query before offset and limit.",
+						},
+						returned: {
+							label: "Returned",
+							description: "Tasks returned after offset and limit.",
+						},
+						groups: {
+							label: "Groups",
+							description: "TaskNotes query group details.",
+						},
+						groupPaths: {
+							label: "Group paths",
+							description: "Task paths keyed by group key.",
+						},
+						query: {
+							label: "Query",
+							description: "The normalized TaskNotes runtime query.",
+						},
+						warnings: {
+							label: "Warnings",
+							description: "Non-fatal TaskNotes query warnings.",
 						},
 					},
 					examples: {

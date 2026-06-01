@@ -38,7 +38,7 @@ describe("default workflows service", () => {
 		expect(vault.files.get("TaskNotes/Workflows/clear-scheduled-when-started.md")).toContain("type: task.clearScheduled");
 		expect(vault.files.get("TaskNotes/Workflows/stamp-started-at.md")).toContain("startedAt");
 		expect(vault.files.get("TaskNotes/Workflows/rollover-overdue-scheduled-tasks.md")).toContain("type: task.reschedule");
-		expect(vault.files.get("TaskNotes/Workflows/escalate-due-today-tasks.md")).toContain("operator: onOrBefore");
+		expect(vault.files.get("TaskNotes/Workflows/escalate-due-today-tasks.md")).toContain("op: lte");
 		expect(vault.files.get("TaskNotes/Workflows/inherit-subtask-dependencies.md")).toContain("type: task.dependencies");
 		expect(vault.files.get("TaskNotes/Workflows/mirror-parent-dependencies-to-subtasks.md")).toContain("blockedBy");
 		expect(vault.files.get("TaskNotes/Views/workflows.base")).toContain("type: tasknotesWorkflows");

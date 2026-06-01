@@ -567,11 +567,11 @@ export const de: TranslationTree = {
 				},
 				query: {
 					label: "Abfrageaufgaben",
-					description: "Wählt Aufgaben mit einer kompakten Workflow-Abfrage aus.",
+					description: "Wählt Aufgaben mit der TaskNotes-Laufzeitabfrage-API aus.",
 					input: {
 						query: {
 							label: "Abfrage",
-							description: "Durch Aufgabenfelder verschlüsseltes Objekt. Werte können Literale oder { operator, value }-Filter sein.",
+							description: "Laufzeitabfrage für Aufgaben mit TaskNotes-Feldern, Operatoren, Sortierung, Gruppierung und Limit.",
 						},
 					},
 					output: {

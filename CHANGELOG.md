@@ -8,3 +8,5 @@
 - Added translated interface resources for French, Russian, Chinese, German, Spanish, Japanese, Portuguese, and Korean.
 - Made trigger output values and step output values use the same editor styling.
 - Added disabled default workflows for clearing scheduled dates when work starts, stamping a started timestamp, rolling overdue scheduled tasks to today, and escalating due-today tasks.
+- Integrated the workflow editor and runner with the richer TaskNotes runtime API, including catalog-backed status/priority options, canonical TaskNotes runtime queries, runtime lifecycle refreshes, and typed TaskNotes API errors in run history.
+- Added a visual query builder for `task.query`, with TaskNotes field/operator catalogs, runtime validation, preview counts, sorting, grouping, limits, and advanced JSON editing for nested queries.

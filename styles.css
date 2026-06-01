@@ -808,6 +808,8 @@
 .tnw-modal .tnw-row-actions button:focus-visible,
 .tnw-outline-item:focus-visible,
 .tnw-modal .tnw-add-row-controls button:focus-visible,
+.tnw-query-actions button:focus-visible,
+.tnw-query-toolbar button:focus-visible,
 .tnw-modal-footer button:focus-visible {
 	outline: 2px solid var(--background-modifier-border-focus);
 	outline-offset: 2px;
@@ -1524,6 +1526,139 @@ details[open] > .tnw-disclosure-summary .tnw-disclosure-chevron::before {
 	white-space: nowrap;
 }
 
+.tnw-query-builder {
+	gap: var(--size-4-3, 12px);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s, 4px);
+	background: var(--background-secondary);
+	padding: var(--size-4-3, 12px);
+}
+
+.tnw-query-header,
+.tnw-query-toolbar {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: var(--size-4-2, 8px);
+}
+
+.tnw-query-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.tnw-query-actions {
+	display: flex;
+	flex: 0 0 auto;
+	gap: var(--size-4-2, 8px);
+}
+
+.tnw-query-actions button,
+.tnw-query-toolbar button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 32px;
+	height: 32px;
+	border: 0;
+	border-radius: var(--radius-s, 4px);
+	background: transparent;
+	box-shadow: none;
+	color: var(--text-muted);
+	padding: 0 10px;
+}
+
+.tnw-query-actions button:hover,
+.tnw-query-actions button:focus-visible,
+.tnw-query-toolbar button:hover,
+.tnw-query-toolbar button:focus-visible {
+	background: var(--background-modifier-hover);
+	box-shadow: none;
+	color: var(--text-normal);
+}
+
+.tnw-query-actions button svg,
+.tnw-query-toolbar button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.tnw-query-section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2, 8px);
+	min-width: 0;
+}
+
+.tnw-query-toolbar {
+	align-items: end;
+	justify-content: flex-start;
+}
+
+.tnw-query-toolbar .tnw-field {
+	min-width: 180px;
+	max-width: 260px;
+}
+
+.tnw-query-condition,
+.tnw-query-options-grid {
+	display: grid;
+	grid-template-columns: minmax(180px, 1.2fr) minmax(150px, 0.85fr) minmax(160px, 1fr) auto;
+	gap: var(--size-4-2, 8px);
+	align-items: end;
+	min-width: 0;
+}
+
+.tnw-query-options-grid {
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.tnw-query-value-placeholder {
+	display: flex;
+	align-items: center;
+	min-height: 32px;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.tnw-query-validation,
+.tnw-query-empty {
+	border-radius: var(--radius-s, 4px);
+	padding: 7px 9px;
+	font-size: var(--font-ui-smaller);
+	line-height: 1.4;
+}
+
+.tnw-query-empty {
+	border: 1px dashed var(--background-modifier-border);
+	color: var(--text-muted);
+}
+
+.tnw-query-validation.is-valid {
+	color: var(--text-muted);
+	background: var(--background-primary);
+}
+
+.tnw-query-validation.is-warning {
+	border: 1px solid color-mix(in srgb, var(--text-warning) 35%, var(--background-modifier-border));
+	color: var(--text-warning);
+	background: color-mix(in srgb, var(--text-warning) 8%, transparent);
+}
+
+.tnw-query-validation.is-error {
+	border: 1px solid color-mix(in srgb, var(--text-error) 40%, var(--background-modifier-border));
+	color: var(--text-error);
+	background: color-mix(in srgb, var(--text-error) 8%, transparent);
+}
+
+.tnw-query-options,
+.tnw-query-json {
+	border-top: 1px solid var(--background-modifier-border);
+}
+
 .tnw-output-fields > summary {
 	cursor: pointer;
 }
@@ -1637,22 +1772,30 @@ details[open] > .tnw-disclosure-summary .tnw-disclosure-chevron::before {
 		max-height: 280px;
 	}
 
-	.tnw-diagnostic,
-	.tnw-definition-panel,
-	.tnw-definition-grid,
-	.tnw-form-grid,
-	.tnw-output-row,
-	.tnw-output-row:not(:has(.tnw-output-description)) {
+		.tnw-diagnostic,
+		.tnw-definition-panel,
+		.tnw-definition-grid,
+		.tnw-form-grid,
+		.tnw-query-condition,
+		.tnw-query-options-grid,
+		.tnw-output-row,
+		.tnw-output-row:not(:has(.tnw-output-description)) {
 		grid-template-columns: 1fr;
 	}
 
 	.tnw-form-actions,
 	.tnw-row-actions,
+	.tnw-query-header,
+	.tnw-query-toolbar,
 	.tnw-modal-footer,
 	.tnw-modal-footer-actions,
 	.tnw-list-actions {
 		flex-wrap: wrap;
 		justify-content: flex-start;
+	}
+
+	.tnw-query-toolbar .tnw-field {
+		max-width: none;
 	}
 
 	.tnw-modal-footer {

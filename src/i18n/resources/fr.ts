@@ -567,11 +567,11 @@ export const fr: TranslationTree = {
 				},
 				query: {
 					label: "Tâches de requête",
-					description: "Sélectionne les tâches avec une requête de workflow compacte.",
+					description: "Sélectionne les tâches avec l’API de requête d’exécution de TaskNotes.",
 					input: {
 						query: {
 							label: "Requête",
-							description: "Objet saisi par les champs de tâches. Les valeurs peuvent être des littéraux ou des filtres { operator, value }.",
+							description: "Requête de tâches d’exécution utilisant les champs, opérateurs, tri, regroupement et limite de TaskNotes.",
 						},
 					},
 					output: {

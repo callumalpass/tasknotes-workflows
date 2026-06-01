@@ -7,6 +7,7 @@ import type { TranslateFn } from "./i18n";
 import type {
 	LoadedWorkflow,
 	StepRunDetail,
+	TaskNotesApiErrorPayload,
 	TaskNotesRuntimeApi,
 	WorkflowRunContext,
 	WorkflowRunDetail,
@@ -104,7 +105,7 @@ export class WorkflowEngine {
 
 			return finishRun(detail, "success");
 		} catch (error) {
-			return finishRun(detail, "failed", errorMessage(error));
+			return finishRun(detail, "failed", normalizedErrorMessage(error, this.tasknotes()));
 		} finally {
 			this.runningWorkflowIds.delete(workflow.id);
 		}
@@ -204,8 +205,12 @@ export class WorkflowEngine {
 			detail.durationMs = Date.now() - startedAt;
 			return detail;
 		} catch (error) {
+			const normalizedError = normalizeStepError(error, this.tasknotes());
 			detail.status = "failed";
-			detail.error = errorMessage(error);
+			detail.error = normalizedError.message;
+			detail.errorCode = normalizedError.code;
+			detail.errorStatus = normalizedError.status;
+			detail.errorDetails = normalizedError.details;
 			detail.endedAt = new Date().toISOString();
 			detail.durationMs = Date.now() - startedAt;
 			return detail;
@@ -263,4 +268,55 @@ function createRunId(): string {
 
 function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
+}
+
+type NormalizedWorkflowError = {
+	message: string;
+	code?: string;
+	status?: number;
+	details?: unknown;
+};
+
+function normalizeStepError(
+	error: unknown,
+	api: TaskNotesRuntimeApi | null
+): NormalizedWorkflowError {
+	const apiError = normalizeApiError(error, api);
+	if (!apiError) return { message: errorMessage(error) };
+	return {
+		message: `${apiError.code}: ${apiError.message}`,
+		code: apiError.code,
+		status: apiError.status,
+		details: apiError.details,
+	};
+}
+
+function normalizedErrorMessage(error: unknown, api: TaskNotesRuntimeApi | null): string {
+	return normalizeStepError(error, api).message;
+}
+
+function normalizeApiError(
+	error: unknown,
+	api: TaskNotesRuntimeApi | null
+): TaskNotesApiErrorPayload | null {
+	try {
+		if (api?.errors?.isApiError?.(error) === true) {
+			return api.errors.normalize(error);
+		}
+		if (isTaskNotesApiErrorPayload(error)) return error;
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+function isTaskNotesApiErrorPayload(error: unknown): error is TaskNotesApiErrorPayload {
+	if (!error || typeof error !== "object") return false;
+	const candidate = error as Record<string, unknown>;
+	return (
+		candidate.name === "TaskNotesApiError" &&
+		typeof candidate.code === "string" &&
+		typeof candidate.message === "string" &&
+		typeof candidate.status === "number"
+	);
 }

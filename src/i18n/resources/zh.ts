@@ -567,11 +567,11 @@ export const zh: TranslationTree = {
 				},
 				query: {
 					label: "查询任务",
-					description: "使用紧凑的工作流查询选择任务。",
+					description: "使用 TaskNotes 运行时查询 API 选择任务。",
 					input: {
 						query: {
 							label: "查询",
-							description: "由任务字段键入的对象。值可以是文字或 { operator, value } 过滤器。",
+							description: "使用 TaskNotes 字段、运算符、排序、分组和限制的运行时任务查询。",
 						},
 					},
 					output: {

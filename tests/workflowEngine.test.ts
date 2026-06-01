@@ -111,26 +111,41 @@ describe("workflow engine", () => {
 		expect(run.steps[0]?.status).toBe("failed");
 	});
 
-	it("supports contains filters in task.query", async () => {
+	it("runs canonical TaskNotes runtime task queries", async () => {
 		const loaded = workflow();
+		const query = {
+			where: { field: "task.projects", op: "contains", value: "Project A" },
+			sort: [{ field: "task.due", direction: "asc" }],
+			limit: 25,
+		};
 		loaded.workflow!.steps = [
 			{
 				id: "query",
 				type: "task.query",
-				input: {
-					query: {
-						projects: { operator: "contains", value: "Project A" },
-					},
-				},
+				input: { query },
 			},
 		];
+		const normalizedQuery = {
+			...query,
+			offset: 0,
+			group: [],
+			scope: { includeArchived: false },
+		};
+		const queryTasks = vi.fn(async () => ({
+			tasks: [{ path: "Tasks/a.md", projects: ["Project A"] }],
+			total: 2,
+			matched: 1,
+			returned: 1,
+			groups: [{ key: "default", label: "All tasks", taskPaths: ["Tasks/a.md"] }],
+			query: normalizedQuery,
+			warnings: [],
+		}));
+		const listTasks = vi.fn();
 		const api = {
-			tasks: {
-				list: vi.fn(async () => [
-					{ path: "Tasks/a.md", projects: ["Project A"] },
-					{ path: "Tasks/b.md", projects: ["Project B"] },
-				]),
+			query: {
+				tasks: queryTasks,
 			},
+			tasks: { list: listTasks },
 		} as unknown as TaskNotesRuntimeApi;
 		const engine = new WorkflowEngine(new StepRegistry(), () => api);
 
@@ -139,9 +154,83 @@ describe("workflow engine", () => {
 		});
 
 		expect(run.status).toBe("success");
+		expect(queryTasks).toHaveBeenCalledWith(query);
+		expect(listTasks).not.toHaveBeenCalled();
 		expect(run.steps[0]?.output).toEqual({
 			tasks: [{ path: "Tasks/a.md", projects: ["Project A"] }],
 			count: 1,
+			total: 2,
+			matched: 1,
+			returned: 1,
+			groups: [{ key: "default", label: "All tasks", taskPaths: ["Tasks/a.md"] }],
+			groupPaths: { default: ["Tasks/a.md"] },
+			query: normalizedQuery,
+			warnings: [],
 		});
+	});
+
+	it("rejects compact task query objects", async () => {
+		const loaded = workflow();
+		loaded.workflow!.steps = [
+			{
+				id: "query",
+				type: "task.query",
+				input: { query: { status: "active" } },
+			},
+		];
+		const queryTasks = vi.fn();
+		const api = {
+			query: {
+				tasks: queryTasks,
+			},
+		} as unknown as TaskNotesRuntimeApi;
+		const engine = new WorkflowEngine(new StepRegistry(), () => api);
+
+		const run = await engine.runWorkflow(loaded, {
+			trigger: { type: "manual", event: "manual" },
+		});
+
+		expect(run.status).toBe("failed");
+		expect(run.error).toBe("task.query requires a TaskNotes runtime query object.");
+		expect(queryTasks).not.toHaveBeenCalled();
+	});
+
+	it("records typed TaskNotes API error details in failed step runs", async () => {
+		const loaded = workflow();
+		const apiError = Object.assign(new Error("Task not found: Tasks/a.md"), {
+			name: "TaskNotesApiError" as const,
+			code: "task_not_found",
+			message: "Task not found: Tasks/a.md",
+			status: 404,
+			details: { path: "Tasks/a.md" },
+		});
+		const api = {
+			tasks: {
+				patch: vi.fn(async () => {
+					throw apiError;
+				}),
+			},
+			errors: {
+				isApiError: vi.fn((error) => error === apiError),
+				normalize: vi.fn(() => apiError),
+			},
+		} as unknown as TaskNotesRuntimeApi;
+		const engine = new WorkflowEngine(new StepRegistry(), () => api);
+
+		const run = await engine.runWorkflow(loaded, {
+			trigger: { type: "manual", event: "manual" },
+		});
+
+		expect(run.status).toBe("failed");
+		expect(run.error).toBe("task_not_found: Task not found: Tasks/a.md");
+		expect(run.steps[0]).toEqual(
+			expect.objectContaining({
+				status: "failed",
+				error: "task_not_found: Task not found: Tasks/a.md",
+				errorCode: "task_not_found",
+				errorStatus: 404,
+				errorDetails: { path: "Tasks/a.md" },
+			})
+		);
 	});
 });

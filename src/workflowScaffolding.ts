@@ -1,4 +1,5 @@
 import { DEFAULT_SOURCE } from "./constants";
+import { defaultRuntimeTaskQuery } from "./taskQuery";
 import type {
 	LoadedWorkflow,
 	WorkflowDefinition,
@@ -81,9 +82,7 @@ export function createDefaultStep(type: string, ids: Set<string>): WorkflowStep 
 export function defaultInputForStep(type: string): Record<string, unknown> {
 	if (type === "task.query") {
 		return {
-			query: {
-				status: { operator: "isNot", value: "done" },
-			},
+			query: defaultRuntimeTaskQuery(),
 		};
 	}
 	if (type === "task.create") return { title: "New task", status: "open" };

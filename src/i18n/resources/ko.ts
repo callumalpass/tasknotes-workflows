@@ -567,11 +567,11 @@ export const ko: TranslationTree = {
 				},
 				query: {
 					label: "쿼리 작업",
-					description: "간결한 워크플로 쿼리로 작업을 선택합니다.",
+					description: "TaskNotes 런타임 쿼리 API로 작업을 선택합니다.",
 					input: {
 						query: {
 							label: "쿼리",
-							description: "작업 필드별로 키가 지정된 개체입니다. 값은 리터럴 또는 { operator, value } 필터일 수 있습니다.",
+							description: "TaskNotes 필드, 연산자, 정렬, 그룹화, 제한을 사용하는 런타임 작업 쿼리입니다.",
 						},
 					},
 					output: {

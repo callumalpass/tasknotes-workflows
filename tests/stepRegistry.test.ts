@@ -25,6 +25,18 @@ describe("step registry", () => {
 
 		expect(patch?.inputFields.map((field) => field.key)).toEqual(["task", "patch"]);
 		expect(patch?.outputFields.map((field) => field.key)).toEqual(["task", "path"]);
+		expect(registry.get("task.query")?.inputFields[0]?.type).toBe("taskQuery");
+		expect(registry.get("task.query")?.outputFields.map((field) => field.key)).toEqual([
+			"tasks",
+			"count",
+			"total",
+			"matched",
+			"returned",
+			"groups",
+			"groupPaths",
+			"query",
+			"warnings",
+		]);
 		expect(startTimer?.category).toBe("Time tracking");
 		expect(startTimer?.inputFields.some((field) => field.key === "options.description")).toBe(true);
 		expect(subtasks?.category).toBe("Task relationships");

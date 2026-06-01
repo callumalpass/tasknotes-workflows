@@ -22,8 +22,15 @@ import {
 import type {
 	LoadedWorkflow,
 	StepDefinition,
+	TaskNotesRuntimeCondition,
 	TaskNotesEventTrigger,
 	TaskNotesRuntimeEventDefinition,
+	TaskNotesRuntimeFilterOperatorDefinition,
+	TaskNotesRuntimeFilterPropertyDefinition,
+	TaskNotesRuntimeOperator,
+	TaskNotesRuntimePredicate,
+	TaskNotesRuntimeTaskQuery,
+	TaskNotesRuntimeValue,
 	WorkflowDefinition,
 	WorkflowDynamicFieldOptions,
 	WorkflowFieldOption,
@@ -68,6 +75,11 @@ type TemplateOption = {
 	label: string;
 };
 
+type SimpleTaskQuery = {
+	mode: "all" | "any";
+	conditions: TaskNotesRuntimeCondition[];
+};
+
 const EDITOR_SECTIONS: Array<{ id: WorkflowEditorSection; labelKey: string; descriptionKey: string }> = [
 	{ id: "definition", labelKey: "editor.sections.definition.label", descriptionKey: "editor.sections.definition.description" },
 	{ id: "triggers", labelKey: "editor.sections.triggers.label", descriptionKey: "editor.sections.triggers.description" },
@@ -76,6 +88,8 @@ const EDITOR_SECTIONS: Array<{ id: WorkflowEditorSection; labelKey: string; desc
 ];
 
 const INTERVAL_PLACEHOLDER = ["30", "m"].join("");
+
+const VALUELESS_OPERATORS = new Set<TaskNotesRuntimeOperator>(["exists", "missing", "isTrue", "isFalse"]);
 
 const DEFAULT_TASKNOTES_EVENTS: readonly TaskNotesRuntimeEventDefinition[] = [
 	{ name: "task.created", label: "Task created", category: "task" },
@@ -736,6 +750,10 @@ export class WorkflowEditModal extends Modal {
 			this.renderValidation(area, validationPath);
 			return;
 		}
+		if (field.type === "taskQuery") {
+			this.renderTaskQueryInput(parent, inputRecord, field, validationPath);
+			return;
+		}
 		const input =
 			field.type === "textarea"
 				? renderTextareaInput(parent, field.label, stringifyScalar(current), field.wide !== false)
@@ -752,6 +770,359 @@ export class WorkflowEditModal extends Modal {
 		});
 		this.renderFieldHelp(input.parentElement, field);
 		this.renderValidation(input, validationPath);
+	}
+
+	private renderTaskQueryInput(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		field: WorkflowInputField,
+		validationPath: string
+	): void {
+		const query = taskQueryFromValue(getPath(inputRecord, field.key) ?? field.defaultValue);
+		setPath(inputRecord, field.key, query);
+
+		const properties = this.plugin.tasknotesFilterProperties();
+		const operators = this.plugin.tasknotesFilterOperators();
+		const wrapper = parent.createDiv({ cls: "tnw-query-builder tnw-field is-wide" });
+		const header = wrapper.createDiv({ cls: "tnw-query-header" });
+		const copy = header.createDiv({ cls: "tnw-query-copy" });
+		copy.createDiv({ cls: "tnw-field-label", text: field.label });
+		if (field.description) copy.createDiv({ cls: "tnw-field-help", text: field.description });
+		const actions = header.createDiv({ cls: "tnw-query-actions" });
+		setButtonIconText(new ButtonComponent(actions), "search", this.t("editor.query.preview"))
+			.setTooltip(this.t("editor.query.preview"))
+			.onClick(() => {
+				void this.previewTaskQuery(query);
+			});
+
+		this.renderTaskQueryRuntimeValidation(wrapper, query);
+		this.renderValidation(wrapper, validationPath);
+
+		if (properties.length === 0 || operators.length === 0) {
+			wrapper.createDiv({
+				cls: "tnw-query-empty",
+				text: this.t("editor.query.runtimeUnavailable"),
+			});
+			this.renderTaskQueryJson(wrapper, inputRecord, field.key, query);
+			return;
+		}
+
+		const simple = simpleTaskQuery(query.where);
+		if (!simple) {
+			wrapper.createDiv({
+				cls: "tnw-query-empty",
+				text: this.t("editor.query.advancedOnly"),
+			});
+			this.renderTaskQueryJson(wrapper, inputRecord, field.key, query);
+			return;
+		}
+
+		this.renderTaskQueryConditions(wrapper, inputRecord, field.key, query, simple, properties, operators);
+		this.renderTaskQueryOptions(wrapper, inputRecord, field.key, query, properties);
+		this.renderTaskQueryJson(wrapper, inputRecord, field.key, query);
+	}
+
+	private renderTaskQueryConditions(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		path: string,
+		query: TaskNotesRuntimeTaskQuery,
+		simple: SimpleTaskQuery,
+		properties: TaskNotesRuntimeFilterPropertyDefinition[],
+		operators: TaskNotesRuntimeFilterOperatorDefinition[]
+	): void {
+		const section = parent.createDiv({ cls: "tnw-query-section" });
+		const toolbar = section.createDiv({ cls: "tnw-query-toolbar" });
+		const modeSelect = renderSelectInput(
+			toolbar,
+			this.t("editor.query.match"),
+			[
+				["all", this.t("editor.query.matchAll")],
+				["any", this.t("editor.query.matchAny")],
+			],
+			simple.mode
+		);
+		modeSelect.addEventListener("change", () => {
+			simple.mode = modeSelect.value === "any" ? "any" : "all";
+			writeSimpleTaskQuery(inputRecord, path, query, simple);
+		});
+		setButtonIconText(new ButtonComponent(toolbar), "plus", this.t("editor.query.addCondition"))
+			.setTooltip(this.t("editor.query.addCondition"))
+			.onClick(() => {
+				simple.conditions.push(defaultQueryCondition(properties));
+				writeSimpleTaskQuery(inputRecord, path, query, simple);
+				this.render();
+			});
+
+		if (simple.conditions.length === 0) {
+			section.createDiv({ cls: "tnw-query-empty", text: this.t("editor.query.noConditions") });
+		}
+
+		for (const [index, condition] of simple.conditions.entries()) {
+			const row = section.createDiv({ cls: "tnw-query-condition" });
+			const property = propertyForCondition(properties, condition);
+			const fieldSelect = renderSelectInput(
+				row,
+				this.t("editor.query.field"),
+				queryPropertyOptions(properties, condition.field),
+				condition.field
+			);
+			fieldSelect.addEventListener("change", () => {
+				condition.field = fieldSelect.value;
+				const nextProperty = propertyForCondition(properties, condition);
+				condition.op = firstSupportedOperator(nextProperty, operators);
+				setDefaultConditionValue(condition, nextProperty, operatorById(operators, condition.op));
+				writeSimpleTaskQuery(inputRecord, path, query, simple);
+				this.render();
+			});
+
+			const operator = operatorById(operators, condition.op);
+			const operatorSelect = renderSelectInput(
+				row,
+				this.t("editor.query.operator"),
+				queryOperatorOptions(property, operators, condition.op),
+				condition.op
+			);
+			operatorSelect.addEventListener("change", () => {
+				condition.op = operatorSelect.value;
+				setDefaultConditionValue(condition, property, operatorById(operators, condition.op));
+				writeSimpleTaskQuery(inputRecord, path, query, simple);
+				this.render();
+			});
+
+			this.renderTaskQueryValueInput(row, condition, property, operator, () => {
+				writeSimpleTaskQuery(inputRecord, path, query, simple);
+			});
+
+			const rowActions = row.createDiv({ cls: "tnw-row-actions tnw-query-row-actions" });
+			new ButtonComponent(rowActions)
+				.setIcon("trash")
+				.setTooltip(this.t("editor.query.removeCondition"))
+				.onClick(() => {
+					simple.conditions.splice(index, 1);
+					writeSimpleTaskQuery(inputRecord, path, query, simple);
+					this.render();
+				});
+		}
+	}
+
+	private renderTaskQueryValueInput(
+		parent: HTMLElement,
+		condition: TaskNotesRuntimeCondition,
+		property: TaskNotesRuntimeFilterPropertyDefinition | undefined,
+		operator: TaskNotesRuntimeFilterOperatorDefinition | undefined,
+		onChange: () => void
+	): void {
+		if (!operatorValueRequired(operator, condition.op)) {
+			delete condition.value;
+			parent.createDiv({
+				cls: "tnw-query-value-placeholder",
+				text: this.t("editor.query.noValue"),
+			});
+			return;
+		}
+
+		if (property?.valueType === "boolean") {
+			const select = renderSelectInput(
+				parent,
+				this.t("editor.query.value"),
+				[
+					["true", this.t("editor.query.true")],
+					["false", this.t("editor.query.false")],
+				],
+				condition.value === false ? "false" : "true"
+			);
+			select.addEventListener("change", () => {
+				condition.value = select.value === "true";
+				onChange();
+			});
+			return;
+		}
+
+		const input = renderTextInput(
+			parent,
+			this.t("editor.query.value"),
+			stringifyQueryValue(condition.value),
+			inputTypeForQueryValue(property)
+		);
+		input.placeholder = valuePlaceholder(property, condition.op);
+		this.attachTemplateSuggest(input);
+		this.attachQueryValueSuggestions(input, property);
+		const update = (): void => {
+			condition.value = parseQueryValueInput(input.value, property, condition.op);
+			onChange();
+		};
+		input.addEventListener("change", update);
+		input.addEventListener("input", update);
+	}
+
+	private renderTaskQueryOptions(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		path: string,
+		query: TaskNotesRuntimeTaskQuery,
+		properties: TaskNotesRuntimeFilterPropertyDefinition[]
+	): void {
+		const details = parent.createEl("details", { cls: "tnw-query-options" });
+		details.open = true;
+		renderDisclosureSummary(details, this.t("editor.query.options"), this.t("editor.query.optionsDescription"));
+		const grid = details.createDiv({ cls: "tnw-query-options-grid" });
+
+		const sort = query.sort?.[0];
+		const sortField = renderSelectInput(
+			grid,
+			this.t("editor.query.sortField"),
+			[["", this.t("editor.query.none")], ...queryPropertyOptions(properties.filter((property) => property.sortable), sort?.field)],
+			sort?.field ?? ""
+		);
+		sortField.addEventListener("change", () => {
+			if (sortField.value) {
+				query.sort = [{ field: sortField.value, direction: sortDirection(query) }];
+			} else {
+				delete query.sort;
+			}
+			setPath(inputRecord, path, query);
+			this.render();
+		});
+
+		const direction = renderSelectInput(
+			grid,
+			this.t("editor.query.sortDirection"),
+			[
+				["asc", this.t("editor.query.ascending")],
+				["desc", this.t("editor.query.descending")],
+			],
+			sortDirection(query)
+		);
+		direction.disabled = !sortField.value;
+		direction.addEventListener("change", () => {
+			if (query.sort?.[0]) query.sort[0].direction = direction.value === "desc" ? "desc" : "asc";
+			setPath(inputRecord, path, query);
+		});
+
+		const group = query.group?.[0];
+		const groupField = renderSelectInput(
+			grid,
+			this.t("editor.query.groupField"),
+			[["", this.t("editor.query.none")], ...queryPropertyOptions(properties.filter((property) => property.groupable), group?.field)],
+			group?.field ?? ""
+		);
+		groupField.addEventListener("change", () => {
+			if (groupField.value) {
+				query.group = [{ field: groupField.value }];
+			} else {
+				delete query.group;
+			}
+			setPath(inputRecord, path, query);
+		});
+
+		const limit = renderTextInput(grid, this.t("editor.query.limit"), query.limit ? String(query.limit) : "", "number");
+		limit.placeholder = "25";
+		limit.addEventListener("change", () => {
+			const value = Number(limit.value);
+			if (Number.isFinite(value) && value > 0) {
+				query.limit = Math.floor(value);
+			} else {
+				delete query.limit;
+			}
+			setPath(inputRecord, path, query);
+		});
+
+		const includeArchived = renderCheckboxInput(
+			grid,
+			this.t("editor.query.includeArchived"),
+			query.scope?.includeArchived === true
+		);
+		includeArchived.addEventListener("change", () => {
+			if (includeArchived.checked) {
+				query.scope = { ...(query.scope ?? {}), includeArchived: true };
+			} else if (query.scope) {
+				delete query.scope.includeArchived;
+				if (Object.keys(query.scope).length === 0) delete query.scope;
+			}
+			setPath(inputRecord, path, query);
+		});
+	}
+
+	private renderTaskQueryJson(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		path: string,
+		query: TaskNotesRuntimeTaskQuery
+	): void {
+		const advanced = parent.createEl("details", { cls: "tnw-query-json tnw-advanced" });
+		renderDisclosureSummary(advanced, this.t("editor.query.jsonTitle"), this.t("editor.query.jsonDescription"));
+		const body = advanced.createDiv({ cls: "tnw-advanced-body" });
+		const area = renderTextareaInput(body, this.t("editor.query.jsonLabel"), JSON.stringify(query, null, 2), true, true);
+		this.attachTemplateSuggest(area);
+		area.addEventListener("change", () => {
+			const parsed = parseObjectJson(area.value);
+			if (parsed.error) {
+				new Notice(parsed.error === "json-object" ? this.t("editor.validation.jsonObject") : parsed.error);
+				return;
+			}
+			setPath(inputRecord, path, taskQueryFromValue(parsed.value));
+			this.render();
+		});
+	}
+
+	private renderTaskQueryRuntimeValidation(parent: HTMLElement, query: TaskNotesRuntimeTaskQuery): void {
+		let validation;
+		try {
+			validation = this.plugin.tasknotesValidateQuery(query);
+		} catch (error) {
+			parent.createDiv({ cls: "tnw-query-validation is-error", text: error instanceof Error ? error.message : String(error) });
+			return;
+		}
+		if (!validation) return;
+		if (validation.valid && validation.warnings.length === 0) {
+			parent.createDiv({ cls: "tnw-query-validation is-valid", text: this.t("editor.query.valid") });
+			return;
+		}
+		const box = parent.createDiv({ cls: validation.valid ? "tnw-query-validation is-warning" : "tnw-query-validation is-error" });
+		for (const issue of validation.issues) {
+			box.createDiv({ text: `${issue.path}: ${issue.message}` });
+		}
+		for (const warning of validation.warnings) {
+			box.createDiv({ text: `${warning.path}: ${warning.message}` });
+		}
+	}
+
+	private async previewTaskQuery(query: TaskNotesRuntimeTaskQuery): Promise<void> {
+		try {
+			const result = await this.plugin.tasknotesExplainQuery(query);
+			if (!result) {
+				new Notice(this.t("editor.query.previewUnavailable"));
+				return;
+			}
+			if (!result.valid) {
+				new Notice(result.issues[0]?.message ?? this.t("editor.query.invalid"));
+				return;
+			}
+			new Notice(this.t("editor.query.previewResult", {
+				matched: result.matched ?? 0,
+				returned: result.returned ?? 0,
+				total: result.total ?? 0,
+			}));
+		} catch (error) {
+			new Notice(error instanceof Error ? error.message : String(error));
+		}
+	}
+
+	private attachQueryValueSuggestions(
+		input: HTMLInputElement,
+		property: TaskNotesRuntimeFilterPropertyDefinition | undefined
+	): void {
+		const options = queryValueOptions(this.plugin, property);
+		if (options.length === 0) return;
+		const id = `tnw-query-values-${Math.random().toString(36).slice(2)}`;
+		input.setAttr("list", id);
+		const list = input.parentElement?.createEl("datalist");
+		if (!list) return;
+		list.id = id;
+		for (const option of options) {
+			list.createEl("option", { value: option.value, text: option.label });
+		}
 	}
 
 	private renderStepOutputs(parent: HTMLElement, step: WorkflowStep, definition: StepDefinition | undefined): void {
@@ -1128,11 +1499,7 @@ export class WorkflowEditModal extends Modal {
 	}
 
 	private dynamicOptions(source: WorkflowDynamicFieldOptions | undefined): WorkflowFieldOption[] {
-		const settings = this.plugin.tasknotesSettingsSnapshot();
-		if (!source || !settings) return [];
-		if (source === "task-statuses") return readNamedOptions(settings.customStatuses);
-		if (source === "task-priorities") return readNamedOptions(settings.customPriorities);
-		return [];
+		return this.plugin.tasknotesDynamicOptions(source);
 	}
 
 	private triggerTypeOptions(): Array<[WorkflowTrigger["type"], string]> {
@@ -1410,6 +1777,217 @@ function renderCheckboxInput(parent: HTMLElement, label: string, checked: boolea
 	return input;
 }
 
+function taskQueryFromValue(value: unknown): TaskNotesRuntimeTaskQuery {
+	if (!isRecord(value)) return {};
+	return JSON.parse(JSON.stringify(value)) as TaskNotesRuntimeTaskQuery;
+}
+
+function simpleTaskQuery(where: TaskNotesRuntimePredicate | undefined): SimpleTaskQuery | null {
+	if (typeof where === "undefined") return { mode: "all", conditions: [] };
+	if (isRuntimeCondition(where)) return { mode: "all", conditions: [where] };
+	if (!isRecord(where)) return null;
+	const all = predicateChildren(where, "all");
+	if (all && all.every(isRuntimeCondition)) {
+		return { mode: "all", conditions: all };
+	}
+	const any = predicateChildren(where, "any");
+	if (any && any.every(isRuntimeCondition)) {
+		return { mode: "any", conditions: any };
+	}
+	return null;
+}
+
+function predicateChildren(
+	where: TaskNotesRuntimePredicate,
+	key: "all" | "any"
+): TaskNotesRuntimePredicate[] | null {
+	if (key === "all") {
+		return "all" in where && Array.isArray(where.all) ? where.all : null;
+	}
+	return "any" in where && Array.isArray(where.any) ? where.any : null;
+}
+
+function writeSimpleTaskQuery(
+	inputRecord: Record<string, unknown>,
+	path: string,
+	query: TaskNotesRuntimeTaskQuery,
+	simple: SimpleTaskQuery
+): void {
+	if (simple.conditions.length === 0) {
+		delete query.where;
+	} else if (simple.mode === "any") {
+		query.where = { any: simple.conditions };
+	} else {
+		query.where = { all: simple.conditions };
+	}
+	setPath(inputRecord, path, query);
+}
+
+function defaultQueryCondition(
+	properties: readonly TaskNotesRuntimeFilterPropertyDefinition[]
+): TaskNotesRuntimeCondition {
+	const property = properties.find((item) => item.id === "task.status") ?? properties[0];
+	const op = property?.supportedOperators?.includes("ne") ? "ne" : property?.supportedOperators?.[0] ?? "eq";
+	const condition: TaskNotesRuntimeCondition = {
+		field: property?.id ?? "task.status",
+		op,
+	};
+	setDefaultConditionValue(condition, property, undefined);
+	return condition;
+}
+
+function propertyForCondition(
+	properties: readonly TaskNotesRuntimeFilterPropertyDefinition[],
+	condition: TaskNotesRuntimeCondition
+): TaskNotesRuntimeFilterPropertyDefinition | undefined {
+	return properties.find((property) => property.id === condition.field);
+}
+
+function queryPropertyOptions(
+	properties: readonly TaskNotesRuntimeFilterPropertyDefinition[],
+	selected?: string
+): Array<[string, string]> {
+	const options = properties.map((property): [string, string] => [
+		property.id,
+		property.label ? `${property.label} (${property.id})` : property.id,
+	]);
+	if (selected && !options.some(([value]) => value === selected)) {
+		options.unshift([selected, selected]);
+	}
+	return options;
+}
+
+function firstSupportedOperator(
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined,
+	operators: readonly TaskNotesRuntimeFilterOperatorDefinition[]
+): string {
+	return property?.supportedOperators?.[0] ?? operators[0]?.id ?? "eq";
+}
+
+function operatorById(
+	operators: readonly TaskNotesRuntimeFilterOperatorDefinition[],
+	id: string
+): TaskNotesRuntimeFilterOperatorDefinition | undefined {
+	return operators.find((operator) => operator.id === id);
+}
+
+function queryOperatorOptions(
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined,
+	operators: readonly TaskNotesRuntimeFilterOperatorDefinition[],
+	selected: string
+): Array<[string, string]> {
+	const supported = new Set(property?.supportedOperators);
+	const filtered = supported.size > 0 ? operators.filter((operator) => supported.has(operator.id)) : operators;
+	const options = filtered.map((operator): [string, string] => [operator.id, operator.label]);
+	if (selected && !options.some(([value]) => value === selected)) {
+		options.unshift([selected, selected]);
+	}
+	return options;
+}
+
+function setDefaultConditionValue(
+	condition: TaskNotesRuntimeCondition,
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined,
+	operator: TaskNotesRuntimeFilterOperatorDefinition | undefined
+): void {
+	if (!operatorValueRequired(operator, condition.op)) {
+		delete condition.value;
+		return;
+	}
+	if (typeof condition.value !== "undefined") return;
+	condition.value = defaultQueryValue(property);
+}
+
+function operatorValueRequired(
+	operator: TaskNotesRuntimeFilterOperatorDefinition | undefined,
+	op: string
+): boolean {
+	if (VALUELESS_OPERATORS.has(op as TaskNotesRuntimeOperator)) return false;
+	return operator?.valueRequired ?? true;
+}
+
+function defaultQueryValue(property: TaskNotesRuntimeFilterPropertyDefinition | undefined): TaskNotesRuntimeValue {
+	if (property?.valueType === "boolean") return true;
+	if (property?.valueType === "number") return 0;
+	if (property?.valueType === "date" || property?.valueType === "datetime") return { fn: "today" };
+	return "";
+}
+
+function stringifyQueryValue(value: unknown): string {
+	if (Array.isArray(value)) return value.map((item) => stringifyQueryValue(item)).join(", ");
+	if (isRecord(value)) {
+		if (value.fn === "today" || value.fn === "now") return value.fn;
+		if (value.fn === "date" && typeof value.value === "string") return value.value;
+		return JSON.stringify(value);
+	}
+	return stringifyScalar(value);
+}
+
+function parseQueryValueInput(
+	value: string,
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined,
+	op: string
+): TaskNotesRuntimeValue {
+	if (op === "in" || op === "notIn") {
+		return value
+			.split(",")
+			.map((item) => parseSingleQueryValue(item, property))
+			.filter((item) => item !== "");
+	}
+	return parseSingleQueryValue(value, property);
+}
+
+function parseSingleQueryValue(
+	value: string,
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined
+): TaskNotesRuntimeValue {
+	const trimmed = value.trim();
+	if (trimmed === "today" || trimmed === "now") return { fn: trimmed };
+	if (property?.valueType === "number") {
+		const numberValue = Number(trimmed);
+		return Number.isFinite(numberValue) ? numberValue : 0;
+	}
+	if (property?.valueType === "boolean") return trimmed === "true";
+	return trimmed;
+}
+
+function inputTypeForQueryValue(property: TaskNotesRuntimeFilterPropertyDefinition | undefined): string {
+	return property?.valueType === "number" ? "number" : "text";
+}
+
+function valuePlaceholder(
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined,
+	op: string
+): string {
+	if (op === "in" || op === "notIn") return "value-one, value-two";
+	if (property?.valueType === "date" || property?.valueType === "datetime") return "today, now, or YYYY-MM-DD";
+	if (property?.valueType === "number") return "0";
+	return "";
+}
+
+function sortDirection(query: TaskNotesRuntimeTaskQuery): "asc" | "desc" {
+	return query.sort?.[0]?.direction === "desc" ? "desc" : "asc";
+}
+
+function queryValueOptions(
+	plugin: TaskNotesWorkflowsPlugin,
+	property: TaskNotesRuntimeFilterPropertyDefinition | undefined
+): WorkflowFieldOption[] {
+	if (property?.id === "task.status") return plugin.tasknotesDynamicOptions("task-statuses");
+	if (property?.id === "task.priority") return plugin.tasknotesDynamicOptions("task-priorities");
+	return [];
+}
+
+function isRuntimeCondition(value: unknown): value is TaskNotesRuntimeCondition {
+	return (
+		isRecord(value) &&
+		typeof value.field === "string" &&
+		value.field.length > 0 &&
+		typeof value.op === "string" &&
+		value.op.length > 0
+	);
+}
+
 function triggerControlsInputs(controls: TriggerControls): Array<HTMLInputElement | HTMLSelectElement> {
 	return [
 		controls.idInput,
@@ -1584,19 +2162,6 @@ function deletePath(input: Record<string, unknown>, path: string): void {
 	}
 	const finalPart = parts[parts.length - 1];
 	if (finalPart) delete current[finalPart];
-}
-
-function readNamedOptions(value: unknown): WorkflowFieldOption[] {
-	if (!Array.isArray(value)) return [];
-	return value
-		.map((item): WorkflowFieldOption | null => {
-			if (!isRecord(item) || typeof item.value !== "string") return null;
-			return {
-				value: item.value,
-				label: typeof item.label === "string" && item.label.trim() ? item.label : item.value,
-			};
-		})
-		.filter((item): item is WorkflowFieldOption => item !== null);
 }
 
 function stringifyScalar(value: unknown): string {

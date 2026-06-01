@@ -19,7 +19,13 @@ import type {
 	LoadedWorkflow,
 	RunSummary,
 	TaskNotesRuntimeEventDefinition,
+	TaskNotesRuntimeFilterOperatorDefinition,
+	TaskNotesRuntimeFilterPropertyDefinition,
+	TaskNotesRuntimeQueryExplainResult,
+	TaskNotesRuntimeQueryValidationResult,
 	TaskNotesWorkflowsSettings,
+	WorkflowDynamicFieldOptions,
+	WorkflowFieldOption,
 	WorkflowRunDetail,
 	WorkflowRunOptions,
 	WorkflowsRuntimeApi,
@@ -41,6 +47,8 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	private staticWorkflowCommandIds = new Set<string>();
 	private manualWorkflowCommandIds = new Set<string>();
 	private workflowsRibbonEl: HTMLElement | null = null;
+	private tasknotesRuntimeAvailable = false;
+	private tasknotesLifecycleRegistered = false;
 
 	get workflows(): LoadedWorkflow[] {
 		return [...this.loadedWorkflows];
@@ -95,10 +103,10 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			await this.defaults.ensureWorkflowViewFile();
 		}
 		await this.reloadWorkflows();
-		this.registerRuntimeExtension();
+		this.refreshTaskNotesRuntimeState();
 		this.registerInterval(
 			window.setInterval(() => {
-				this.registerRuntimeExtension();
+				this.refreshTaskNotesRuntimeState();
 			}, 5000)
 		);
 
@@ -187,6 +195,26 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	tasknotesEventDefinitions(): TaskNotesRuntimeEventDefinition[] {
 		return this.bridge.listEvents();
+	}
+
+	tasknotesDynamicOptions(source: WorkflowDynamicFieldOptions | undefined): WorkflowFieldOption[] {
+		return this.bridge.dynamicOptions(source);
+	}
+
+	tasknotesFilterProperties(): TaskNotesRuntimeFilterPropertyDefinition[] {
+		return this.bridge.filterProperties();
+	}
+
+	tasknotesFilterOperators(): TaskNotesRuntimeFilterOperatorDefinition[] {
+		return this.bridge.filterOperators();
+	}
+
+	tasknotesValidateQuery(query: unknown): TaskNotesRuntimeQueryValidationResult | null {
+		return this.bridge.validateTaskQuery(query);
+	}
+
+	async tasknotesExplainQuery(query: unknown): Promise<TaskNotesRuntimeQueryExplainResult | null> {
+		return await this.bridge.explainTaskQuery(query);
 	}
 
 	async openWorkflowFile(file: TFile): Promise<void> {
@@ -447,6 +475,55 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	private registerRuntimeExtension(): void {
 		this.bridge.registerExtension(this.runtimeApi(), this.manifest.version, this.t("common.appName"));
+	}
+
+	private refreshTaskNotesRuntimeState(): void {
+		const available = this.bridge.available;
+		if (!available) {
+			if (this.tasknotesRuntimeAvailable) {
+				this.bridge.unregisterExtension();
+				this.tasknotesLifecycleRegistered = false;
+			}
+			this.tasknotesRuntimeAvailable = false;
+			return;
+		}
+
+		this.registerRuntimeExtension();
+		this.registerTaskNotesLifecycleListeners();
+
+		if (!this.tasknotesRuntimeAvailable) {
+			this.scheduler.start();
+			void this.renderWorkflowBaseViews();
+			refreshWorkflowNoteCards(this);
+		}
+		this.tasknotesRuntimeAvailable = true;
+	}
+
+	private registerTaskNotesLifecycleListeners(): void {
+		if (this.tasknotesLifecycleRegistered) return;
+		const events = ["ready", "settings.changed", "cache.changed", "cache.rebuilt"] as const;
+		let registered = false;
+		for (const event of events) {
+			const ref = this.bridge.onLifecycle(event, () => {
+				this.handleTaskNotesLifecycleEvent(event);
+			});
+			if (ref) {
+				this.registerEvent(ref);
+				registered = true;
+			}
+		}
+		this.tasknotesLifecycleRegistered = registered;
+	}
+
+	private handleTaskNotesLifecycleEvent(event: string): void {
+		if (event === "ready") {
+			this.refreshTaskNotesRuntimeState();
+		}
+		if (event === "settings.changed") {
+			this.refreshManualWorkflowCommands();
+		}
+		void this.renderWorkflowBaseViews();
+		refreshWorkflowNoteCards(this);
 	}
 
 	private runtimeApi(): WorkflowsRuntimeApi {

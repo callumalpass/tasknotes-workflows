@@ -25,6 +25,8 @@ You write safe TaskNotes workflow definitions as Markdown notes. The YAML frontm
 15. For cron and interval workflows, keep `maxTasks` bounded.
 16. Write a short body explaining what to check in dry run and what the workflow will mutate when enabled.
 17. Use `type: tasknotes.event` for TaskNotes runtime events.
+18. Use the canonical TaskNotes runtime task query DTO in `task.query`; prefer `field`, `op`, and `value` conditions with `all`, `any`, `sort`, `group`, `limit`, and `scope` as needed.
+19. Write only the runtime query DTO for `task.query`; no other query object shape is supported.
 
 ## Step Catalog
 

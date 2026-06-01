@@ -567,11 +567,11 @@ export const ja: TranslationTree = {
 				},
 				query: {
 					label: "クエリタスク",
-					description: "コンパクトなワークフロー クエリを使用してタスクを選択します。",
+					description: "TaskNotes のランタイムクエリ API を使用してタスクを選択します。",
 					input: {
 						query: {
 							label: "クエリ",
-							description: "タスクフィールドをキーとするオブジェクト。値はリテラルまたは { operator, value } フィルターにすることができます。",
+							description: "TaskNotes のフィールド、演算子、並び替え、グループ化、上限を使用するランタイムタスククエリです。",
 						},
 					},
 					output: {

@@ -218,14 +218,22 @@ steps:
     type: task.query
     input:
       query:
-        due:
-          operator: before
-          value: today
-        status:
-          operator: notIn
-          value:
-            - done
-            - cancelled
+        where:
+          all:
+            - field: task.due
+              op: lt
+              value:
+                fn: today
+            - field: task.status
+              op: notIn
+              value:
+                - done
+                - cancelled
+        sort:
+          - field: task.due
+            direction: asc
+        scope:
+          includeArchived: false
   - id: mark-high
     type: task.patch
     forEach: "{{steps.overdue.tasks}}"
@@ -265,14 +273,22 @@ steps:
     type: task.query
     input:
       query:
-        scheduled:
-          operator: before
-          value: today
-        status:
-          operator: notIn
-          value:
-            - done
-            - cancelled
+        where:
+          all:
+            - field: task.scheduled
+              op: lt
+              value:
+                fn: today
+            - field: task.status
+              op: notIn
+              value:
+                - done
+                - cancelled
+        sort:
+          - field: task.scheduled
+            direction: asc
+        scope:
+          includeArchived: false
   - id: reschedule-to-today
     type: task.reschedule
     forEach: "{{steps.overdue-scheduled.tasks}}"
@@ -311,14 +327,22 @@ steps:
     type: task.query
     input:
       query:
-        due:
-          operator: onOrBefore
-          value: today
-        status:
-          operator: notIn
-          value:
-            - done
-            - cancelled
+        where:
+          all:
+            - field: task.due
+              op: lte
+              value:
+                fn: today
+            - field: task.status
+              op: notIn
+              value:
+                - done
+                - cancelled
+        sort:
+          - field: task.due
+            direction: asc
+        scope:
+          includeArchived: false
   - id: mark-high
     type: task.patch
     forEach: "{{steps.due-now.tasks}}"
@@ -798,7 +822,12 @@ steps:
     type: task.query
     input:
       query:
-        status: active
+        where:
+          field: task.status
+          op: eq
+          value: active
+        scope:
+          includeArchived: false
   - id: show-count
     type: notice.show
     input:

@@ -567,11 +567,11 @@ export const es: TranslationTree = {
 				},
 				query: {
 					label: "Tareas de consulta",
-					description: "Selecciona tareas con una consulta de flujo de trabajo compacta.",
+					description: "Selecciona tareas con la API de consultas en tiempo de ejecución de TaskNotes.",
 					input: {
 						query: {
 							label: "Consulta",
-							description: "Objeto codificado por campos de tarea. Los valores pueden ser literales o filtros { operator, value }.",
+							description: "Consulta de tareas en tiempo de ejecución con campos, operadores, ordenación, agrupación y límite de TaskNotes.",
 						},
 					},
 					output: {
