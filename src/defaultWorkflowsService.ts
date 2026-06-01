@@ -232,6 +232,7 @@ steps:
         sort:
           - field: task.due
             direction: asc
+        limit: 50
         scope:
           includeArchived: false
   - id: mark-high
@@ -287,6 +288,7 @@ steps:
         sort:
           - field: task.scheduled
             direction: asc
+        limit: 50
         scope:
           includeArchived: false
   - id: reschedule-to-today
@@ -309,14 +311,14 @@ Runs while Obsidian is open. Use dry run first to confirm the selected tasks bef
 `,
 		},
 		{
-			path: `${folder}/escalate-due-today-tasks.md`,
+			path: `${folder}/escalate-upcoming-due-tasks.md`,
 			content: `---
 type: tasknotes-workflow
 schemaVersion: 1
-id: escalate-due-today-tasks
-name: Escalate due-today tasks
+id: escalate-upcoming-due-tasks
+name: Escalate upcoming due tasks
 enabled: false
-description: Mark incomplete tasks due today or earlier as high priority.
+description: Mark incomplete tasks due within the next three days as high priority.
 triggers:
   - id: every-morning
     type: cron
@@ -332,15 +334,25 @@ steps:
             - field: task.due
               op: lte
               value:
-                fn: today
+                fn: dateAdd
+                value:
+                  fn: today
+                amount: 3
+                unit: day
             - field: task.status
               op: notIn
               value:
                 - done
                 - cancelled
+            - field: task.priority
+              op: notIn
+              value:
+                - high
+                - highest
         sort:
           - field: task.due
             direction: asc
+        limit: 50
         scope:
           includeArchived: false
   - id: mark-high
@@ -358,10 +370,61 @@ run:
   onError: continue
 ---
 
-# Escalate due-today tasks
+# Escalate upcoming due tasks
 
-Enable this workflow if due and overdue tasks should be promoted to high priority each morning.
+Enable this workflow if tasks due in the next few days should be promoted to high priority each morning.
 Adjust the priority value first if your vault uses custom priority names.
+`,
+		},
+		{
+			path: `${folder}/blocked-task-review.md`,
+			content: `---
+type: tasknotes-workflow
+schemaVersion: 1
+id: blocked-task-review
+name: Blocked task review
+enabled: false
+description: Show a weekday count of incomplete tasks that are currently blocked.
+triggers:
+  - id: weekday-morning
+    type: cron
+    schedule: "0 9 * * 1-5"
+    timezone: local
+steps:
+  - id: blocked-tasks
+    type: task.query
+    input:
+      query:
+        where:
+          all:
+            - field: task.isBlocked
+              op: isTrue
+            - field: task.status
+              op: notIn
+              value:
+                - done
+                - cancelled
+        sort:
+          - field: task.due
+            direction: asc
+        limit: 25
+        scope:
+          includeArchived: false
+  - id: show-count
+    type: notice.show
+    input:
+      message: "You have {{steps.blocked-tasks.count}} blocked task(s) to review."
+run:
+  mode: sequential
+  noOverlap: true
+  source: tasknotes-workflows
+  maxTasks: 25
+  onError: stop
+---
+
+# Blocked task review
+
+Enable this workflow if you want a weekday reminder when incomplete tasks are still blocked by dependencies.
 `,
 		},
 		{
