@@ -15,12 +15,25 @@ import type {
 	WorkflowStep,
 	WorkflowStepExample,
 } from "./types";
+import type { InterpolationValues, TranslateFn } from "./i18n";
 
 export class StepRegistry {
 	private readonly steps = new Map<string, StepDefinition>();
+	private translate: TranslateFn;
 
-	constructor() {
-		for (const step of createDefaultSteps()) {
+	constructor(translate: TranslateFn = fallbackTranslate) {
+		this.translate = translate;
+		this.refresh();
+	}
+
+	updateTranslator(translate: TranslateFn): void {
+		this.translate = translate;
+		this.refresh();
+	}
+
+	private refresh(): void {
+		this.steps.clear();
+		for (const step of localizeStepDefinitions(createDefaultSteps(), this.translate)) {
 			this.register(step);
 		}
 	}
@@ -45,6 +58,132 @@ type StepMetadata = {
 	examples?: WorkflowStepExample[];
 	writes?: boolean;
 };
+
+const CATEGORY_KEYS: Record<string, string> = {
+	TaskNotes: "tasknotes",
+	"Task relationships": "taskRelationships",
+	"Time tracking": "timeTracking",
+	Obsidian: "obsidian",
+	"Control flow": "controlFlow",
+};
+
+function fallbackTranslate(key: string): string {
+	return key;
+}
+
+function translateWithFallback(
+	translate: TranslateFn,
+	key: string,
+	fallback: string,
+	params?: InterpolationValues
+): string {
+	const translated = translate(key, params);
+	return translated === key ? fallback : translated;
+}
+
+function translateFirstWithFallback(
+	translate: TranslateFn,
+	keys: string[],
+	fallback: string,
+	params?: InterpolationValues
+): string {
+	for (const key of keys) {
+		const translated = translate(key, params);
+		if (translated !== key) return translated;
+	}
+	return fallback;
+}
+
+function localizeStepDefinitions(steps: StepDefinition[], translate: TranslateFn): StepDefinition[] {
+	return steps.map((step) => localizeStepDefinition(step, translate));
+}
+
+function localizeStepDefinition(step: StepDefinition, translate: TranslateFn): StepDefinition {
+	const baseKey = `steps.definitions.${step.type}`;
+	return {
+		...step,
+		label: translateWithFallback(translate, `${baseKey}.label`, step.label),
+		description: translateWithFallback(translate, `${baseKey}.description`, step.description),
+		category: translateWithFallback(
+			translate,
+			`steps.categories.${CATEGORY_KEYS[step.category] ?? "tasknotes"}`,
+			step.category
+		),
+		inputFields: step.inputFields.map((field) => localizeInputField(field, translate, baseKey)),
+		outputFields: step.outputFields.map((field) => localizeOutputField(field, translate, baseKey)),
+		examples: step.examples.map((example, index) => ({
+			...example,
+			label: translateWithFallback(translate, `${baseKey}.examples.${index}.label`, example.label),
+		})),
+	};
+}
+
+function localizeInputField(
+	field: WorkflowInputField,
+	translate: TranslateFn,
+	baseKey: string
+): WorkflowInputField {
+	const fieldKey = `${baseKey}.input.${field.key}`;
+	const commonKey = commonInputTranslationKey(field.key);
+	return {
+		...field,
+		label: translateFirstWithFallback(
+			translate,
+			[`${fieldKey}.label`, ...(commonKey ? [`${commonKey}.label`] : [])],
+			field.label
+		),
+		description: field.description
+			? translateFirstWithFallback(
+					translate,
+					[`${fieldKey}.description`, ...(commonKey ? [`${commonKey}.description`] : [])],
+					field.description
+				)
+			: undefined,
+		placeholder: field.placeholder
+			? translateWithFallback(translate, `${fieldKey}.placeholder`, field.placeholder)
+			: undefined,
+		options: field.options?.map((option) => ({
+			...option,
+			label: translateWithFallback(translate, `${fieldKey}.options.${option.value}`, option.label),
+		})),
+	};
+}
+
+function localizeOutputField(
+	field: WorkflowOutputField,
+	translate: TranslateFn,
+	baseKey: string
+): WorkflowOutputField {
+	const fieldKey = `${baseKey}.output.${field.key}`;
+	const commonKey = commonOutputTranslationKey(field.key);
+	return {
+		...field,
+		label: translateFirstWithFallback(
+			translate,
+			[`${fieldKey}.label`, ...(commonKey ? [`${commonKey}.label`] : [])],
+			field.label
+		),
+		description: field.description
+			? translateFirstWithFallback(
+					translate,
+					[`${fieldKey}.description`, ...(commonKey ? [`${commonKey}.description`] : [])],
+					field.description
+				)
+			: undefined,
+	};
+}
+
+function commonInputTranslationKey(key: string): string | null {
+	if (key === "task") return "steps.common.task";
+	if (key === "path") return "steps.common.path";
+	return null;
+}
+
+function commonOutputTranslationKey(key: string): string | null {
+	if (key === "task") return "steps.common.outputTask";
+	if (key === "path") return "steps.common.outputPath";
+	return null;
+}
 
 export function shouldRunStep(step: WorkflowStep, context: WorkflowRunContext): boolean {
 	if (!step.if) return true;

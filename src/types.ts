@@ -13,6 +13,7 @@ export interface TaskNotesWorkflowsSettings {
 	maxRunsPerWorkflow: number;
 	maxHistoryEntries: number;
 	minIntervalMs: number;
+	uiLanguage: string;
 }
 
 export type RunLogLevel = "summary" | "inputs" | "inputs-and-outputs";

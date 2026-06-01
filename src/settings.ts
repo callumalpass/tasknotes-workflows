@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS: TaskNotesWorkflowsSettings = {
 	maxRunsPerWorkflow: 100,
 	maxHistoryEntries: 1000,
 	minIntervalMs: 60_000,
+	uiLanguage: "system",
 };
 
 export function normalizeSettings(input: Partial<TaskNotesWorkflowsSettings>): TaskNotesWorkflowsSettings {
@@ -26,5 +27,6 @@ export function normalizeSettings(input: Partial<TaskNotesWorkflowsSettings>): T
 		maxRunsPerWorkflow: Math.max(10, input.maxRunsPerWorkflow ?? DEFAULT_SETTINGS.maxRunsPerWorkflow),
 		maxHistoryEntries: Math.max(50, input.maxHistoryEntries ?? DEFAULT_SETTINGS.maxHistoryEntries),
 		minIntervalMs: Math.max(30_000, input.minIntervalMs ?? DEFAULT_SETTINGS.minIntervalMs),
+		uiLanguage: input.uiLanguage?.trim() || DEFAULT_SETTINGS.uiLanguage,
 	};
 }

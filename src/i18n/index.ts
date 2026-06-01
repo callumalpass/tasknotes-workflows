@@ -1,0 +1,37 @@
+import { I18nService } from "./I18nService";
+import type { I18nServiceOptions, TranslationResources } from "./types";
+import { en } from "./resources/en";
+import { fr } from "./resources/fr";
+import { ru } from "./resources/ru";
+import { zh } from "./resources/zh";
+import { de } from "./resources/de";
+import { es } from "./resources/es";
+import { ja } from "./resources/ja";
+import { pt } from "./resources/pt";
+import { ko } from "./resources/ko";
+
+export const translationResources = {
+	en,
+	fr,
+	ru,
+	zh,
+	de,
+	es,
+	ja,
+	pt,
+	ko,
+} satisfies TranslationResources;
+
+export type TranslationKey = string;
+export type { InterpolationValues, TranslateFn } from "./types";
+
+export function createI18nService(options?: Partial<I18nServiceOptions>): I18nService {
+	return new I18nService({
+		resources: translationResources,
+		defaultLocale: "en",
+		fallbackLocale: "en",
+		...options,
+	});
+}
+
+export { I18nService };

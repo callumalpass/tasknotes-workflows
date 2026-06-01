@@ -3,6 +3,7 @@ import { todayString } from "./duration";
 import { createStepExecutionContext, shouldRunStep, StepRegistry } from "./stepRegistry";
 import { resolveTemplateValue } from "./template";
 import type { App } from "obsidian";
+import type { TranslateFn } from "./i18n";
 import type {
 	LoadedWorkflow,
 	StepRunDetail,
@@ -14,13 +15,25 @@ import type {
 	WorkflowStep,
 } from "./types";
 
+const ENGINE_FALLBACK_MESSAGES: Record<string, string> = {
+	"engine.workflowInvalid": "Workflow is invalid: {path}",
+	"engine.workflowAlreadyRunning": "Workflow is already running.",
+	"engine.workflowDisabled": "Workflow is disabled.",
+	"engine.conditionsDidNotMatch": "Workflow conditions did not match.",
+	"engine.stepFailed": "Step failed.",
+	"engine.unknownStepType": "Unknown step type: {type}",
+	"engine.forEachNonArray": "forEach resolved to a non-array value.",
+	"engine.forEachTooManyItems": "forEach selected {count} items, above run.maxTasks {max}.",
+};
+
 export class WorkflowEngine {
 	private readonly runningWorkflowIds = new Set<string>();
 
 	constructor(
 		private readonly stepRegistry: StepRegistry,
 		private readonly tasknotes: () => TaskNotesRuntimeApi | null,
-		private readonly obsidian: () => App | null = () => null
+		private readonly obsidian: () => App | null = () => null,
+		private readonly translate: TranslateFn = (key) => key
 	) {}
 
 	async runWorkflow(
@@ -29,7 +42,7 @@ export class WorkflowEngine {
 	): Promise<WorkflowRunDetail> {
 		const workflow = loadedWorkflow.workflow;
 		if (!workflow) {
-			throw new Error(`Workflow is invalid: ${loadedWorkflow.file.path}`);
+			throw new Error(this.t("engine.workflowInvalid", { path: loadedWorkflow.file.path }));
 		}
 
 		const runId = createRunId();
@@ -47,11 +60,11 @@ export class WorkflowEngine {
 		};
 
 		if (workflow.run.noOverlap && this.runningWorkflowIds.has(workflow.id)) {
-			return finishRun(detail, "skipped", "Workflow is already running.");
+			return finishRun(detail, "skipped", this.t("engine.workflowAlreadyRunning"));
 		}
 
 		if (!options.dryRun && !workflow.enabled) {
-			return finishRun(detail, "skipped", "Workflow is disabled.");
+			return finishRun(detail, "skipped", this.t("engine.workflowDisabled"));
 		}
 
 		this.runningWorkflowIds.add(workflow.id);
@@ -70,7 +83,7 @@ export class WorkflowEngine {
 			};
 
 			if (!conditionsMatch(workflow.conditions, context)) {
-				return finishRun(detail, "skipped", "Workflow conditions did not match.");
+				return finishRun(detail, "skipped", this.t("engine.conditionsDidNotMatch"));
 			}
 
 			for (const step of workflow.steps) {
@@ -82,7 +95,7 @@ export class WorkflowEngine {
 					workflow.run.maxTasks
 				);
 				if (stepResult.status === "failed" && workflow.run.onError === "stop") {
-					return finishRun(detail, "failed", stepResult.error ?? "Step failed.");
+					return finishRun(detail, "failed", stepResult.error ?? this.t("engine.stepFailed"));
 				}
 				if (step.type === "workflow.stop" && stepResult.status === "success") {
 					return finishRun(detail, "stopped");
@@ -106,7 +119,7 @@ export class WorkflowEngine {
 	): Promise<StepRunDetail> {
 		const definition = this.stepRegistry.get(step.type);
 		if (!definition) {
-			const failed = createStepDetail(step, "failed", `Unknown step type: ${step.type}`);
+			const failed = createStepDetail(step, "failed", this.t("engine.unknownStepType", { type: step.type }));
 			run.steps.push(failed);
 			return failed;
 		}
@@ -122,7 +135,7 @@ export class WorkflowEngine {
 			: undefined;
 		if (typeof forEachValue !== "undefined") {
 			if (!Array.isArray(forEachValue)) {
-				const failed = createStepDetail(step, "failed", "forEach resolved to a non-array value.");
+				const failed = createStepDetail(step, "failed", this.t("engine.forEachNonArray"));
 				run.steps.push(failed);
 				return failed;
 			}
@@ -130,7 +143,7 @@ export class WorkflowEngine {
 				const failed = createStepDetail(
 					step,
 					"failed",
-					`forEach selected ${forEachValue.length} items, above run.maxTasks ${maxTasks}.`
+					this.t("engine.forEachTooManyItems", { count: forEachValue.length, max: maxTasks })
 				);
 				run.steps.push(failed);
 				return failed;
@@ -198,6 +211,18 @@ export class WorkflowEngine {
 			return detail;
 		}
 	}
+
+	private t(key: string, params?: Record<string, string | number>): string {
+		const translated = this.translate(key, params);
+		return translated === key ? interpolate(ENGINE_FALLBACK_MESSAGES[key] ?? key, params) : translated;
+	}
+}
+
+function interpolate(template: string, params?: Record<string, string | number>): string {
+	if (!params) return template;
+	return template.replace(/\{(\w+)\}/gu, (_, token: string) =>
+		Object.prototype.hasOwnProperty.call(params, token) ? String(params[token]) : `{${token}}`
+	);
 }
 
 function finishRun(

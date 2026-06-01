@@ -2,6 +2,20 @@ import { describe, expect, it } from "vitest";
 import { StepRegistry } from "../src/stepRegistry";
 
 describe("step registry", () => {
+	it("localizes step metadata with fallback to built-in English", () => {
+		const registry = new StepRegistry((key) => {
+			if (key === "steps.definitions.task.get.label") return "Translated task lookup";
+			if (key === "steps.common.task.label") return "Translated task path";
+			return key;
+		});
+
+		const step = registry.get("task.get");
+
+		expect(step?.label).toBe("Translated task lookup");
+		expect(step?.description).toBe("Reads one task by path.");
+		expect(step?.inputFields[0]?.label).toBe("Translated task path");
+	});
+
 	it("describes expected inputs and outputs for editor scaffolding", () => {
 		const registry = new StepRegistry();
 		const patch = registry.get("task.patch");

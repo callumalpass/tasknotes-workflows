@@ -73,12 +73,12 @@ export class WorkflowBasesView extends Component {
 	private renderHeader(parent: HTMLElement): void {
 		const header = parent.createDiv({ cls: "tnw-base-header" });
 		const title = header.createDiv({ cls: "tnw-title-block" });
-		title.createEl("h2", { text: "Workflows" });
+		title.createEl("h2", { text: this.plugin.t("baseView.title") });
 		title.createDiv({
 			cls: "tnw-subtitle",
 			text: this.plugin.tasknotesAvailable
-				? "TaskNotes runtime API is available."
-				: "TaskNotes runtime API is unavailable; task-writing steps cannot run.",
+				? this.plugin.t("baseView.tasknotesAvailable")
+				: this.plugin.t("baseView.tasknotesUnavailable"),
 		});
 	}
 
@@ -89,11 +89,11 @@ export class WorkflowBasesView extends Component {
 		const workflows = this.plugin.workflows;
 		if (workflows.length === 0) {
 			const empty = cards.createDiv({ cls: "tnw-empty" });
-			empty.createDiv({ cls: "tnw-empty-title", text: "No workflows found" });
+			empty.createDiv({ cls: "tnw-empty-title", text: this.plugin.t("baseView.empty") });
 			const actions = empty.createDiv({ cls: "tnw-form-actions" });
 			new ButtonComponent(actions)
 				.setIcon("plus")
-				.setButtonText("New workflow")
+				.setButtonText(this.plugin.t("baseView.newWorkflow"))
 				.setCta()
 				.onClick(() => {
 					new WorkflowEditModal(this.plugin.app, this.plugin).open();

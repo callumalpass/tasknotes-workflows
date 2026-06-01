@@ -114,6 +114,92 @@ Enable this workflow to start time tracking when a TaskNotes task moves to \`act
 `,
 		},
 		{
+			path: `${folder}/clear-scheduled-when-started.md`,
+			content: `---
+type: tasknotes-workflow
+schemaVersion: 1
+id: clear-scheduled-when-started
+name: Clear scheduled when started
+enabled: false
+description: Clear a task's scheduled date when its status changes to active or in-progress.
+triggers:
+  - id: status-active
+    type: tasknotes.event
+    event: task.status.changed
+    to: active
+  - id: status-in-progress
+    type: tasknotes.event
+    event: task.status.changed
+    to: in-progress
+conditions:
+  - field: trigger.after.path
+    operator: exists
+  - field: trigger.after.scheduled
+    operator: exists
+steps:
+  - id: clear-scheduled
+    type: task.clearScheduled
+    input:
+      task: "{{trigger.after.path}}"
+run:
+  mode: sequential
+  noOverlap: true
+  source: tasknotes-workflows
+  maxTasks: 1
+  onError: stop
+---
+
+# Clear scheduled when started
+
+Enable this workflow if moving a task into active work means it should no longer appear on its scheduled day.
+Adjust the status trigger values to match your TaskNotes status names before enabling it.
+`,
+		},
+		{
+			path: `${folder}/stamp-started-at.md`,
+			content: `---
+type: tasknotes-workflow
+schemaVersion: 1
+id: stamp-started-at
+name: Stamp started timestamp
+enabled: false
+description: Set a startedAt field the first time a task status changes to active or in-progress.
+triggers:
+  - id: status-active
+    type: tasknotes.event
+    event: task.status.changed
+    to: active
+  - id: status-in-progress
+    type: tasknotes.event
+    event: task.status.changed
+    to: in-progress
+conditions:
+  - field: trigger.after.path
+    operator: exists
+  - field: trigger.after.startedAt
+    operator: missing
+steps:
+  - id: stamp-started
+    type: task.patch
+    input:
+      task: "{{trigger.after.path}}"
+      patch:
+        startedAt: "{{now}}"
+run:
+  mode: sequential
+  noOverlap: true
+  source: tasknotes-workflows
+  maxTasks: 1
+  onError: stop
+---
+
+# Stamp started timestamp
+
+Enable this workflow if you want a custom \`startedAt\` field recorded when work begins.
+Rename the field or remove the missing-field condition if your workflow should update the timestamp every time the task restarts.
+`,
+		},
+		{
 			path: `${folder}/morning-overdue-review.md`,
 			content: `---
 type: tasknotes-workflow
@@ -158,6 +244,100 @@ run:
 # Morning overdue review
 
 Runs while Obsidian is open. Use dry run first, then enable it when the query matches the right tasks.
+`,
+		},
+		{
+			path: `${folder}/rollover-overdue-scheduled-tasks.md`,
+			content: `---
+type: tasknotes-workflow
+schemaVersion: 1
+id: rollover-overdue-scheduled-tasks
+name: Rollover overdue scheduled tasks
+enabled: false
+description: Move incomplete tasks with past scheduled dates to today.
+triggers:
+  - id: every-morning
+    type: cron
+    schedule: "0 8 * * *"
+    timezone: local
+steps:
+  - id: overdue-scheduled
+    type: task.query
+    input:
+      query:
+        scheduled:
+          operator: before
+          value: today
+        status:
+          operator: notIn
+          value:
+            - done
+            - cancelled
+  - id: reschedule-to-today
+    type: task.reschedule
+    forEach: "{{steps.overdue-scheduled.tasks}}"
+    input:
+      task: "{{item.path}}"
+      date: "{{today}}"
+run:
+  mode: sequential
+  noOverlap: true
+  source: tasknotes-workflows
+  maxTasks: 50
+  onError: continue
+---
+
+# Rollover overdue scheduled tasks
+
+Runs while Obsidian is open. Use dry run first to confirm the selected tasks before enabling automatic date changes.
+`,
+		},
+		{
+			path: `${folder}/escalate-due-today-tasks.md`,
+			content: `---
+type: tasknotes-workflow
+schemaVersion: 1
+id: escalate-due-today-tasks
+name: Escalate due-today tasks
+enabled: false
+description: Mark incomplete tasks due today or earlier as high priority.
+triggers:
+  - id: every-morning
+    type: cron
+    schedule: "0 8 * * *"
+    timezone: local
+steps:
+  - id: due-now
+    type: task.query
+    input:
+      query:
+        due:
+          operator: onOrBefore
+          value: today
+        status:
+          operator: notIn
+          value:
+            - done
+            - cancelled
+  - id: mark-high
+    type: task.patch
+    forEach: "{{steps.due-now.tasks}}"
+    input:
+      task: "{{item.path}}"
+      patch:
+        priority: high
+run:
+  mode: sequential
+  noOverlap: true
+  source: tasknotes-workflows
+  maxTasks: 50
+  onError: continue
+---
+
+# Escalate due-today tasks
+
+Enable this workflow if due and overdue tasks should be promoted to high priority each morning.
+Adjust the priority value first if your vault uses custom priority names.
 `,
 		},
 		{

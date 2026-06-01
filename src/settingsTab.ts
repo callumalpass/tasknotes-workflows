@@ -2,23 +2,30 @@ import { Notice, PluginSettingTab, Setting, type App } from "obsidian";
 import { DEFAULT_WORKFLOW_FOLDER, DEFAULT_WORKFLOW_VIEW_PATH } from "./constants";
 import type TaskNotesWorkflowsPlugin from "../main";
 
-const TASKNOTES_LABEL = "TaskNotes";
-
 export class WorkflowsSettingsTab extends PluginSettingTab {
 	constructor(app: App, private readonly plugin: TaskNotesWorkflowsPlugin) {
 		super(app, plugin);
+		this.plugin.registerEvent(
+			this.plugin.i18n.on("locale-changed", () => {
+				if (this.containerEl.isConnected) this.renderSettings();
+			})
+		);
 	}
 
 	override display(): void {
+		this.renderSettings();
+	}
+
+	private renderSettings(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 		containerEl.addClass("tnw-settings");
 
-		new Setting(containerEl).setName("Workflow files").setHeading();
+		new Setting(containerEl).setName(this.plugin.t("settings.workflowFiles.heading")).setHeading();
 
 		new Setting(containerEl)
-			.setName("Workflow folder")
-			.setDesc("Vault folder containing Markdown workflow definitions.")
+			.setName(this.plugin.t("settings.workflowFiles.folder.name"))
+			.setDesc(this.plugin.t("settings.workflowFiles.folder.description"))
 			.addText((text) =>
 				text.setValue(this.plugin.settings.workflowFolder).onChange((value) => {
 					this.plugin.settings.workflowFolder = value.trim() || DEFAULT_WORKFLOW_FOLDER;
@@ -27,8 +34,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 			new Setting(containerEl)
-				.setName("Workflow base")
-				.setDesc("Vault path for the generated bases workflow view.")
+				.setName(this.plugin.t("settings.workflowFiles.base.name"))
+				.setDesc(this.plugin.t("settings.workflowFiles.base.description"))
 			.addText((text) =>
 				text.setValue(this.plugin.settings.workflowViewPath).onChange((value) => {
 					this.plugin.settings.workflowViewPath = value.trim() || DEFAULT_WORKFLOW_VIEW_PATH;
@@ -37,8 +44,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Create workflow defaults")
-			.setDesc("Write example workflow notes when the plugin loads or when defaults are maintained.")
+			.setName(this.plugin.t("settings.workflowFiles.createDefaults.name"))
+			.setDesc(this.plugin.t("settings.workflowFiles.createDefaults.description"))
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.autoCreateDefaultWorkflows).onChange((value) => {
 					this.plugin.settings.autoCreateDefaultWorkflows = value;
@@ -47,8 +54,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 			new Setting(containerEl)
-				.setName("Create workflow base")
-				.setDesc("Write the generated bases workflow view when the plugin loads or when defaults are maintained.")
+				.setName(this.plugin.t("settings.workflowFiles.createBase.name"))
+				.setDesc(this.plugin.t("settings.workflowFiles.createBase.description"))
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.autoCreateWorkflowView).onChange((value) => {
 					this.plugin.settings.autoCreateWorkflowView = value;
@@ -57,29 +64,24 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Maintain defaults")
-			.setDesc("Create missing workflow notes and the workflow base without overwriting existing files.")
+			.setName(this.plugin.t("settings.workflowFiles.maintainDefaults.name"))
+			.setDesc(this.plugin.t("settings.workflowFiles.maintainDefaults.description"))
 			.addButton((button) =>
 				button
-					.setButtonText("Maintain")
+					.setButtonText(this.plugin.t("common.maintain"))
 					.setCta()
 					.onClick(() => {
 						void this.plugin.ensureDefaultFiles().then((result) => {
-							const created = [...result.workflows, ...(result.view ? [result.view] : [])];
-							new Notice(
-								created.length > 0
-									? `Created ${created.length} default file${created.length === 1 ? "" : "s"}.`
-									: "Default workflow files are already present."
-							);
+							this.plugin.showDefaultFilesNotice(result);
 						});
 					})
 			);
 
-		new Setting(containerEl).setName("Triggers").setHeading();
+		new Setting(containerEl).setName(this.plugin.t("settings.triggers.heading")).setHeading();
 
 			new Setting(containerEl)
-				.setName(`${TASKNOTES_LABEL} event triggers`)
-				.setDesc(`Run workflows from ${TASKNOTES_LABEL} runtime API events such as task.status.changed.`)
+				.setName(this.plugin.t("settings.triggers.tasknotesEvents.name"))
+				.setDesc(this.plugin.t("settings.triggers.tasknotesEvents.description"))
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.enableTaskEventTriggers).onChange((value) => {
 					this.plugin.settings.enableTaskEventTriggers = value;
@@ -88,8 +90,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Scheduled triggers")
-			.setDesc("Run cron and interval workflows while Obsidian is open.")
+			.setName(this.plugin.t("settings.triggers.scheduled.name"))
+			.setDesc(this.plugin.t("settings.triggers.scheduled.description"))
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.enableScheduledTriggers).onChange((value) => {
 					this.plugin.settings.enableScheduledTriggers = value;
@@ -98,8 +100,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Advanced Obsidian triggers")
-			.setDesc("Allow Obsidian vault and workspace triggers. Keep path filters narrow.")
+			.setName(this.plugin.t("settings.triggers.obsidian.name"))
+			.setDesc(this.plugin.t("settings.triggers.obsidian.description"))
 			.addToggle((toggle) =>
 				toggle.setValue(this.plugin.settings.enableObsidianTriggers).onChange((value) => {
 					this.plugin.settings.enableObsidianTriggers = value;
@@ -108,8 +110,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Minimum interval")
-			.setDesc("Lowest allowed interval trigger frequency in milliseconds.")
+			.setName(this.plugin.t("settings.triggers.minInterval.name"))
+			.setDesc(this.plugin.t("settings.triggers.minInterval.description"))
 			.addText((text) =>
 				text.setValue(String(this.plugin.settings.minIntervalMs)).onChange((value) => {
 					const next = Number(value);
@@ -120,11 +122,11 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 				})
 			);
 
-		new Setting(containerEl).setName("Run logs").setHeading();
+		new Setting(containerEl).setName(this.plugin.t("settings.runLogs.heading")).setHeading();
 
 		new Setting(containerEl)
-			.setName("Run log folder")
-			.setDesc("Optional vault path for run summaries and detail files. Leave blank to use this plugin's config folder.")
+			.setName(this.plugin.t("settings.runLogs.folder.name"))
+			.setDesc(this.plugin.t("settings.runLogs.folder.description"))
 			.addText((text) =>
 				text.setValue(this.plugin.settings.runLogRoot).onChange((value) => {
 					this.plugin.settings.runLogRoot = value.trim();
@@ -133,13 +135,13 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Run log level")
-			.setDesc("Controls how much detail is kept in run records.")
+			.setName(this.plugin.t("settings.runLogs.level.name"))
+			.setDesc(this.plugin.t("settings.runLogs.level.description"))
 			.addDropdown((dropdown) =>
 				dropdown
-					.addOption("summary", "Summary")
-					.addOption("inputs", "Inputs")
-					.addOption("inputs-and-outputs", "Inputs and outputs")
+					.addOption("summary", this.plugin.t("settings.runLogs.level.options.summary"))
+					.addOption("inputs", this.plugin.t("settings.runLogs.level.options.inputs"))
+					.addOption("inputs-and-outputs", this.plugin.t("settings.runLogs.level.options.inputsAndOutputs"))
 					.setValue(this.plugin.settings.runLogLevel)
 					.onChange((value) => {
 						this.plugin.settings.runLogLevel = value as typeof this.plugin.settings.runLogLevel;
@@ -148,8 +150,8 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Runs retained per workflow")
-			.setDesc("Old detail files are deleted after this limit.")
+			.setName(this.plugin.t("settings.runLogs.retention.name"))
+			.setDesc(this.plugin.t("settings.runLogs.retention.description"))
 			.addText((text) =>
 				text.setValue(String(this.plugin.settings.maxRunsPerWorkflow)).onChange((value) => {
 					const next = Number(value);
@@ -161,12 +163,29 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Clear run history")
-			.setDesc("Delete plugin-local workflow run logs.")
+			.setName(this.plugin.t("settings.runLogs.clear.name"))
+			.setDesc(this.plugin.t("settings.runLogs.clear.description"))
 			.addButton((button) =>
-				button.setButtonText("Clear").onClick(() => {
-					void this.plugin.clearRunHistory().then(() => new Notice("Workflow run history cleared."));
+				button.setButtonText(this.plugin.t("common.clear")).onClick(() => {
+					void this.plugin.clearRunHistory().then(() => new Notice(this.plugin.t("notices.runHistoryCleared")));
 				})
 			);
+
+		new Setting(containerEl).setName(this.plugin.t("settings.language.heading")).setHeading();
+
+		new Setting(containerEl)
+			.setName(this.plugin.t("settings.language.name"))
+			.setDesc(this.plugin.t("settings.language.dropdownDescription"))
+			.addDropdown((dropdown) => {
+				dropdown.addOption("system", this.plugin.t("common.systemDefault"));
+				for (const code of this.plugin.i18n.getAvailableLocales()) {
+					dropdown.addOption(code, this.plugin.i18n.getNativeLanguageName(code));
+				}
+				dropdown.setValue(this.plugin.settings.uiLanguage ?? "system").onChange((value) => {
+					this.plugin.settings.uiLanguage = value;
+					this.plugin.i18n.setLocale(value);
+					void this.plugin.saveSettings();
+				});
+			});
 	}
 }

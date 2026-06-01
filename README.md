@@ -8,7 +8,7 @@ The runtime uses Obsidian APIs only. Node is only used by the development, build
 
 On first load, the plugin can also create `TaskNotes/Views/workflows.base`. That Base uses the custom `tasknotesWorkflows` view type and renders workflow cards for creating, editing, opening, running, and dry-running workflows.
 
-Default workflow files are created disabled. They include starter examples for time tracking, overdue review, folder movement, subtask inheritance, dependency inheritance, parent-to-subtask mirroring, and blocked-task warnings.
+Default workflow files are created disabled. They include starter examples for time tracking, status-triggered date cleanup, started timestamps, overdue review, scheduled-date rollover, due-date priority escalation, folder movement, subtask inheritance, dependency inheritance, parent-to-subtask mirroring, and blocked-task warnings.
 
 ## Status
 

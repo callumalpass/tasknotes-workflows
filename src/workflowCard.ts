@@ -1,6 +1,7 @@
 import { ButtonComponent, Notice } from "obsidian";
 import type TaskNotesWorkflowsPlugin from "../main";
 import type { LoadedWorkflow, WorkflowStep, WorkflowTrigger } from "./types";
+import { RunHistoryModal } from "./runHistoryModal";
 import { loadedWorkflowStatus } from "./workflowParser";
 import { WorkflowEditModal } from "./workflowEditModal";
 
@@ -30,12 +31,12 @@ export function renderWorkflowCard(
 	}
 
 	const chips = header.createDiv({ cls: "tnw-card-chips" });
-	renderChip(chips, loadedWorkflowStatus(loaded));
+	renderChip(chips, displayWorkflowStatus(plugin, loadedWorkflowStatus(loaded)), loadedWorkflowStatus(loaded));
 	if (loaded.lastRun) {
-		renderChip(chips, loaded.lastRun.status);
+		renderChip(chips, plugin.t(`common.runStatus.${loaded.lastRun.status}`), loaded.lastRun.status);
 	}
 	if (workflow?.run.noOverlap) {
-		renderChip(chips, "no overlap");
+		renderChip(chips, plugin.t("workflowCard.labels.noOverlap"));
 	}
 
 	if (workflow?.description && !options.compact) {
@@ -54,35 +55,46 @@ export function renderWorkflowCard(
 
 	if (workflow) {
 		const details = card.createDiv({ cls: "tnw-card-details" });
-		renderDetail(details, "Triggers", summarizeTriggers(workflow.triggers));
-		renderDetail(details, "Steps", summarizeSteps(workflow.steps));
+		renderDetail(details, plugin.t("workflowCard.labels.triggers"), summarizeTriggers(plugin, workflow.triggers));
+		renderDetail(details, plugin.t("workflowCard.labels.steps"), summarizeSteps(workflow.steps));
 		if (loaded.lastRun) {
-			renderDetail(details, "Last run", `${loaded.lastRun.status} / ${loaded.lastRun.ts}`);
+			renderDetail(
+				details,
+				plugin.t("workflowCard.labels.lastRun"),
+				`${plugin.t(`common.runStatus.${loaded.lastRun.status}`)} / ${loaded.lastRun.ts}`
+			);
 		}
 	}
 
 	const actions = card.createDiv({ cls: "tnw-card-actions" });
 	new ButtonComponent(actions)
 		.setIcon("pencil")
-		.setTooltip("Edit workflow")
+		.setTooltip(plugin.t("workflowCard.tooltips.edit"))
 		.onClick(() => {
 			new WorkflowEditModal(plugin.app, plugin, { loaded }).open();
 		});
 	new ButtonComponent(actions)
 		.setIcon("flask-conical")
-		.setTooltip("Dry run workflow")
+		.setTooltip(plugin.t("workflowCard.tooltips.dryRun"))
 		.setDisabled(!workflow)
 		.onClick(() => runWorkflow(plugin, workflow?.id, true));
 	new ButtonComponent(actions)
 		.setIcon("play")
-		.setTooltip("Run workflow")
+		.setTooltip(plugin.t("workflowCard.tooltips.run"))
 		.setDisabled(!workflow)
 		.onClick(() => runWorkflow(plugin, workflow?.id, false));
+	new ButtonComponent(actions)
+		.setIcon("history")
+		.setTooltip(plugin.t("workflowCard.tooltips.history"))
+		.setDisabled(!workflow)
+		.onClick(() => {
+			new RunHistoryModal(plugin.app, plugin, loaded).open();
+		});
 
 	if (options.showOpenNote !== false) {
 		new ButtonComponent(actions)
 			.setIcon("file-text")
-			.setTooltip("Open workflow note")
+			.setTooltip(plugin.t("workflowCard.tooltips.openNote"))
 			.onClick(() => {
 				void plugin.openWorkflowFile(loaded.file);
 			});
@@ -91,8 +103,8 @@ export function renderWorkflowCard(
 	return card;
 }
 
-function renderChip(parent: HTMLElement, status: string): void {
-	parent.createSpan({ cls: `tnw-chip is-${cssClass(status)}`, text: status });
+function renderChip(parent: HTMLElement, label: string, statusClass = label): void {
+	parent.createSpan({ cls: `tnw-chip is-${cssClass(statusClass)}`, text: label });
 }
 
 function renderDetail(parent: HTMLElement, label: string, value: string): void {
@@ -101,18 +113,23 @@ function renderDetail(parent: HTMLElement, label: string, value: string): void {
 	detail.createSpan({ cls: "tnw-card-detail-value", text: value });
 }
 
-function summarizeTriggers(triggers: WorkflowTrigger[]): string {
+function summarizeTriggers(plugin: TaskNotesWorkflowsPlugin, triggers: WorkflowTrigger[]): string {
 	return triggers
 		.map((trigger) => {
 			if (trigger.type === "tasknotes.event") {
-				return `TaskNotes ${trigger.event}${trigger.to ? ` -> ${stringifyScalar(trigger.to)}` : ""}`;
+				return plugin.t("workflowCard.summary.tasknotesEvent", {
+					event: trigger.event,
+					to: trigger.to
+						? plugin.t("workflowCard.summary.tasknotesTo", { value: stringifyScalar(trigger.to) })
+						: "",
+				});
 			}
-			if (trigger.type === "cron") return `cron ${trigger.schedule}`;
-			if (trigger.type === "interval") return `every ${trigger.every}`;
-			if (trigger.type === "obsidian.vault") return `vault ${trigger.event}`;
-			if (trigger.type === "obsidian.metadata") return `metadata ${trigger.event}`;
-			if (trigger.type === "obsidian.workspace") return `workspace ${trigger.event}`;
-			return "manual";
+			if (trigger.type === "cron") return plugin.t("workflowCard.summary.cron", { schedule: trigger.schedule });
+			if (trigger.type === "interval") return plugin.t("workflowCard.summary.interval", { every: trigger.every });
+			if (trigger.type === "obsidian.vault") return plugin.t("workflowCard.summary.vault", { event: trigger.event });
+			if (trigger.type === "obsidian.metadata") return plugin.t("workflowCard.summary.metadata", { event: trigger.event });
+			if (trigger.type === "obsidian.workspace") return plugin.t("workflowCard.summary.workspace", { event: trigger.event });
+			return plugin.t("workflowCard.summary.manual");
 		})
 		.join(", ");
 }
@@ -125,8 +142,20 @@ function runWorkflow(plugin: TaskNotesWorkflowsPlugin, workflowId: string | unde
 	if (!workflowId) return;
 	void plugin
 		.runWorkflowById(workflowId, { dryRun })
-		.then((run) => new Notice(`${dryRun ? "Dry run" : "Run"} ${run.status}: ${run.workflowName}`))
+		.then((run) =>
+			new Notice(
+				plugin.t(dryRun ? "notices.workflowDryRunCompleted" : "notices.workflowRunCompleted", {
+					status: plugin.t(`common.runStatus.${run.status}`),
+					name: run.workflowName,
+				})
+			)
+		)
 		.catch((error) => new Notice(error instanceof Error ? error.message : String(error)));
+}
+
+function displayWorkflowStatus(plugin: TaskNotesWorkflowsPlugin, status: string): string {
+	const translated = plugin.t(`common.workflowStatus.${status}`);
+	return translated === `common.workflowStatus.${status}` ? status : translated;
 }
 
 function cssClass(value: string): string {

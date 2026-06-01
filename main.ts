@@ -14,6 +14,7 @@ import { WorkflowRepository } from "./src/workflowRepository";
 import { buildWorkflowBasesViewFactory, WorkflowBasesView } from "./src/workflowBasesView";
 import { refreshWorkflowNoteCards, registerWorkflowNoteCards } from "./src/workflowNoteCard";
 import { WorkflowEditModal } from "./src/workflowEditModal";
+import { createI18nService, I18nService, type InterpolationValues } from "./src/i18n";
 import type {
 	LoadedWorkflow,
 	RunSummary,
@@ -26,6 +27,7 @@ import type {
 
 export default class TaskNotesWorkflowsPlugin extends Plugin {
 	override settings: TaskNotesWorkflowsSettings = { ...DEFAULT_SETTINGS };
+	i18n!: I18nService;
 	repository!: WorkflowRepository;
 	runLogs!: RunLogService;
 	stepRegistry!: StepRegistry;
@@ -36,7 +38,9 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	private defaults!: DefaultWorkflowsService;
 	private loadedWorkflows: LoadedWorkflow[] = [];
 	private workflowBaseViews = new Set<WorkflowBasesView>();
+	private staticWorkflowCommandIds = new Set<string>();
 	private manualWorkflowCommandIds = new Set<string>();
+	private workflowsRibbonEl: HTMLElement | null = null;
 
 	get workflows(): LoadedWorkflow[] {
 		return [...this.loadedWorkflows];
@@ -49,11 +53,26 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	override async onload(): Promise<void> {
 		await this.loadSettings();
 
+		this.i18n = createI18nService({
+			initialLocale: this.settings.uiLanguage,
+			getSystemLocale: () => this.getSystemUILocale(),
+		});
+		this.i18n.on("locale-changed", ({ current }) => {
+			const languageLabel = this.i18n.getNativeLanguageName(current);
+			new Notice(this.t("notices.languageChanged", { language: languageLabel }));
+			this.refreshLocalizedUi();
+		});
+
 		this.bridge = new TaskNotesBridge(this.app);
 		this.repository = new WorkflowRepository(this.app, () => this.settings);
 		this.runLogs = new RunLogService(this.app, () => this.settings);
-		this.stepRegistry = new StepRegistry();
-		this.engine = new WorkflowEngine(this.stepRegistry, () => this.bridge.api, () => this.app);
+		this.stepRegistry = new StepRegistry((key, params) => this.t(key, params));
+		this.engine = new WorkflowEngine(
+			this.stepRegistry,
+			() => this.bridge.api,
+			() => this.app,
+			(key, params) => this.t(key, params)
+		);
 		this.scheduler = new WorkflowScheduler(
 			this,
 			this.bridge,
@@ -83,9 +102,10 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			}, 5000)
 		);
 
-		this.addRibbonIcon("workflow", "Workflows", () => {
+		this.workflowsRibbonEl = this.addRibbonIcon("workflow", this.t("baseView.title"), () => {
 			void this.openWorkflowBase();
 		});
+		this.updateRibbonLabels();
 	}
 
 	override onunload(): void {
@@ -152,6 +172,10 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		return await this.runLogs.recentRuns(workflowId);
 	}
 
+	async readRunDetail(workflowId: string, runId: string): Promise<WorkflowRunDetail | null> {
+		return await this.runLogs.readRunDetail(workflowId, runId);
+	}
+
 	async clearRunHistory(): Promise<void> {
 		await this.runLogs.clearHistory();
 		await this.reloadWorkflows();
@@ -190,49 +214,97 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		return detail;
 	}
 
+	t(key: string, params?: InterpolationValues): string {
+		return this.i18n.translate(key, params);
+	}
+
+	private getSystemUILocale(): string {
+		if (typeof navigator !== "undefined" && navigator.language) {
+			return navigator.language;
+		}
+		return "en";
+	}
+
+	private refreshLocalizedUi(): void {
+		this.stepRegistry.updateTranslator((key, params) => this.t(key, params));
+		this.bridge.unregisterExtension();
+		this.registerRuntimeExtension();
+		this.refreshStaticWorkflowCommands();
+		this.refreshManualWorkflowCommands();
+		this.updateRibbonLabels();
+		void this.renderWorkflowBaseViews();
+		refreshWorkflowNoteCards(this);
+	}
+
+	private updateRibbonLabels(): void {
+		if (!this.workflowsRibbonEl) return;
+		const label = this.t("baseView.title");
+		this.workflowsRibbonEl.setAttr("aria-label", label);
+		this.workflowsRibbonEl.setAttr("title", label);
+	}
+
 	private registerCommands(): void {
 		this.addCommand({
 			id: "open-workflows",
-			name: "Open workflows",
+			name: this.t("commands.openWorkflows"),
 			icon: "workflow",
 			callback: () => {
 				void this.openWorkflowBase();
 			},
 		});
+		this.staticWorkflowCommandIds.add("open-workflows");
 
 		this.addCommand({
 			id: "new-workflow",
-			name: "New workflow",
+			name: this.t("commands.newWorkflow"),
 			icon: "plus",
 			callback: () => {
 				new WorkflowEditModal(this.app, this).open();
 			},
 		});
+		this.staticWorkflowCommandIds.add("new-workflow");
 
 		this.addCommand({
 			id: "reload-workflows",
-			name: "Reload workflows",
+			name: this.t("commands.reloadWorkflows"),
 			icon: "refresh-cw",
 			callback: () => {
-				void this.reloadWorkflows().then(() => new Notice("Workflows reloaded."));
+				void this.reloadWorkflows().then(() => new Notice(this.t("notices.workflowsReloaded")));
 			},
 		});
+		this.staticWorkflowCommandIds.add("reload-workflows");
 
 		this.addCommand({
 			id: "maintain-default-workflows",
-			name: "Maintain default workflow files",
+			name: this.t("commands.maintainDefaultWorkflows"),
 			icon: "file-plus-2",
 			callback: () => {
 				void this.ensureDefaultFiles().then((result) => {
-					const created = [...result.workflows, ...(result.view ? [result.view] : [])];
-					new Notice(
-						created.length > 0
-							? `Created ${created.length} default file${created.length === 1 ? "" : "s"}.`
-							: "Default workflow files are already present."
-					);
+					this.showDefaultFilesNotice(result);
 				});
 			},
 		});
+		this.staticWorkflowCommandIds.add("maintain-default-workflows");
+	}
+
+	private refreshStaticWorkflowCommands(): void {
+		for (const commandId of this.staticWorkflowCommandIds) {
+			this.removeCommand(commandId);
+		}
+		this.staticWorkflowCommandIds.clear();
+		this.registerCommands();
+	}
+
+	showDefaultFilesNotice(result: { workflows: string[]; view: string | null }): void {
+		const created = [...result.workflows, ...(result.view ? [result.view] : [])];
+		new Notice(
+			created.length > 0
+				? this.t("notices.defaultFilesCreated", {
+						count: created.length,
+						fileLabel: created.length === 1 ? "file" : "files",
+					})
+				: this.t("notices.defaultFilesAlreadyPresent")
+		);
 	}
 
 	private refreshManualWorkflowCommands(): void {
@@ -250,7 +322,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 			this.addCommand({
 				id: commandId,
-				name: `Run: ${workflow.name}`,
+				name: this.t("commands.runWorkflow", { name: workflow.name }),
 				icon: "play",
 				checkCallback: (checking) => {
 					const currentWorkflow = this.findEnabledManualWorkflow(workflow.id);
@@ -280,12 +352,17 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	private runManualWorkflowCommand(workflowId: string): void {
 		const workflow = this.findEnabledManualWorkflow(workflowId);
 		if (!workflow?.workflow) {
-			new Notice("Workflow command is no longer available.");
+			new Notice(this.t("notices.workflowCommandUnavailable"));
 			return;
 		}
 		void this.runWorkflowById(workflow.workflow.id)
 			.then((run) => {
-				new Notice(`Run ${run.status}: ${run.workflowName}`);
+				new Notice(
+					this.t("notices.workflowRunCompleted", {
+						status: this.t(`common.runStatus.${run.status}`),
+						name: run.workflowName,
+					})
+				);
 			})
 			.catch((error) => {
 				new Notice(error instanceof Error ? error.message : String(error));
@@ -332,7 +409,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			await this.openWorkflowBaseFile(file);
 			return;
 		}
-		new Notice(`Workflow base not found: ${this.settings.workflowViewPath}`);
+		new Notice(this.t("notices.workflowBaseNotFound", { path: this.settings.workflowViewPath }));
 	}
 
 	private async openWorkflowBaseFile(file: TFile): Promise<void> {
@@ -358,7 +435,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 				this,
 				WORKFLOW_BASE_VIEW_TYPE,
 				{
-					name: "TaskNotes Workflows",
+					name: this.t("common.appName"),
 					icon: "workflow",
 					factory: buildWorkflowBasesViewFactory(this),
 				}
@@ -369,7 +446,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	}
 
 	private registerRuntimeExtension(): void {
-		this.bridge.registerExtension(this.runtimeApi(), this.manifest.version);
+		this.bridge.registerExtension(this.runtimeApi(), this.manifest.version, this.t("common.appName"));
 	}
 
 	private runtimeApi(): WorkflowsRuntimeApi {

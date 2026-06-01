@@ -30,14 +30,14 @@ export class TaskNotesBridge {
 		return "TaskNotes is not loaded or does not expose the runtime API.";
 	}
 
-	registerExtension(runtimeApi: WorkflowsRuntimeApi, version: string): void {
+	registerExtension(runtimeApi: WorkflowsRuntimeApi, version: string, displayName = "TaskNotes Workflows"): void {
 		const api = this.api;
 		if (!api?.extensions?.register || this.extensionHandle) return;
 
 		this.extensionHandle = api.extensions.register({
 			id: PLUGIN_ID,
 			namespace: PLUGIN_ID,
-			displayName: "TaskNotes Workflows",
+			displayName,
 			version,
 			capabilities: CORE_CAPABILITIES,
 			api: runtimeApi,
