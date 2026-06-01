@@ -99,3 +99,57 @@ jobs:
             manifest.json
             styles.css
 
+  publish-release:
+    name: Publish Obsidian Release Assets
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download Obsidian plugin assets
+        uses: actions/download-artifact@v4
+        with:
+          name: tasknotes-workflows-${{ github.sha }}
+          path: release-assets
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate release tag
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="$(node -e "const fs = require('node:fs'); process.stdout.write(JSON.parse(fs.readFileSync('release-assets/manifest.json', 'utf8')).version);")"
+
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Release tag '$TAG' must match manifest version '$VERSION'."
+            exit 1
+          fi
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          ASSETS=(
+            "release-assets/main.js"
+            "release-assets/manifest.json"
+            "release-assets/styles.css"
+          )
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file CHANGELOG.md
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" \
+              --title "$TAG" \
+              --notes-file CHANGELOG.md \
+              --draft
+          fi
