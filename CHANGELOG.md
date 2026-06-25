@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed
+
+- (#2076) Run log retention cleanup no longer shows ENOENT notices when concurrent workflow runs try to delete the same old detail file. Thanks to @yvos for reporting this.
+- (#2077) Editing the workflow folder setting no longer creates folders for every partial path while typing. Thanks to @yvos for reporting this.
+
 ## [0.1.1] - 2026-06-01
 
 ### Changed

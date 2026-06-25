@@ -87,7 +87,16 @@ export class RunLogService {
 			.sort((left, right) => left.localeCompare(right));
 		const excess = files.slice(0, Math.max(0, files.length - this.getSettings().maxRunsPerWorkflow));
 		for (const path of excess) {
+			await this.removeFileIfPresent(path);
+		}
+	}
+
+	private async removeFileIfPresent(path: string): Promise<void> {
+		try {
 			await this.app.vault.adapter.remove(path);
+		} catch (error) {
+			if (isMissingPathError(error)) return;
+			throw error;
 		}
 	}
 
@@ -128,11 +137,17 @@ export class RunLogService {
 		if (!(await this.exists(path))) return;
 		const listed = await this.app.vault.adapter.list(path);
 		for (const file of listed.files) {
-			await this.app.vault.adapter.remove(file);
+			await this.removeFileIfPresent(file);
 		}
 		for (const folder of listed.folders) {
 			await this.removeRecursively(folder);
 		}
 		await this.app.vault.adapter.rmdir(path, true);
 	}
+}
+
+function isMissingPathError(error: unknown): boolean {
+	if (!(error instanceof Error)) return false;
+	const code = "code" in error ? String(error.code) : "";
+	return code === "ENOENT" || error.message.includes("ENOENT");
 }

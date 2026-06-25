@@ -1,4 +1,4 @@
-import { Notice, PluginSettingTab, Setting, type App } from "obsidian";
+import { Notice, PluginSettingTab, Setting, type App, type TextComponent } from "obsidian";
 import { DEFAULT_WORKFLOW_FOLDER, DEFAULT_WORKFLOW_VIEW_PATH } from "./constants";
 import type TaskNotesWorkflowsPlugin from "../main";
 
@@ -26,12 +26,12 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName(this.plugin.t("settings.workflowFiles.folder.name"))
 			.setDesc(this.plugin.t("settings.workflowFiles.folder.description"))
-			.addText((text) =>
-				text.setValue(this.plugin.settings.workflowFolder).onChange((value) => {
-					this.plugin.settings.workflowFolder = value.trim() || DEFAULT_WORKFLOW_FOLDER;
-					void this.plugin.saveSettingsAndReload();
-				})
-			);
+			.addText((text) => {
+				text.setValue(this.plugin.settings.workflowFolder);
+				this.commitTextOnFinish(text, (value) => {
+					this.updateWorkflowFolder(value);
+				});
+			});
 
 			new Setting(containerEl)
 				.setName(this.plugin.t("settings.workflowFiles.base.name"))
@@ -187,5 +187,25 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 					void this.plugin.saveSettings();
 				});
 			});
+	}
+
+	private updateWorkflowFolder(value: string): void {
+		const next = value.trim() || DEFAULT_WORKFLOW_FOLDER;
+		if (next === this.plugin.settings.workflowFolder) return;
+		this.plugin.settings.workflowFolder = next;
+		void this.plugin.saveSettingsAndReload();
+	}
+
+	private commitTextOnFinish(text: TextComponent, onCommit: (value: string) => void): void {
+		const commit = () => {
+			onCommit(text.getValue());
+		};
+		text.inputEl.addEventListener("blur", commit);
+		text.inputEl.addEventListener("keydown", (event) => {
+			if (event.key !== "Enter") return;
+			event.preventDefault();
+			commit();
+			text.inputEl.blur();
+		});
 	}
 }
