@@ -4,6 +4,8 @@ import { safePathSegment } from "./path";
 import type { RunSummary, TaskNotesWorkflowsSettings, WorkflowRunDetail } from "./types";
 
 export class RunLogService {
+	private writeQueue: Promise<unknown> = Promise.resolve();
+
 	constructor(
 		private readonly app: App,
 		private readonly getSettings: () => TaskNotesWorkflowsSettings
@@ -23,9 +25,14 @@ export class RunLogService {
 			error: detail.error,
 		};
 
-		await this.ensureFolder(this.rootPath());
-		await this.appendHistory(summary);
-		await this.writeDetail(detail);
+		await this.enqueueWrite(async () => {
+			await this.ensureFolder(this.rootPath());
+			await this.appendHistory(summary);
+			await this.writeDetail(detail);
+		});
+		// Retention runs outside the write lock: removeFileIfPresent tolerates a
+		// file another pass already pruned, so concurrent retention is safe and
+		// need not serialize (which would also deadlock a blocked listing).
 		await this.applyRetention(detail.workflowId);
 		return summary;
 	}
@@ -37,23 +44,41 @@ export class RunLogService {
 		return text
 			.split("\n")
 			.filter((line) => line.trim().length > 0)
-			.map((line) => JSON.parse(line) as RunSummary)
+			.flatMap((line) => {
+				try {
+					return [JSON.parse(line) as RunSummary];
+				} catch {
+					return [];
+				}
+			})
 			.filter((summary) => !workflowId || summary.workflowId === workflowId)
 			.reverse();
 	}
 
 	async readRunDetail(workflowId: string, runId: string): Promise<WorkflowRunDetail | null> {
 		const path = this.detailPath(workflowId, runId);
-		if (!(await this.exists(path))) return null;
-		return JSON.parse(await this.app.vault.adapter.read(path)) as WorkflowRunDetail;
+		try {
+			if (!(await this.exists(path))) return null;
+			return JSON.parse(await this.app.vault.adapter.read(path)) as WorkflowRunDetail;
+		} catch {
+			return null;
+		}
 	}
 
 	async clearHistory(): Promise<void> {
-		const rootPath = this.rootPath();
-		if (await this.exists(rootPath)) {
-			await this.removeRecursively(rootPath);
-		}
-		await this.ensureFolder(rootPath);
+		await this.enqueueWrite(async () => {
+			const rootPath = this.rootPath();
+			if (await this.exists(rootPath)) {
+				await this.removeRecursively(rootPath);
+			}
+			await this.ensureFolder(rootPath);
+		});
+	}
+
+	private enqueueWrite<T>(operation: () => Promise<T>): Promise<T> {
+		const result = this.writeQueue.then(operation);
+		this.writeQueue = result.catch(() => undefined);
+		return result;
 	}
 
 	private async appendHistory(summary: RunSummary): Promise<void> {
@@ -82,11 +107,19 @@ export class RunLogService {
 		if (!(await this.exists(folder))) return;
 
 		const listed = await this.app.vault.adapter.list(folder);
-		const files = listed.files
-			.filter((path) => path.endsWith(".json"))
-			.sort((left, right) => left.localeCompare(right));
-		const excess = files.slice(0, Math.max(0, files.length - this.getSettings().maxRunsPerWorkflow));
-		for (const path of excess) {
+		const files = listed.files.filter((path) => path.endsWith(".json"));
+		const excessCount = files.length - this.getSettings().maxRunsPerWorkflow;
+		if (excessCount <= 0) return;
+
+		// Run ids are random, so file names carry no ordering; prune oldest by mtime.
+		const stats = await Promise.all(
+			files.map(async (path) => ({
+				path,
+				mtime: (await this.app.vault.adapter.stat(path))?.mtime ?? 0,
+			}))
+		);
+		stats.sort((left, right) => left.mtime - right.mtime || left.path.localeCompare(right.path));
+		for (const { path } of stats.slice(0, excessCount)) {
 			await this.removeFileIfPresent(path);
 		}
 	}
