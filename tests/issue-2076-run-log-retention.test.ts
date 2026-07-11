@@ -57,6 +57,10 @@ class RacingAdapter {
 		return snapshot;
 	}
 
+	async stat(path: string): Promise<{ mtime: number } | null> {
+		return this.files.has(path) ? { mtime: 0 } : null;
+	}
+
 	async remove(path: string): Promise<void> {
 		if (!this.files.delete(path)) throw enoent(path);
 	}
