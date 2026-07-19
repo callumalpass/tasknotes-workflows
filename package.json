@@ -32,7 +32,7 @@
 	"author": "Callum Alpass",
 	"license": "MIT",
 	"dependencies": {
-		"@callumalpass/mdbase-runtime": "file:../mdbase-spec/packages/runtime-contracts",
+		"@callumalpass/mdbase-runtime": "0.1.0-rc.1",
 		"obsidian-bases-expression": "^0.2.0",
 		"obsidian-bases-expression-builder": "^0.1.0",
 		"yaml": "^2.8.1"
