@@ -3,6 +3,7 @@ import { todayString } from "./duration";
 import { createStepExecutionContext, shouldRunStep, StepRegistry } from "./stepRegistry";
 import { resolveTemplateValue } from "./template";
 import type { App } from "obsidian";
+import type { MdbaseRuntimeHostApi } from "@callumalpass/mdbase-runtime";
 import type { TranslateFn } from "./i18n";
 import type {
 	LoadedWorkflow,
@@ -23,18 +24,20 @@ const ENGINE_FALLBACK_MESSAGES: Record<string, string> = {
 	"engine.conditionsDidNotMatch": "Workflow conditions did not match.",
 	"engine.stepFailed": "Step failed.",
 	"engine.unknownStepType": "Unknown step type: {type}",
+	"engine.preflightFailed": "Workflow runtime preflight failed: {details}",
 	"engine.forEachNonArray": "forEach resolved to a non-array value.",
-	"engine.forEachTooManyItems": "forEach selected {count} items, above run.maxTasks {max}.",
+	"engine.forEachTooManyItems": "forEach selected {count} items, above run.limits.maxItems {max}.",
 };
 
 export class WorkflowEngine {
-	private readonly runningWorkflowIds = new Set<string>();
+	private readonly runningGroups = new Set<string>();
 
 	constructor(
 		private readonly stepRegistry: StepRegistry,
 		private readonly tasknotes: () => TaskNotesRuntimeApi | null,
 		private readonly obsidian: () => App | null = () => null,
-		private readonly translate: TranslateFn = (key) => key
+		private readonly translate: TranslateFn = (key) => key,
+		private readonly runtimeHost: () => MdbaseRuntimeHostApi | null = () => null
 	) {}
 
 	async runWorkflow(
@@ -59,8 +62,13 @@ export class WorkflowEngine {
 			trigger: options.trigger,
 			steps: [],
 		};
+		const preflightError = this.preflightError(workflow.requires);
+		if (preflightError) {
+			return finishRun(detail, "failed", this.t("engine.preflightFailed", { details: preflightError }));
+		}
 
-		if (workflow.run.noOverlap && this.runningWorkflowIds.has(workflow.id)) {
+		const concurrencyGroup = this.concurrencyGroup(workflow.id, workflow.run.concurrency.group);
+		if (workflow.run.concurrency.policy !== "allow" && this.runningGroups.has(concurrencyGroup)) {
 			return finishRun(detail, "skipped", this.t("engine.workflowAlreadyRunning"));
 		}
 
@@ -68,7 +76,7 @@ export class WorkflowEngine {
 			return finishRun(detail, "skipped", this.t("engine.workflowDisabled"));
 		}
 
-		this.runningWorkflowIds.add(workflow.id);
+		this.runningGroups.add(concurrencyGroup);
 		try {
 			const context: WorkflowRunContext = {
 				workflow: {
@@ -76,7 +84,11 @@ export class WorkflowEngine {
 					name: workflow.name,
 					filePath: loadedWorkflow.file.path,
 				},
-				trigger: options.trigger,
+				trigger: workflow.triggers.find((trigger) => trigger.id === options.trigger.id) ?? {
+					id: options.trigger.id,
+					type: options.trigger.triggerType ?? options.trigger.type,
+				},
+				event: options.trigger,
 				vars: workflow.vars,
 				steps: {},
 				now: startedAt.toISOString(),
@@ -93,7 +105,7 @@ export class WorkflowEngine {
 					workflow.run.source,
 					context,
 					detail,
-					workflow.run.maxTasks
+					workflow.run.limits.maxItems
 				);
 				if (stepResult.status === "failed" && workflow.run.onError === "stop") {
 					return finishRun(detail, "failed", stepResult.error ?? this.t("engine.stepFailed"));
@@ -107,7 +119,7 @@ export class WorkflowEngine {
 		} catch (error) {
 			return finishRun(detail, "failed", normalizedErrorMessage(error, this.tasknotes()));
 		} finally {
-			this.runningWorkflowIds.delete(workflow.id);
+			this.runningGroups.delete(concurrencyGroup);
 		}
 	}
 
@@ -116,11 +128,27 @@ export class WorkflowEngine {
 		source: string,
 		context: WorkflowRunContext,
 		run: WorkflowRunDetail,
-		maxTasks: number
+		maxItems: number
 	): Promise<StepRunDetail> {
 		const definition = this.stepRegistry.get(step.type);
-		if (!definition) {
+		const runtimeAction = this.resolveRuntimeAction(step);
+		if (runtimeAction.error) {
+			const failed = createStepDetail(step, "failed", this.t("engine.preflightFailed", { details: runtimeAction.error }));
+			run.steps.push(failed);
+			return failed;
+		}
+		if (!definition && !runtimeAction.runtime) {
 			const failed = createStepDetail(step, "failed", this.t("engine.unknownStepType", { type: step.type }));
+			run.steps.push(failed);
+			return failed;
+		}
+		const preflightError = this.preflightError(step.requires);
+		if (preflightError) {
+			const failed = createStepDetail(
+				step,
+				"failed",
+				this.t("engine.preflightFailed", { details: preflightError })
+			);
 			run.steps.push(failed);
 			return failed;
 		}
@@ -128,34 +156,46 @@ export class WorkflowEngine {
 		if (!shouldRunStep(step, context)) {
 			const skipped = createStepDetail(step, "skipped");
 			run.steps.push(skipped);
+			context.steps[step.id] = stepResultRecord(skipped);
 			return skipped;
 		}
 
 		const forEachValue = step.forEach
-			? resolveTemplateValue(step.forEach, context)
+			? resolveTemplateValue(step.forEach.items, context)
 			: undefined;
 		if (typeof forEachValue !== "undefined") {
+			const forEach = step.forEach;
+			if (!forEach) {
+				const failed = createStepDetail(step, "failed", this.t("engine.forEachNonArray"));
+				run.steps.push(failed);
+				context.steps[step.id] = stepResultRecord(failed);
+				return failed;
+			}
 			if (!Array.isArray(forEachValue)) {
 				const failed = createStepDetail(step, "failed", this.t("engine.forEachNonArray"));
 				run.steps.push(failed);
+				context.steps[step.id] = stepResultRecord(failed);
 				return failed;
 			}
-			if (forEachValue.length > maxTasks) {
+			if (forEachValue.length > maxItems) {
 				const failed = createStepDetail(
 					step,
 					"failed",
-					this.t("engine.forEachTooManyItems", { count: forEachValue.length, max: maxTasks })
+					this.t("engine.forEachTooManyItems", { count: forEachValue.length, max: maxItems })
 				);
 				run.steps.push(failed);
+				context.steps[step.id] = stepResultRecord(failed);
 				return failed;
 			}
 
 			const outputs: unknown[] = [];
 			for (const [index, item] of forEachValue.entries()) {
 				const itemContext: WorkflowRunContext = { ...context, item };
+				if (forEach.as) itemContext[forEach.as] = item;
 				const detail = await this.runSingleStep(
 					step,
 					definition,
+					runtimeAction.runtime,
 					source,
 					itemContext,
 					run.runId,
@@ -164,21 +204,33 @@ export class WorkflowEngine {
 				);
 				run.steps.push(detail);
 				if (detail.status === "success") outputs.push(detail.output);
-				if (detail.status === "failed") return detail;
+				if (detail.status === "failed") {
+					context.steps[step.id] = stepResultRecord(detail);
+					return detail;
+				}
 			}
-			context.steps[step.id] = outputs;
+			context.steps[step.id] = { status: "success", output: outputs };
 			return run.steps[run.steps.length - 1] ?? createStepDetail(step, "success");
 		}
 
-		const detail = await this.runSingleStep(step, definition, source, context, run.runId, run.dryRun);
+		const detail = await this.runSingleStep(
+			step,
+			definition,
+			runtimeAction.runtime,
+			source,
+			context,
+			run.runId,
+			run.dryRun
+		);
 		run.steps.push(detail);
-		if (detail.status === "success") context.steps[step.id] = detail.output;
+		context.steps[step.id] = stepResultRecord(detail);
 		return detail;
 	}
 
 	private async runSingleStep(
 		step: WorkflowStep,
-		definition: NonNullable<ReturnType<StepRegistry["get"]>>,
+		definition: ReturnType<StepRegistry["get"]>,
+		runtime: MdbaseRuntimeHostApi | null,
 		source: string,
 		context: WorkflowRunContext,
 		runId: string,
@@ -195,12 +247,22 @@ export class WorkflowEngine {
 		};
 
 		try {
-			const input = resolveTemplateValue(step.input ?? {}, context);
+			const sourceInput = step.input ?? {};
+			const input = resolveTemplateValue(sourceInput, context);
+			detail.sourceInput = sourceInput;
 			detail.input = input;
-			detail.output = await definition.run(
-				input,
-				createStepExecutionContext(runId, dryRun, this.tasknotes(), this.obsidian(), source)
-			);
+			if (runtime) {
+				detail.output = dryRun
+					? { dryRun: true, wouldRun: step.type, input }
+					: await runtime.dispatch(step.type, input, runtimeDispatchContext(runId, context));
+			} else if (definition) {
+				detail.output = await definition.run(
+					input,
+					createStepExecutionContext(runId, dryRun, this.tasknotes(), this.obsidian(), source)
+				);
+			} else {
+				throw new Error(this.t("engine.unknownStepType", { type: step.type }));
+			}
 			detail.endedAt = new Date().toISOString();
 			detail.durationMs = Date.now() - startedAt;
 			return detail;
@@ -221,6 +283,66 @@ export class WorkflowEngine {
 		const translated = this.translate(key, params);
 		return translated === key ? interpolate(ENGINE_FALLBACK_MESSAGES[key] ?? key, params) : translated;
 	}
+
+	private preflightError(requirements: WorkflowStep["requires"]): string | null {
+		if (!requirements || (!requirements.capabilities?.length && !requirements.providers?.length)) return null;
+		const runtime = this.runtimeHost();
+		if (!runtime) return "The mdbase runtime provider host is unavailable.";
+		const result = runtime.preflight(requirements);
+		if (result.valid) return null;
+		return result.diagnostics.map((diagnostic) => `${diagnostic.message} [${diagnostic.code}]`).join("; ");
+	}
+
+	private resolveRuntimeAction(step: WorkflowStep): { runtime: MdbaseRuntimeHostApi | null; error?: string } {
+		const runtime = this.runtimeHost();
+		if (!runtime) return { runtime: null };
+		let available: boolean;
+		try {
+			available = runtime.contracts().some((contract) => contract.type === "action" && contract.id === step.type);
+		} catch (error) {
+			return { runtime: null, error: `Runtime contract discovery failed: ${errorMessage(error)}` };
+		}
+		if (!available) return { runtime: null };
+		try {
+			const result = runtime.preflight({
+				actions: [step.type],
+				capabilities: step.requires?.capabilities,
+				providers: step.requires?.providers,
+			});
+			if (!result.valid) {
+				return {
+					runtime: null,
+					error: result.diagnostics.map((diagnostic) => `${diagnostic.message} [${diagnostic.code}]`).join("; "),
+				};
+			}
+			return { runtime };
+		} catch (error) {
+			return { runtime: null, error: `Runtime action preflight failed: ${errorMessage(error)}` };
+		}
+	}
+
+	private concurrencyGroup(workflowId: string, group: string): string {
+		return group === "global" ? "global" : `${group || "workflow"}:${workflowId}`;
+	}
+}
+
+function runtimeDispatchContext(
+	runId: string,
+	context: WorkflowRunContext
+): Parameters<MdbaseRuntimeHostApi["dispatch"]>[2] {
+	const resourcePath = typeof context.event.path === "string"
+		? context.event.path
+		: typeof context.event.after?.path === "string"
+			? context.event.after.path
+			: undefined;
+	return {
+		actor: { id: "local-user", kind: "user" },
+		origin: { workflow: context.workflow.id, path: context.workflow.filePath },
+		run_id: runId,
+		correlation_id: context.event.correlationId ?? runId,
+		executor: "tasknotes-workflows",
+		resource: resourcePath ? { path: resourcePath } : undefined,
+	};
 }
 
 function interpolate(template: string, params?: Record<string, string | number>): string {
@@ -244,7 +366,7 @@ function finishRun(
 
 function createStepDetail(
 	step: WorkflowStep,
-	status: WorkflowRunStatus,
+	status: StepRunDetail["status"],
 	error?: string
 ): StepRunDetail {
 	const now = new Date().toISOString();
@@ -257,6 +379,14 @@ function createStepDetail(
 		durationMs: 0,
 		error,
 	};
+}
+
+function stepResultRecord(detail: StepRunDetail): WorkflowRunContext["steps"][string] {
+	const result: WorkflowRunContext["steps"][string] = { status: detail.status };
+	if (detail.status === "success") result.output = detail.output;
+	if (detail.status === "skipped" || detail.status === "cancelled") result.output = null;
+	if (detail.error) result.error = detail.error;
+	return result;
 }
 
 function createRunId(): string {

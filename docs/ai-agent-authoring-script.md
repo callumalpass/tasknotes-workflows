@@ -4,33 +4,54 @@ Use this script when an AI agent writes TaskNotes Workflows Markdown files.
 
 ## Role
 
-You write safe TaskNotes workflow definitions as Markdown notes. The YAML frontmatter is executable configuration. The Markdown body explains intent, assumptions, and safe testing steps.
+Write safe canonical mdbase runtime workflow records. YAML frontmatter is
+executable configuration. The Markdown body explains intent, assumptions, and
+safe testing steps.
 
 ## Rules
 
-1. Write files in `TaskNotes/Workflows/` unless the user specifies another workflow folder.
-2. Treat `TaskNotes/Views/workflows.base` as the default human Base view; do not hand-edit it unless the user asks.
-3. Use `type: tasknotes-workflow` and `schemaVersion: 1`.
-4. Prefer `enabled: false` for new workflows that mutate tasks or vault files. Tell the user to dry-run before enabling.
-5. Use `triggers`, not a top-level `on` key.
-6. Use `steps` as the canonical pipeline. Only use `actions` when converting very old examples.
-7. Never use arbitrary JavaScript, shell commands, or unrestricted HTTP requests.
-8. Mutate tasks only through typed step types such as `task.patch`, `task.move`, `time.start`, and `task.complete`.
-9. Mutate vault files only through typed Obsidian step types such as `obsidian.createNote`, `obsidian.appendNote`, `obsidian.updateFrontmatter`, and `obsidian.moveFile`.
-10. Use relationship read steps such as `task.parents`, `task.subtasks`, and `task.dependencies` instead of reimplementing TaskNotes relationship logic in queries.
-11. Use constrained references such as `{{trigger.after.path}}`, `{{trigger.path}}`, `{{steps.query.tasks}}`, `{{steps.parents.tasks[0].path}}`, `{{item.path}}`, `{{today}}`, and `{{now}}`.
-12. Give every trigger and step a stable id.
-13. Add `run.noOverlap: true` unless the user explicitly needs overlap.
-14. For event-triggered workflows, avoid responding to workflow-originated mutations unless `allowSelfTrigger: true` is clearly required.
-15. For cron and interval workflows, keep `maxTasks` bounded.
-16. Write a short body explaining what to check in dry run and what the workflow will mutate when enabled.
-17. Use `type: tasknotes.event` for TaskNotes runtime events.
-18. Use the canonical TaskNotes runtime task query DTO in `task.query`; prefer `field`, `op`, and `value` conditions with `all`, `any`, `sort`, `group`, `limit`, and `scope` as needed.
-19. Write only the runtime query DTO for `task.query`; no other query object shape is supported.
+1. Write files in `TaskNotes/Workflows/` unless the user chooses another folder.
+2. Use `type: workflow`, `version: 1`, `trigger.event`, and `step.action`.
+3. Never write `schemaVersion`, trigger `type`, step `type`, `forEach`,
+   `maxItems`, or `onError` in a new file.
+4. Put TaskNotes-only trigger configuration under `x-tasknotes`.
+5. Prefer `enabled: false` for workflows that mutate tasks or vault files.
+6. Use `$expr` objects for computed values. Plain strings are literals.
+7. Give every trigger and step a stable runtime identifier.
+8. Use `run.execution.mode: single_executor` for side-effecting workflows.
+9. Keep `run.limits.max_items` bounded.
+10. Do not use arbitrary JavaScript, shell commands, or unrestricted HTTP.
+11. Use the TaskNotes action catalog rather than editing task frontmatter.
+12. Explain dry-run checks and mutations in the Markdown body.
+
+TaskNotes-specific trigger metadata is a runtime extension:
+
+```yaml
+triggers:
+  - id: status-active
+    event: task.status.changed
+    if:
+      $expr: 'event.after.status == "active"'
+    x-tasknotes:
+      type: tasknotes.event
+      to: active
+```
+
+Scheduled triggers use a canonical event ID plus executor metadata:
+
+```yaml
+triggers:
+  - id: weekday-morning
+    event: tasknotes-workflows.schedule.cron
+    x-tasknotes:
+      type: cron
+      schedule: "0 9 * * 1-5"
+      timezone: local
+```
 
 ## Step Catalog
 
-When available, inspect the runtime step catalog before writing inputs:
+Inspect the live step catalog before authoring TaskNotes-specific inputs:
 
 ```js
 const tasknotes = app.plugins.getPlugin("tasknotes")?.api;
@@ -38,48 +59,53 @@ const workflows = tasknotes?.extensions.get("tasknotes-workflows");
 workflows?.listStepDefinitions();
 ```
 
-Use each step's `inputFields` as the contract for what the frontmatter expects, and `outputFields` as the contract for references like `{{steps.query.tasks}}`.
-
 ## Template
 
 ```markdown
 ---
-type: tasknotes-workflow
-schemaVersion: 1
+type: workflow
 id: short-lowercase-id
+version: 1
 name: Human readable name
 enabled: false
 description: One sentence.
 triggers:
   - id: manual
-    type: manual
-conditions: []
+    event: tasknotes-workflows.manual
+    x-tasknotes:
+      type: manual
 steps:
   - id: first-step
-    type: notice.show
+    action: notice.show
     input:
-      message: "Workflow is wired."
+      message: Workflow is wired.
 run:
-  mode: sequential
-  noOverlap: true
+  execution:
+    mode: single_executor
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    max_items: 25
+  on_error: stop
+x-tasknotes:
+  format_version: 1
   source: tasknotes-workflows
-  maxTasks: 25
-  onError: stop
 ---
 
 # Human readable name
 
-What it does:
-
 - Explain the trigger.
 - Explain each mutation.
-- Explain dry-run checks.
+- Explain the dry-run checks.
 ```
 
 ## Review Checklist
 
-- The YAML parses.
-- The workflow is disabled if it writes tasks.
-- Every referenced value exists in `workflow`, `trigger`, `vars`, `steps`, `item`, `today`, or `now`.
-- Batch workflows use `forEach` and `maxTasks`.
-- The body is useful to a human reading the note later.
+- The record validates against the canonical runtime workflow schema.
+- The workflow is disabled when it writes tasks or vault files.
+- Every referenced event and action has a registered contract or an intentional
+  TaskNotes executor adapter.
+- Expression values use `{ $expr: "..." }`; literal strings remain literal.
+- Iteration uses `for_each` and is bounded by `run.limits.max_items`.
+- The body is useful to a human reviewing the automation.

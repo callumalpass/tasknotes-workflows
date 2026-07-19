@@ -38,7 +38,16 @@ export const ja: TranslationTree = {
 		newWorkflow: "新しいワークフロー",
 		reloadWorkflows: "ワークフローをリロードする",
 		maintainDefaultWorkflows: "デフォルトのワークフローファイルを維持する",
+		migrateWorkflowFiles: "ワークフローファイルを mdbase ランタイム形式に移行する",
 		runWorkflow: "実行: {name}",
+	},
+	migration: {
+		title: "ワークフローファイルを移行",
+		summary: "変換可能: {convertible}、移行済み: {canonical}、手動確認が必要: {invalid}。",
+		manualAttention: "手動確認",
+		unrecognized: "認識できるワークフロー形式ではありません。",
+		apply: "{count} 件のワークフローを移行",
+		completed: "{count} 件のワークフローを移行しました。バックアップ: {path}",
 	},
 	notices: {
 		languageChanged: "言語が{language}に変更されました。",
@@ -173,6 +182,7 @@ export const ja: TranslationTree = {
 			other: "{count} ステップ",
 		},
 		input: "入力",
+		sourceInput: "Source input",
 		output: "出力",
 		empty: {
 			diagnostics: "実行を表示するには、ワークフロー診断を修正する必要があります。",
@@ -189,7 +199,7 @@ export const ja: TranslationTree = {
 		stepFailed: "ステップが失敗しました。",
 		unknownStepType: "不明なステップ タイプ: {type}",
 		forEachNonArray: "forEach は non-array 値に解決されました。",
-		forEachTooManyItems: "forEach は、run.maxTasks {max} より上の {count} アイテムを選択しました。",
+		forEachTooManyItems: "forEach は、run.limits.maxItems {max} より上の {count} アイテムを選択しました。",
 	},
 	editor: {
 		title: {
@@ -254,6 +264,7 @@ export const ja: TranslationTree = {
 			id: "ID",
 			typeLabel: "タイプ",
 			tasknotesEvent: "TaskNotesイベント",
+			runtimeProvider: "ランタイムプロバイダー",
 			fromStatus: "ステータスから",
 			toStatus: "ステータスへ",
 			pathGlob: "パスグロブ",
@@ -281,6 +292,10 @@ export const ja: TranslationTree = {
 				tasknotesEvent: {
 					label: "TaskNotesイベント",
 					description: "TaskNotes が選択されたランタイム イベントを発行するときに実行されます。",
+				},
+				runtimeEvent: {
+					label: "ランタイムイベント",
+					description: "登録済みの mdbase ランタイムプロバイダーが選択したイベントを送信したときに実行します。",
 				},
 				cron: {
 					label: "Cronスケジュール",
@@ -414,11 +429,27 @@ export const ja: TranslationTree = {
 						label: "現在の状況",
 						description: "イベント後のタスクのステータス。",
 					},
+					scheduled: {
+						label: "Scheduled date",
+						description: "The task scheduled date after the event.",
+					},
+					due: {
+						label: "Due date",
+						description: "The task due date after the event.",
+					},
 				},
 				before: {
 					status: {
 						label: "以前のステータス",
 						description: "イベント前のタスクのステータス。",
+					},
+					scheduled: {
+						label: "Previous scheduled date",
+						description: "The task scheduled date before the event.",
+					},
+					due: {
+						label: "Previous due date",
+						description: "The task due date before the event.",
 					},
 				},
 				changes: {
@@ -475,6 +506,7 @@ export const ja: TranslationTree = {
 			advancedDescription: "安定した ID は、後のステップの参照を作成します。バッチ実行では、各値にオプションの を使用します。",
 			forEach: "それぞれについて",
 			forEachHelp: "バッチ ステップのオプションの配列参照。",
+			forEachAs: "ループの別名",
 			inputJson: "JSONを入力してください",
 			writes: "書きます",
 			needsAttention: "注意が必要です",
@@ -491,10 +523,18 @@ export const ja: TranslationTree = {
 		},
 		runPolicy: {
 			noOverlap: "重複なし",
+			concurrencyPolicy: "同時実行",
+			concurrencyPolicies: {
+				skip: "実行中はスキップ",
+				queue: "実行中はキューに追加",
+				replace: "実行中の処理を置換",
+				allow: "並列実行を許可",
+			},
+			concurrencyGroup: "同時実行グループ",
 			onError: "エラー時",
 			advancedTitle: "高度な実行制限",
 			advancedDescription: "これらの値により、自動化された実行が識別可能かつ制限された状態に保たれます。",
-			maxTasks: "最大タスク数",
+			maxItems: "最大タスク数",
 			source: "ソース",
 		},
 		footer: {
@@ -509,6 +549,31 @@ export const ja: TranslationTree = {
 			triggerValue: "トリガー{label}",
 			stepValue: "{stepId} {label}",
 		},
+		expressions: {
+			mode: "Value mode",
+			modes: {
+				fixedDate: "Fixed date",
+				workflowValue: "Workflow value",
+				relativeDate: "Relative date",
+				advanced: "Advanced expression",
+			},
+			fixedDate: "Date",
+			sourceValue: "Source value",
+			amount: "Amount",
+			unit: "Unit",
+			units: {
+				day: "Days",
+				week: "Weeks",
+				month: "Months",
+				year: "Years",
+			},
+			advancedTitle: "Use expression",
+			advancedDescription: "Return a computed value for this field.",
+			formulaLabel: "Bases 数式",
+			openBuilder: "数式ビルダーを開く",
+			jsonLabel: "Expression JSON",
+			helperList: "Available helpers: {helpers}",
+		},
 		validation: {
 			nameRequired: "名前は必須です。",
 			invalidWorkflowId: "小文字、数字、ドット、アンダースコア、またはダッシュを使用してください。まずは手紙から始めましょう。",
@@ -517,6 +582,7 @@ export const ja: TranslationTree = {
 			invalidTriggerId: "トリガー ID は文字で始まり、id-safe 文字を使用する必要があります。",
 			duplicateTriggerId: "トリガー ID は一意である必要があります。",
 			tasknotesEventRequired: "TaskNotes イベントを選択します。",
+			runtimeEventRequired: "ランタイムイベント ID を入力してください。",
 			cronScheduleRequired: "cron スケジュールを追加します。",
 			intervalRequired: "間隔を追加します。",
 			stepRequired: "少なくとも 1 つのステップを追加します。",
@@ -526,6 +592,41 @@ export const ja: TranslationTree = {
 			fieldRequired: "{field}は必須です。",
 			positiveNumber: "正の数を使用してください。",
 			jsonObject: "ステップ入力は JSON オブジェクトである必要があります。",
+			invalidExpression: "Expression is invalid.",
+		},
+		query: {
+			preview: "Preview",
+			previewUnavailable: "TaskNotes query preview is unavailable.",
+			previewResult: "Query matches {matched} of {total} tasks and returns {returned}.",
+			runtimeUnavailable: "Load TaskNotes to edit query fields from the runtime catalog.",
+			advancedOnly: "This query uses nesting or negation. Edit the JSON directly.",
+			valid: "TaskNotes accepts this query.",
+			invalid: "TaskNotes query is invalid.",
+			match: "Match",
+			matchAll: "All conditions",
+			matchAny: "Any condition",
+			addCondition: "Add condition",
+			removeCondition: "Remove condition",
+			noConditions: "No conditions. The query will match all tasks in scope.",
+			field: "Field",
+			operator: "Operator",
+			value: "Value",
+			noValue: "No value",
+			true: "True",
+			false: "False",
+			options: "Sort, group, and scope",
+			optionsDescription: "Optional result controls for this task query.",
+			sortField: "Sort by",
+			sortDirection: "Direction",
+			ascending: "Ascending",
+			descending: "Descending",
+			groupField: "Group by",
+			limit: "Limit",
+			includeArchived: "Include archived tasks",
+			none: "None",
+			jsonTitle: "Advanced JSON",
+			jsonDescription: "Use this for nested groups, negation, date math, folders, offsets, or exact API input.",
+			jsonLabel: "Runtime query JSON",
 		},
 	},
 	steps: {
@@ -539,7 +640,7 @@ export const ja: TranslationTree = {
 		common: {
 			task: {
 				label: "タスク",
-				description: "TaskNotes タスクへのボールト パス。トリガーされたタスクのワークフローは通常、{{trigger.after.path}} を使用します。",
+				description: "TaskNotes タスクへのボールト パス。トリガーされたタスクのワークフローは通常、{{event.after.path}} を使用します。",
 			},
 			path: {
 				label: "パス",
@@ -581,7 +682,35 @@ export const ja: TranslationTree = {
 						},
 						count: {
 							label: "カウント",
-							description: "一致するタスクの数。",
+							description: "Number of returned tasks.",
+						},
+						total: {
+							label: "Total",
+							description: "Total tasks before filtering.",
+						},
+						matched: {
+							label: "Matched",
+							description: "Tasks matching the query before offset and limit.",
+						},
+						returned: {
+							label: "Returned",
+							description: "Tasks returned after offset and limit.",
+						},
+						groups: {
+							label: "Groups",
+							description: "TaskNotes query group details.",
+						},
+						groupPaths: {
+							label: "Group paths",
+							description: "Task paths keyed by group key.",
+						},
+						query: {
+							label: "Query",
+							description: "The normalized TaskNotes runtime query.",
+						},
+						warnings: {
+							label: "Warnings",
+							description: "Non-fatal TaskNotes query warnings.",
 						},
 					},
 					examples: {

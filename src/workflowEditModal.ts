@@ -8,6 +8,8 @@ import {
 	type App,
 	type IconName,
 } from "obsidian";
+import { collectObsidianBasesSchema, openBasesExpressionBuilder } from "obsidian-bases-expression-builder";
+import type { FormulaLanguageSchema } from "obsidian-bases-expression";
 import type TaskNotesWorkflowsPlugin from "../main";
 import {
 	TRIGGER_TYPES,
@@ -19,11 +21,20 @@ import {
 	slugifyWorkflowId,
 	uniqueWorkflowId,
 } from "./workflowScaffolding";
+import {
+	EXPRESSION_KEY,
+	expressionSource,
+	isWorkflowExpression,
+	summarizeExpression,
+	validateExpressionTree,
+	workflowExpressionSchema,
+} from "./expressions";
 import type {
 	LoadedWorkflow,
 	StepDefinition,
 	TaskNotesRuntimeCondition,
 	TaskNotesEventTrigger,
+	MdbaseRuntimeEventTrigger,
 	TaskNotesRuntimeEventDefinition,
 	TaskNotesRuntimeFilterOperatorDefinition,
 	TaskNotesRuntimeFilterPropertyDefinition,
@@ -49,6 +60,7 @@ type TriggerControls = {
 	idInput: HTMLInputElement;
 	typeSelect: HTMLSelectElement;
 	eventInput?: HTMLInputElement | HTMLSelectElement;
+	providerInput?: HTMLInputElement;
 	scheduleInput?: HTMLInputElement;
 	timezoneInput?: HTMLInputElement;
 	fromInput?: HTMLInputElement;
@@ -79,6 +91,8 @@ type SimpleTaskQuery = {
 	mode: "all" | "any";
 	conditions: TaskNotesRuntimeCondition[];
 };
+
+type DateExpressionMode = "fixed" | "value" | "relative" | "advanced";
 
 const EDITOR_SECTIONS: Array<{ id: WorkflowEditorSection; labelKey: string; descriptionKey: string }> = [
 	{ id: "definition", labelKey: "editor.sections.definition.label", descriptionKey: "editor.sections.definition.description" },
@@ -122,6 +136,7 @@ const DEFAULT_TASKNOTES_EVENTS: readonly TaskNotesRuntimeEventDefinition[] = [
 const TRIGGER_TYPE_KEYS: Record<WorkflowTrigger["type"], string> = {
 	manual: "manual",
 	"tasknotes.event": "tasknotesEvent",
+	"runtime.event": "runtimeEvent",
 	cron: "cron",
 	interval: "interval",
 	"obsidian.vault": "obsidianVault",
@@ -245,7 +260,7 @@ export class WorkflowEditModal extends Modal {
 		const meta = status.createDiv({ cls: "tnw-modal-summary-meta" });
 		renderPill(meta, this.plugin.i18n.translatePlural("editor.summary.triggerCount", this.draft.triggers.length));
 		renderPill(meta, this.plugin.i18n.translatePlural("editor.summary.stepCount", this.draft.steps.length));
-		renderPill(meta, this.draft.run.noOverlap ? this.t("editor.summary.noOverlap") : this.t("editor.summary.overlapAllowed"));
+		renderPill(meta, this.draft.run.concurrency.policy !== "allow" ? this.t("editor.summary.noOverlap") : this.t("editor.summary.overlapAllowed"));
 		if (this.isDirty()) renderPill(meta, this.t("common.unsavedChanges"), "is-warning");
 	}
 
@@ -426,6 +441,7 @@ export class WorkflowEditModal extends Modal {
 				id: idInput.value,
 				type: typeSelect.value as WorkflowTrigger["type"],
 				event: controls.eventInput?.value ?? triggerEventValue(trigger),
+				provider: controls.providerInput?.value ?? triggerProviderValue(trigger),
 				schedule: controls.scheduleInput?.value ?? triggerScheduleValue(trigger),
 				timezone: controls.timezoneInput?.value ?? triggerTimezoneValue(trigger),
 				from: controls.fromInput?.value ?? ("from" in trigger ? stringifyScalar(trigger.from) : ""),
@@ -478,6 +494,29 @@ export class WorkflowEditModal extends Modal {
 			controls.pathInput.placeholder = "TaskNotes/**/*.md";
 			this.attachTemplateSuggest(controls.pathInput, trigger);
 			controls.allowSelfTriggerInput = renderCheckboxInput(advancedParent, this.t("editor.triggers.allowSelfTrigger"), trigger.allowSelfTrigger === true);
+			return;
+		}
+		if (trigger.type === "runtime.event") {
+			controls.eventInput = renderTextInput(
+				parent,
+				this.t("editor.triggers.event"),
+				trigger.event
+			);
+			controls.eventInput.placeholder = "canvas.drop";
+			controls.providerInput = renderTextInput(
+				advancedParent,
+				this.t("editor.triggers.runtimeProvider"),
+				trigger.provider ?? ""
+			);
+			// Runtime provider identifiers are case-sensitive machine names.
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
+			controls.providerInput.placeholder = "canvas-bases";
+			controls.pathInput = renderTextInput(
+				advancedParent,
+				this.t("editor.triggers.pathGlob"),
+				trigger.path?.glob ?? ""
+			);
+			this.renderValidation(controls.eventInput, `trigger.${index}.event`);
 			return;
 		}
 		if (trigger.type === "cron") {
@@ -555,7 +594,7 @@ export class WorkflowEditModal extends Modal {
 		renderDisclosureSummary(details, this.t("editor.triggers.valuesAvailable", { count: outputs.length }));
 		for (const output of outputs) {
 			const row = details.createDiv({ cls: output.description ? "tnw-output-row" : "tnw-output-row is-compact" });
-			row.createSpan({ cls: "tnw-output-key", text: `{{trigger.${output.key}}}` });
+			row.createSpan({ cls: "tnw-output-key", text: `{{event.${output.key}}}` });
 			row.createSpan({ cls: "tnw-output-type", text: output.type });
 			if (output.description) row.createSpan({ cls: "tnw-output-description", text: output.description });
 		}
@@ -666,16 +705,46 @@ export class WorkflowEditModal extends Modal {
 		this.renderValidation(idInput, `step.${index}.id`);
 
 		if (definition?.supportsForEach !== false) {
-			const forEach = renderTextInput(advancedGrid, this.t("editor.steps.forEach"), step.forEach ?? "");
-			forEach.placeholder = "{{steps.query.tasks}}";
-			this.attachTemplateSuggest(forEach);
+			const forEach = renderTextInput(advancedGrid, this.t("editor.steps.forEach"), forEachInputValue(step));
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Formula placeholders are code examples.
+			forEach.placeholder = 'steps.query.output.tasks';
 			forEach.addEventListener("change", () => {
-				this.draft.steps[index].forEach = forEach.value.trim() || undefined;
+				this.draft.steps[index].forEach = forEach.value.trim()
+					? { ...(this.draft.steps[index].forEach ?? {}), items: { [EXPRESSION_KEY]: forEach.value.trim() } }
+					: undefined;
+			});
+			forEach.addEventListener("input", () => {
+				this.draft.steps[index].forEach = forEach.value.trim()
+					? { ...(this.draft.steps[index].forEach ?? {}), items: { [EXPRESSION_KEY]: forEach.value.trim() } }
+					: undefined;
 			});
 			forEach.parentElement?.createDiv({
 				cls: "tnw-field-help",
 				text: this.t("editor.steps.forEachHelp"),
 			});
+			const aliasInput = renderTextInput(advancedGrid, this.t("editor.steps.forEachAs"), step.forEach?.as ?? "");
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Loop alias placeholders are identifiers.
+			aliasInput.placeholder = "task";
+			aliasInput.addEventListener("change", () => {
+				const alias = aliasInput.value.trim();
+				if (!this.draft.steps[index].forEach && !alias) return;
+				this.draft.steps[index].forEach = {
+					items: this.draft.steps[index].forEach?.items ?? { [EXPRESSION_KEY]: forEach.value.trim() || "[]" },
+					as: alias || undefined,
+				};
+			});
+			setButtonIconText(new ButtonComponent(advancedGrid), "wand-sparkles", this.t("editor.expressions.openBuilder"))
+				.setTooltip(this.t("editor.expressions.openBuilder"))
+				.onClick(() => {
+					const current = this.draft.steps[index].forEach?.items;
+					this.openExpressionBuilder(expressionSource(current) || forEach.value.trim(), (source) => {
+						this.draft.steps[index].forEach = {
+							...(this.draft.steps[index].forEach ?? {}),
+							items: { [EXPRESSION_KEY]: source },
+						};
+						this.render();
+					});
+				});
 		}
 
 		this.renderStepInputFields(grid, step, index, definition);
@@ -714,7 +783,15 @@ export class WorkflowEditModal extends Modal {
 		const current = getPath(inputRecord, field.key) ?? field.defaultValue ?? "";
 		const validationPath = `step.${stepIndex}.input.${field.key}`;
 		const options = field.options ?? this.dynamicOptions(field.optionsFrom);
+		if (field.type === "date") {
+			this.renderDateExpressionField(parent, inputRecord, field, current, validationPath);
+			return;
+		}
 		if (field.type === "boolean") {
+			if (isWorkflowExpression(current)) {
+				this.renderAdvancedExpressionField(parent, inputRecord, field, current, validationPath);
+				return;
+			}
 			const wrapper = parent.createEl("label", { cls: "tnw-field is-inline" });
 			wrapper.createSpan({ cls: "tnw-field-label", text: field.label });
 			const input = wrapper.createEl("input", { type: "checkbox" });
@@ -725,6 +802,10 @@ export class WorkflowEditModal extends Modal {
 			return;
 		}
 		if (field.type === "select" && options.length > 0) {
+			if (isWorkflowExpression(current)) {
+				this.renderAdvancedExpressionField(parent, inputRecord, field, current, validationPath);
+				return;
+			}
 			const selectOptions: Array<[string, string]> = [
 				["", ""],
 				...options.map((option): [string, string] => [option.value, option.label]),
@@ -754,6 +835,10 @@ export class WorkflowEditModal extends Modal {
 			this.renderTaskQueryInput(parent, inputRecord, field, validationPath);
 			return;
 		}
+		if (isWorkflowExpression(current)) {
+			this.renderAdvancedExpressionField(parent, inputRecord, field, current, validationPath);
+			return;
+		}
 		const input =
 			field.type === "textarea"
 				? renderTextareaInput(parent, field.label, stringifyScalar(current), field.wide !== false)
@@ -770,6 +855,190 @@ export class WorkflowEditModal extends Modal {
 		});
 		this.renderFieldHelp(input.parentElement, field);
 		this.renderValidation(input, validationPath);
+		this.renderAdvancedExpressionDisclosure(input.parentElement, inputRecord, field, validationPath);
+	}
+
+	private renderDateExpressionField(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		field: WorkflowInputField,
+		current: unknown,
+		validationPath: string
+	): void {
+		const mode = dateExpressionMode(current);
+		const wrapper = parent.createDiv({ cls: "tnw-field tnw-expression-field is-wide" });
+		const header = wrapper.createDiv({ cls: "tnw-expression-header" });
+		const copy = header.createDiv({ cls: "tnw-expression-copy" });
+		copy.createDiv({ cls: "tnw-field-label", text: field.label });
+		this.renderFieldHelp(copy, field);
+		const modeSelect = renderSelectInput(
+			header,
+			this.t("editor.expressions.mode"),
+			[
+				["fixed", this.t("editor.expressions.modes.fixedDate")],
+				["value", this.t("editor.expressions.modes.workflowValue")],
+				["relative", this.t("editor.expressions.modes.relativeDate")],
+				["advanced", this.t("editor.expressions.modes.advanced")],
+			],
+			mode
+		);
+		modeSelect.addEventListener("change", () => {
+			this.writeDefaultDateExpressionMode(inputRecord, field.key, modeSelect.value as DateExpressionMode, current);
+			this.render();
+		});
+
+		const body = wrapper.createDiv({ cls: `tnw-expression-body is-${mode}` });
+		if (mode === "fixed") {
+			const input = renderTextInput(body, this.t("editor.expressions.fixedDate"), stringifyScalar(current), "date");
+			input.addEventListener("change", () => setOrDeletePath(inputRecord, field.key, input.value.trim()));
+			this.renderValidation(input, validationPath);
+		} else if (mode === "value") {
+			const source = renderTextInput(body, this.t("editor.expressions.sourceValue"), dateExpressionSource(current));
+			source.placeholder = "{{event.after.due}}";
+			this.attachTemplateSuggest(source);
+			source.addEventListener("change", () => setOrDeletePath(inputRecord, field.key, source.value.trim()));
+			source.addEventListener("input", () => setOrDeletePath(inputRecord, field.key, source.value.trim()));
+			this.renderValidation(source, validationPath);
+		} else if (mode === "relative") {
+			const expression = dateRelativeExpressionFromValue(current);
+			const source = renderTextInput(body, this.t("editor.expressions.sourceValue"), stringifyScalar(expression.value));
+			source.placeholder = "{{event.after.due}}";
+			this.attachTemplateSuggest(source);
+			const amount = renderTextInput(body, this.t("editor.expressions.amount"), stringifyScalar(expression.amount), "number");
+			const unit = renderSelectInput(
+				body,
+				this.t("editor.expressions.unit"),
+				[
+					["day", this.t("editor.expressions.units.day")],
+					["week", this.t("editor.expressions.units.week")],
+					["month", this.t("editor.expressions.units.month")],
+					["year", this.t("editor.expressions.units.year")],
+				],
+				stringifyScalar(expression.unit)
+			);
+			const update = (): void => {
+				const amountValue = Number(amount.value);
+				setPath(inputRecord, field.key, dateRelativeExpression(
+					source.value.trim() || "{{event.after.due}}",
+					Number.isFinite(amountValue) ? amountValue : 0,
+					unit.value || "day"
+				));
+			};
+			source.addEventListener("change", update);
+			source.addEventListener("input", update);
+			amount.addEventListener("change", update);
+			amount.addEventListener("input", update);
+			unit.addEventListener("change", update);
+			this.renderValidation(source, validationPath);
+		} else {
+			this.renderExpressionFormulaEditor(body, inputRecord, field.key, current, validationPath);
+		}
+
+		const summary = expressionSummary(current);
+		if (summary) wrapper.createDiv({ cls: "tnw-expression-summary", text: summary });
+	}
+
+	private renderAdvancedExpressionDisclosure(
+		parent: HTMLElement | null,
+		inputRecord: Record<string, unknown>,
+		field: WorkflowInputField,
+		validationPath: string
+	): void {
+		if (!parent) return;
+		const details = parent.ownerDocument.createElement("details");
+		details.className = "tnw-expression-advanced";
+		if (parent.matches("label.tnw-field")) {
+			parent.insertAdjacentElement("afterend", details);
+		} else {
+			parent.appendChild(details);
+		}
+		renderDisclosureSummary(details, this.t("editor.expressions.advancedTitle"), this.t("editor.expressions.advancedDescription"));
+		const body = details.createDiv({ cls: "tnw-advanced-body" });
+		this.renderExpressionFormulaEditor(body, inputRecord, field.key, getPath(inputRecord, field.key), validationPath);
+	}
+
+	private renderAdvancedExpressionField(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		field: WorkflowInputField,
+		current: unknown,
+		validationPath: string
+	): void {
+		const wrapper = parent.createDiv({ cls: "tnw-field tnw-expression-field is-wide" });
+		const header = wrapper.createDiv({ cls: "tnw-expression-header" });
+		const copy = header.createDiv({ cls: "tnw-expression-copy" });
+		copy.createDiv({ cls: "tnw-field-label", text: field.label });
+		this.renderFieldHelp(copy, field);
+		header.createSpan({ cls: "tnw-chip", text: this.t("editor.expressions.modes.advanced") });
+		this.renderExpressionFormulaEditor(wrapper, inputRecord, field.key, current, validationPath);
+		const summary = expressionSummary(current);
+		if (summary) wrapper.createDiv({ cls: "tnw-expression-summary", text: summary });
+	}
+
+	private renderExpressionFormulaEditor(
+		parent: HTMLElement,
+		inputRecord: Record<string, unknown>,
+		path: string,
+		current: unknown,
+		validationPath: string
+	): void {
+			const wrapper = parent.createDiv({ cls: "tnw-expression-formula" });
+			const row = wrapper.createDiv({ cls: "tnw-expression-formula-row" });
+			const formula = renderTextareaInput(row, this.t("editor.expressions.formulaLabel"), expressionSource(current), true, true);
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Formula placeholders are code examples.
+			formula.placeholder = "date(event.after.due) - duration(\"7d\")";
+		formula.addEventListener("change", () => {
+			const source = formula.value.trim();
+			if (!source) {
+				setOrDeletePath(inputRecord, path, undefined);
+				this.render();
+				return;
+			}
+			const value = { [EXPRESSION_KEY]: source };
+			const issues = validateExpressionTree(value, validationPath, this.expressionSchema());
+			if (issues.length > 0) {
+				new Notice(issues[0]?.message ?? this.t("editor.validation.invalidExpression"));
+				return;
+			}
+			setPath(inputRecord, path, value);
+			this.render();
+		});
+		setButtonIconText(new ButtonComponent(row), "wand-sparkles", this.t("editor.expressions.openBuilder"))
+			.setTooltip(this.t("editor.expressions.openBuilder"))
+			.onClick(() => {
+				this.openExpressionBuilder(formula.value, (source) => {
+					setPath(inputRecord, path, { [EXPRESSION_KEY]: source });
+					this.render();
+				});
+			});
+		this.renderValidation(formula, validationPath);
+	}
+
+	private writeDefaultDateExpressionMode(
+		inputRecord: Record<string, unknown>,
+		path: string,
+		mode: DateExpressionMode,
+		current: unknown
+	): void {
+		if (mode === "fixed") {
+			setOrDeletePath(inputRecord, path, isWorkflowExpression(current) ? "" : stringifyScalar(current));
+			return;
+		}
+		if (mode === "value") {
+			setPath(inputRecord, path, dateExpressionSource(current) || "{{event.after.due}}");
+			return;
+		}
+		if (mode === "relative") {
+			setPath(inputRecord, path, dateRelativeExpressionFromValue(current));
+			return;
+		}
+		setPath(
+			inputRecord,
+			path,
+			isWorkflowExpression(current)
+				? current
+				: dateRelativeExpression(dateExpressionSource(current) || "{{event.after.due}}", -7, "day")
+		);
 	}
 
 	private renderTaskQueryInput(
@@ -1131,7 +1400,7 @@ export class WorkflowEditModal extends Modal {
 		renderDisclosureSummary(details, this.t("editor.steps.outputsAvailable", { count: definition.outputFields.length }));
 		for (const output of definition.outputFields) {
 			const row = details.createDiv({ cls: output.description ? "tnw-output-row" : "tnw-output-row is-compact" });
-			row.createSpan({ cls: "tnw-output-key", text: `{{steps.${step.id}.${output.key}}}` });
+			row.createSpan({ cls: "tnw-output-key", text: `{{steps.${step.id}.output.${output.key}}}` });
 			row.createSpan({ cls: "tnw-output-type", text: output.type });
 			if (output.description) row.createSpan({ cls: "tnw-output-description", text: output.description });
 		}
@@ -1146,12 +1415,21 @@ export class WorkflowEditModal extends Modal {
 		const section = createSection(parent, this.t("editor.sections.run.title"), this.t("editor.sections.run.body"));
 		const grid = section.createDiv({ cls: "tnw-form-grid" });
 
-		const noOverlapLabel = grid.createEl("label", { cls: "tnw-field is-inline" });
-		noOverlapLabel.createSpan({ cls: "tnw-field-label", text: this.t("editor.runPolicy.noOverlap") });
-		const noOverlap = noOverlapLabel.createEl("input", { type: "checkbox" });
-		noOverlap.checked = this.draft.run.noOverlap;
-		noOverlap.addEventListener("change", () => {
-			this.draft.run.noOverlap = noOverlap.checked;
+		const concurrencyPolicy = renderSelectInput(
+			grid,
+			this.t("editor.runPolicy.concurrencyPolicy"),
+			[
+				["skip", this.t("editor.runPolicy.concurrencyPolicies.skip")],
+				["queue", this.t("editor.runPolicy.concurrencyPolicies.queue")],
+				["replace", this.t("editor.runPolicy.concurrencyPolicies.replace")],
+				["allow", this.t("editor.runPolicy.concurrencyPolicies.allow")],
+			],
+			this.draft.run.concurrency.policy
+		);
+		concurrencyPolicy.addEventListener("change", () => {
+			const value = concurrencyPolicy.value;
+			this.draft.run.concurrency.policy =
+				value === "queue" || value === "replace" || value === "allow" ? value : "skip";
 		});
 
 		const onError = renderSelectInput(
@@ -1172,12 +1450,17 @@ export class WorkflowEditModal extends Modal {
 		);
 		const advancedGrid = advanced.createDiv({ cls: "tnw-form-grid" });
 
-		const maxTasks = renderTextInput(advancedGrid, this.t("editor.runPolicy.maxTasks"), String(this.draft.run.maxTasks), "number");
-		maxTasks.addEventListener("change", () => {
-			const value = Number(maxTasks.value);
-			if (Number.isFinite(value) && value > 0) this.draft.run.maxTasks = Math.floor(value);
+		const concurrencyGroup = renderTextInput(advancedGrid, this.t("editor.runPolicy.concurrencyGroup"), this.draft.run.concurrency.group);
+		concurrencyGroup.addEventListener("change", () => {
+			this.draft.run.concurrency.group = concurrencyGroup.value.trim() || "workflow";
 		});
-		this.renderValidation(maxTasks, "run.maxTasks");
+
+		const maxItems = renderTextInput(advancedGrid, this.t("editor.runPolicy.maxItems"), String(this.draft.run.limits.maxItems), "number");
+		maxItems.addEventListener("change", () => {
+			const value = Number(maxItems.value);
+			if (Number.isFinite(value) && value > 0) this.draft.run.limits.maxItems = Math.floor(value);
+		});
+		this.renderValidation(maxItems, "run.limits.maxItems");
 
 		const source = renderTextInput(advancedGrid, this.t("editor.runPolicy.source"), this.draft.run.source);
 		source.addEventListener("change", () => {
@@ -1320,7 +1603,7 @@ export class WorkflowEditModal extends Modal {
 		if (activeTrigger) {
 			for (const output of this.triggerOutputFields(activeTrigger)) {
 				options.push({
-					value: `{{trigger.${output.key}}}`,
+					value: `{{event.${output.key}}}`,
 					label: this.t("editor.templateSuggestions.triggerValue", { label: output.label || output.key }),
 				});
 			}
@@ -1330,7 +1613,7 @@ export class WorkflowEditModal extends Modal {
 			if (!definition) continue;
 			for (const output of definition.outputFields) {
 				options.push({
-					value: `{{steps.${step.id}.${output.key}}}`,
+					value: `{{steps.${step.id}.output.${output.key}}}`,
 					label: this.t("editor.templateSuggestions.stepValue", {
 						stepId: step.id,
 						label: output.label || output.key,
@@ -1343,6 +1626,42 @@ export class WorkflowEditModal extends Modal {
 
 	private attachTemplateSuggest(input: HTMLInputElement | HTMLTextAreaElement, trigger?: WorkflowTrigger): void {
 		new TemplateValueSuggest(this.app, input, () => this.templateOptions(trigger));
+	}
+
+	private openExpressionBuilder(initialExpression: string, onApply: (source: string) => void): void {
+		const modal = openBasesExpressionBuilder(this.app, {
+			initialExpression: initialExpression || "true",
+			schema: this.expressionSchema(),
+			showPreview: false,
+			onApply: ({ source, validation }) => {
+				if (!validation.valid) {
+					new Notice(validation.issues[0]?.message ?? this.t("editor.validation.invalidExpression"));
+					return;
+				}
+				onApply(source);
+			},
+		});
+		modal.modalEl.classList.add("tnw-obe-builder-modal");
+		const ownerBody = modal.modalEl.ownerDocument.body;
+		ownerBody.classList.add("tnw-obe-builder-active");
+		const closeBuilder = modal.onClose.bind(modal);
+		modal.onClose = () => {
+			ownerBody.classList.remove("tnw-obe-builder-active");
+			closeBuilder();
+		};
+	}
+
+	private expressionSchema(): FormulaLanguageSchema {
+		return mergeFormulaSchemas(
+			collectObsidianBasesSchema(this.app, {
+				includeValueSuggestions: true,
+				maxValuesPerProperty: 40,
+			}),
+			workflowExpressionSchema({
+				steps: this.draft.steps,
+				stepDefinitions: (type) => this.plugin.stepRegistry.get(type),
+			})
+		);
 	}
 
 	private renderSectionValidation(parent: HTMLElement, path: string): void {
@@ -1382,12 +1701,14 @@ export class WorkflowEditModal extends Modal {
 			if (triggerIds.has(trigger.id)) add(`trigger.${index}.id`, this.t("editor.validation.duplicateTriggerId"));
 			triggerIds.add(trigger.id);
 			if (isTaskNotesEventTrigger(trigger) && !trigger.event.trim()) add(`trigger.${index}.event`, this.t("editor.validation.tasknotesEventRequired"));
+			if (trigger.type === "runtime.event" && !trigger.event.trim()) add(`trigger.${index}.event`, this.t("editor.validation.runtimeEventRequired"));
 			if (trigger.type === "cron" && !trigger.schedule.trim()) add(`trigger.${index}.schedule`, this.t("editor.validation.cronScheduleRequired"));
 			if (trigger.type === "interval" && !trigger.every.trim()) add(`trigger.${index}.schedule`, this.t("editor.validation.intervalRequired"));
 		}
 
 		if (this.draft.steps.length === 0) add("steps", this.t("editor.validation.stepRequired"));
 		const stepIds = new Set<string>();
+		const expressionSchema = this.expressionSchema();
 		for (const [index, step] of this.draft.steps.entries()) {
 			if (!isValidWorkflowId(step.id)) add(`step.${index}.id`, this.t("editor.validation.invalidStepId"));
 			if (stepIds.has(step.id)) add(`step.${index}.id`, this.t("editor.validation.duplicateStepId"));
@@ -1399,14 +1720,22 @@ export class WorkflowEditModal extends Modal {
 			}
 			for (const field of definition.inputFields) {
 				const value = getPath(step.input ?? {}, field.key) ?? field.defaultValue;
+				for (const issue of validateExpressionTree(value, `step.${index}.input.${field.key}`, expressionSchema)) {
+					add(issue.path, issue.message);
+				}
 				if (field.required && isEmptyRequiredValue(value)) {
 					add(`step.${index}.input.${field.key}`, this.t("editor.validation.fieldRequired", { field: field.label }));
 				}
 			}
+			if (typeof step.forEach !== "undefined") {
+				for (const issue of validateExpressionTree(step.forEach.items, `step.${index}.forEach.items`, expressionSchema)) {
+					add(issue.path, issue.message);
+				}
+			}
 		}
 
-		if (!Number.isFinite(this.draft.run.maxTasks) || this.draft.run.maxTasks <= 0) {
-			add("run.maxTasks", this.t("editor.validation.positiveNumber"));
+		if (!Number.isFinite(this.draft.run.limits.maxItems) || this.draft.run.limits.maxItems <= 0) {
+			add("run.limits.maxItems", this.t("editor.validation.positiveNumber"));
 		}
 		return {
 			issues,
@@ -1432,7 +1761,7 @@ export class WorkflowEditModal extends Modal {
 		if (section === "definition") return "";
 		if (section === "triggers") return `${this.draft.triggers.length}`;
 		if (section === "steps") return `${this.draft.steps.length}`;
-		return this.draft.run.noOverlap ? this.t("workflowCard.labels.noOverlap") : this.t("editor.summary.overlapAllowed");
+		return this.draft.run.concurrency.policy !== "allow" ? this.t("workflowCard.labels.noOverlap") : this.t("editor.summary.overlapAllowed");
 	}
 
 	private moveStep(index: number, delta: -1 | 1): void {
@@ -1538,6 +1867,7 @@ export class WorkflowEditModal extends Modal {
 			}
 			return this.tasknotesEventLabel(trigger.event);
 		}
+		if (trigger.type === "runtime.event") return trigger.event;
 		if (trigger.type === "cron") return this.t("editor.triggers.summary.schedule", { schedule: trigger.schedule });
 		if (trigger.type === "interval") return this.t("editor.triggers.summary.every", { every: trigger.every });
 		if (trigger.type === "obsidian.vault") return this.t("editor.triggers.summary.vaultFile", { event: trigger.event });
@@ -1555,7 +1885,7 @@ export class WorkflowEditModal extends Modal {
 
 	private stepSummaryDetail(step: WorkflowStep, definition: StepDefinition | undefined): string {
 		const parts = [step.id, definition?.category ?? step.type];
-		if (step.forEach) parts.push(this.t("editor.steps.summary.forEach", { value: step.forEach }));
+		if (step.forEach) parts.push(this.t("editor.steps.summary.forEach", { value: forEachInputValue(step) }));
 		return parts.join(" / ");
 	}
 
@@ -1578,10 +1908,23 @@ export class WorkflowEditModal extends Modal {
 				output("after.path", "string"),
 				output("after.title", "string"),
 				output("after.status", "string"),
+				output("after.scheduled", "date"),
+				output("after.due", "date"),
 				output("before.status", "string"),
+				output("before.scheduled", "date"),
+				output("before.due", "date"),
 				output("changes", "object"),
 				output("source", "string"),
 				output("correlationId", "string"),
+			];
+		}
+		if (trigger.type === "runtime.event") {
+			return [
+				...common,
+				output("path", "string"),
+				output("source", "string"),
+				output("correlationId", "string"),
+				output("data", "object"),
 			];
 		}
 		if (trigger.type === "cron" || trigger.type === "interval") {
@@ -1606,7 +1949,7 @@ export class WorkflowEditModal extends Modal {
 }
 
 class TemplateValueSuggest extends AbstractInputSuggest<TemplateOption> {
-	private readonly textInputEl: HTMLInputElement | HTMLTextAreaElement;
+	private readonly templateInputEl: HTMLInputElement | HTMLTextAreaElement;
 
 	constructor(
 		app: App,
@@ -1614,12 +1957,12 @@ class TemplateValueSuggest extends AbstractInputSuggest<TemplateOption> {
 		private readonly getTemplateOptions: () => TemplateOption[]
 	) {
 		super(app, textInputEl as HTMLInputElement);
-		this.textInputEl = textInputEl;
+		this.templateInputEl = textInputEl;
 		this.limit = 40;
 	}
 
 	protected override getSuggestions(_query: string): TemplateOption[] {
-		const range = templateQueryRange(this.textInputEl);
+		const range = templateQueryRange(this.templateInputEl);
 		if (!range) return [];
 		const query = range.query.toLowerCase();
 		return this.getTemplateOptions().filter((option) => {
@@ -1635,7 +1978,7 @@ class TemplateValueSuggest extends AbstractInputSuggest<TemplateOption> {
 	}
 
 	override selectSuggestion(value: TemplateOption, _evt: MouseEvent | KeyboardEvent): void {
-		insertTemplateSuggestion(this.textInputEl, value.value);
+		insertTemplateSuggestion(this.templateInputEl, value.value);
 		this.close();
 	}
 }
@@ -1648,6 +1991,12 @@ function summarizeStep(step: WorkflowStep, definition: StepDefinition | undefine
 	return definition?.label ?? step.type;
 }
 
+function forEachInputValue(step: WorkflowStep): string {
+	const items = step.forEach?.items;
+	if (isWorkflowExpression(items)) return items[EXPRESSION_KEY];
+	return stringifyScalar(items);
+}
+
 function dedupeTemplateOptions(options: TemplateOption[]): TemplateOption[] {
 	const seen = new Set<string>();
 	return options.filter((option) => {
@@ -1655,6 +2004,20 @@ function dedupeTemplateOptions(options: TemplateOption[]): TemplateOption[] {
 		seen.add(option.value);
 		return true;
 	});
+}
+
+function mergeFormulaSchemas(...schemas: FormulaLanguageSchema[]): FormulaLanguageSchema {
+	const propertyTypes: NonNullable<FormulaLanguageSchema["propertyTypes"]> = {};
+	for (const schema of schemas) {
+		Object.assign(propertyTypes, schema.propertyTypes ?? {});
+	}
+	return {
+		properties: schemas.flatMap((schema) => schema.properties ?? []),
+		formulas: schemas.flatMap((schema) => schema.formulas ?? []),
+		objects: schemas.flatMap((schema) => schema.objects ?? []),
+		functions: schemas.flatMap((schema) => schema.functions ?? []),
+		propertyTypes,
+	};
 }
 
 function templateQueryRange(input: HTMLInputElement | HTMLTextAreaElement): { start: number; end: number; query: string } | null {
@@ -1992,6 +2355,7 @@ function triggerControlsInputs(controls: TriggerControls): Array<HTMLInputElemen
 	return [
 		controls.idInput,
 		controls.eventInput,
+		controls.providerInput,
 		controls.scheduleInput,
 		controls.timezoneInput,
 		controls.fromInput,
@@ -2010,10 +2374,15 @@ function isTaskNotesEventTriggerType(type: WorkflowTrigger["type"]): type is Tas
 	return type === "tasknotes.event";
 }
 
+function isRuntimeEventTriggerType(type: WorkflowTrigger["type"]): type is MdbaseRuntimeEventTrigger["type"] {
+	return type === "runtime.event";
+}
+
 function triggerFromControls(input: {
 	id: string;
 	type: WorkflowTrigger["type"];
 	event: string;
+	provider: string;
 	schedule: string;
 	timezone: string;
 	from: string;
@@ -2033,6 +2402,15 @@ function triggerFromControls(input: {
 			to: input.to.trim() || undefined,
 			path,
 			allowSelfTrigger: input.allowSelfTrigger || undefined,
+		};
+	}
+	if (isRuntimeEventTriggerType(input.type)) {
+		return {
+			id,
+			type: "runtime.event",
+			event: input.event.trim() || "canvas.drop",
+			provider: input.provider.trim() || undefined,
+			path,
 		};
 	}
 	if (input.type === "cron") {
@@ -2080,6 +2458,10 @@ function triggerScheduleValue(trigger: WorkflowTrigger): string {
 	return "";
 }
 
+function triggerProviderValue(trigger: WorkflowTrigger): string {
+	return trigger.type === "runtime.event" ? trigger.provider ?? "" : "";
+}
+
 function triggerTimezoneValue(trigger: WorkflowTrigger): string {
 	return trigger.type === "cron" ? trigger.timezone ?? "local" : "";
 }
@@ -2101,6 +2483,84 @@ function inputTypeForField(field: WorkflowInputField): string {
 	if (field.type === "number") return "number";
 	if (field.type === "date") return "date";
 	return "text";
+}
+
+function dateExpressionMode(value: unknown): DateExpressionMode {
+	if (isDateRelativeExpression(value)) return "relative";
+	if (isWorkflowExpression(value)) return "advanced";
+	if (isExactTemplateReference(value)) return "value";
+	return "fixed";
+}
+
+function dateExpressionSource(value: unknown): string {
+	if (isWorkflowExpression(value)) return parseDateRelativeExpression(value[EXPRESSION_KEY])?.value ?? value[EXPRESSION_KEY];
+	if (typeof value === "string" && isExactTemplateReference(value)) return value;
+	return "";
+}
+
+function dateRelativeExpressionFromValue(value: unknown): Record<string, unknown> {
+	if (isWorkflowExpression(value)) {
+		const parsed = parseDateRelativeExpression(value[EXPRESSION_KEY]);
+		if (parsed) return dateRelativeExpression(parsed.value, parsed.amount, parsed.unit);
+	}
+	return dateRelativeExpression(dateExpressionSource(value) || "{{event.after.due}}", -7, "day");
+}
+
+function dateRelativeExpression(value: string, amount: number, unit: string): Record<string, unknown> {
+	const source = templateReferenceToExpression(value);
+	const absAmount = Math.abs(amount);
+	const operator = amount < 0 ? "-" : "+";
+	const durationUnit = durationUnitToken(unit);
+	return { [EXPRESSION_KEY]: `date(${source}) ${operator} duration("${absAmount}${durationUnit}")` };
+}
+
+function isDateRelativeExpression(value: unknown): boolean {
+	return isWorkflowExpression(value) && parseDateRelativeExpression(value[EXPRESSION_KEY]) !== null;
+}
+
+function parseDateRelativeExpression(source: string): { value: string; amount: number; unit: string } | null {
+	const match = /^date\((.+)\)\s*([+-])\s*duration\("(\d+)([a-z]+)"\)$/u.exec(source.trim());
+	if (!match) return null;
+	const amount = Number(match[3] ?? 0) * (match[2] === "-" ? -1 : 1);
+	return {
+		value: expressionToTemplateReference(match[1] ?? "event.after.due"),
+		amount,
+		unit: unitFromDurationToken(match[4] ?? "d"),
+	};
+}
+
+function templateReferenceToExpression(value: string): string {
+	const match = /^\s*\{\{\s*([^{}]+?)\s*\}\}\s*$/u.exec(value);
+	return match?.[1]?.trim() || value.trim() || "event.after.due";
+}
+
+function expressionToTemplateReference(value: string): string {
+	const source = value.trim();
+	return source ? `{{${source}}}` : "{{event.after.due}}";
+}
+
+function durationUnitToken(unit: string): string {
+	if (unit === "week") return "w";
+	if (unit === "month") return "mo";
+	if (unit === "year") return "y";
+	return "d";
+}
+
+function unitFromDurationToken(unit: string): string {
+	if (unit === "w") return "week";
+	if (unit === "mo") return "month";
+	if (unit === "y") return "year";
+	return "day";
+}
+
+function isExactTemplateReference(value: unknown): value is string {
+	return typeof value === "string" && /^\s*\{\{\s*[^{}]+?\s*\}\}\s*$/u.test(value);
+}
+
+function expressionSummary(value: unknown): string | null {
+	if (isWorkflowExpression(value)) return summarizeExpression(value);
+	if (isExactTemplateReference(value)) return `from ${value}`;
+	return null;
 }
 
 function coerceInputValue(value: string, field: WorkflowInputField): unknown {

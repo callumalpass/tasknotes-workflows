@@ -5,6 +5,7 @@ import { pathMatchesFilter } from "./path";
 import type { TaskNotesBridge } from "./tasknotesBridge";
 import type {
 	LoadedWorkflow,
+	MdbaseRuntimeEventTrigger,
 	ObsidianMetadataTrigger,
 	ObsidianWorkspaceTrigger,
 	TaskNotesEventTrigger,
@@ -12,6 +13,7 @@ import type {
 	WorkflowRunDetail,
 	WorkflowRunOptions,
 	WorkflowTriggerPayload,
+	TaskNotesMdbaseRuntimeEventEnvelope,
 } from "./types";
 
 type RunWorkflow = (
@@ -37,6 +39,7 @@ export class WorkflowScheduler {
 	start(): void {
 		this.stop();
 		this.registerTaskEvents();
+		this.registerRuntimeEvents();
 		this.registerSchedules();
 		this.registerObsidianEvents();
 	}
@@ -60,6 +63,7 @@ export class WorkflowScheduler {
 			manual: true,
 			trigger: {
 				type: dryRun ? "dry-run" : "manual",
+				triggerType: "manual",
 				event: "manual",
 				manual: true,
 				actualAt: new Date().toISOString(),
@@ -91,6 +95,22 @@ export class WorkflowScheduler {
 		}, 60_000);
 		this.intervalIds.push(tick);
 		void this.handleScheduleTick().catch(showError);
+	}
+
+	private registerRuntimeEvents(): void {
+		if (!this.getSettings().enableTaskEventTriggers) return;
+		const events = new Set<string>();
+		for (const loaded of this.getWorkflows()) {
+			for (const trigger of loaded.workflow?.triggers ?? []) {
+				if (trigger.type === "runtime.event") events.add(trigger.event);
+			}
+		}
+		for (const event of events) {
+			const disposable = this.bridge.onRuntimeEvent(event, async (envelope) => {
+				await this.handleRuntimeEvent(envelope);
+			});
+			if (disposable) this.cleanupCallbacks.push(() => void disposable.dispose());
+		}
 	}
 
 	private registerObsidianEvents(): void {
@@ -168,6 +188,17 @@ export class WorkflowScheduler {
 		}
 	}
 
+	private async handleRuntimeEvent(envelope: TaskNotesMdbaseRuntimeEventEnvelope): Promise<void> {
+		const payload = normalizeRuntimeEventPayload(envelope);
+		for (const workflow of this.getWorkflows()) {
+			for (const trigger of workflow.workflow?.triggers ?? []) {
+				if (trigger.type !== "runtime.event") continue;
+				if (!this.runtimeTriggerMatches(trigger, envelope, payload)) continue;
+				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
+			}
+		}
+	}
+
 	private async handleScheduleTick(): Promise<void> {
 		const now = new Date();
 		for (const workflow of this.getWorkflows()) {
@@ -177,6 +208,7 @@ export class WorkflowScheduler {
 					await this.runWorkflow(workflow, {
 						trigger: {
 							type: "cron",
+							triggerType: "cron",
 							id: trigger.id,
 							event: "cron",
 							scheduledAt: now.toISOString(),
@@ -188,6 +220,7 @@ export class WorkflowScheduler {
 					await this.runWorkflow(workflow, {
 						trigger: {
 							type: "interval",
+							triggerType: "interval",
 							id: trigger.id,
 							event: "interval",
 							scheduledAt: now.toISOString(),
@@ -211,7 +244,8 @@ export class WorkflowScheduler {
 				if (!pathMatchesFilter(file.path, trigger.path)) continue;
 				await this.runWorkflow(workflow, {
 					trigger: {
-						type: "obsidian.vault",
+						type: event,
+						triggerType: "obsidian.vault",
 						id: trigger.id,
 						event,
 						path: file.path,
@@ -235,7 +269,8 @@ export class WorkflowScheduler {
 				if (!file && trigger.path) continue;
 				await this.runWorkflow(workflow, {
 					trigger: {
-						type: "obsidian.workspace",
+						type: event,
+						triggerType: "obsidian.workspace",
 						id: trigger.id,
 						event,
 						path: file?.path,
@@ -259,7 +294,8 @@ export class WorkflowScheduler {
 				if (!file && trigger.path) continue;
 				await this.runWorkflow(workflow, {
 					trigger: {
-						type: "obsidian.metadata",
+						type: event,
+						triggerType: "obsidian.metadata",
 						id: trigger.id,
 						event,
 						path: file?.path,
@@ -273,7 +309,7 @@ export class WorkflowScheduler {
 	}
 
 	private taskNotesTriggerMatches(trigger: TaskNotesEventTrigger, payload: WorkflowTriggerPayload): boolean {
-		if (trigger.event !== payload.event) return false;
+		if (trigger.event !== (payload.event ?? payload.type)) return false;
 		if (!trigger.allowSelfTrigger && payload.source === "tasknotes-workflows") return false;
 		const taskPath = stringifyScalar(payload.after?.path ?? payload.task?.path ?? payload.path ?? "");
 		if (taskPath && !pathMatchesFilter(taskPath, trigger.path)) return false;
@@ -285,6 +321,17 @@ export class WorkflowScheduler {
 			const after = payload.changes?.status?.after ?? payload.after?.status;
 			if (stringifyScalar(after) !== stringifyScalar(trigger.to)) return false;
 		}
+		return true;
+	}
+
+	private runtimeTriggerMatches(
+		trigger: MdbaseRuntimeEventTrigger,
+		envelope: TaskNotesMdbaseRuntimeEventEnvelope,
+		payload: WorkflowTriggerPayload
+	): boolean {
+		if (trigger.event !== envelope.type) return false;
+		if (trigger.provider && trigger.provider !== envelope.source.provider) return false;
+		if (trigger.path && (!payload.path || !pathMatchesFilter(payload.path, trigger.path))) return false;
 		return true;
 	}
 
@@ -319,7 +366,8 @@ export class WorkflowScheduler {
 function normalizeTaskNotesEventPayload(event: string, rawPayload: unknown): WorkflowTriggerPayload {
 	const payload = isRecord(rawPayload) ? rawPayload : {};
 	return {
-		type: "tasknotes.event",
+		type: event,
+		triggerType: "tasknotes.event",
 		event,
 		task: asRecord(payload.task),
 		before: asRecord(payload.before),
@@ -332,6 +380,31 @@ function normalizeTaskNotesEventPayload(event: string, rawPayload: unknown): Wor
 		path: typeof payload.taskPath === "string" ? payload.taskPath : undefined,
 		data: payload,
 		actualAt: new Date().toISOString(),
+	};
+}
+
+function normalizeRuntimeEventPayload(
+	envelope: TaskNotesMdbaseRuntimeEventEnvelope
+): WorkflowTriggerPayload {
+	const record = isRecord(envelope.payload.record) ? envelope.payload.record : undefined;
+	const file = isRecord(envelope.payload.file) ? envelope.payload.file : undefined;
+	const path = [envelope.payload.path, record?.path, file?.path].find(
+		(value): value is string => typeof value === "string" && value.length > 0
+	);
+	return {
+		type: envelope.type,
+		triggerType: "runtime.event",
+		event: envelope.type,
+		path,
+		source: envelope.source.provider,
+		correlationId: envelope.trace?.correlation_id,
+		data: {
+			payload: envelope.payload,
+			eventId: envelope.id,
+			contractVersion: envelope.contract_version,
+			causationId: envelope.trace?.causation_id,
+		},
+		actualAt: envelope.occurred_at,
 	};
 }
 

@@ -201,7 +201,7 @@ function createDefaultSteps(): StepDefinition[] {
 			task: await api.tasks.get(requiredString(input, "task")),
 		}), {
 			inputFields: [taskPathField()],
-			examples: [{ label: "Read the triggering task", input: { task: "{{trigger.after.path}}" } }],
+			examples: [{ label: "Read the triggering task", input: { task: "{{event.after.path}}" } }],
 		}),
 		{
 			type: "task.query",
@@ -285,7 +285,7 @@ function createDefaultSteps(): StepDefinition[] {
 				{ key: "tasks", label: "Tasks", type: "TaskInfo[]", description: "Resolved dependency tasks." },
 				{ key: "count", label: "Count", type: "number", description: "Number of dependencies." },
 			],
-			examples: [{ label: "Read triggering task dependencies", input: { task: "{{trigger.after.path}}" } }],
+			examples: [{ label: "Read triggering task dependencies", input: { task: "{{event.after.path}}" } }],
 			mutatesTasks: false,
 			supportsDryRun: true,
 			supportsForEach: true,
@@ -316,7 +316,7 @@ function createDefaultSteps(): StepDefinition[] {
 				},
 				{ key: "blocking", label: "Blocking", type: "TaskInfo[]", description: "Tasks blocked by this task." },
 			],
-			examples: [{ label: "Read all relationships", input: { task: "{{trigger.after.path}}" } }],
+			examples: [{ label: "Read all relationships", input: { task: "{{event.after.path}}" } }],
 			mutatesTasks: false,
 			supportsDryRun: true,
 			supportsForEach: true,
@@ -358,7 +358,7 @@ function createDefaultSteps(): StepDefinition[] {
 					defaultValue: { status: "active" },
 				},
 			],
-			examples: [{ label: "Mark active", input: { task: "{{trigger.after.path}}", patch: { status: "active" } } }],
+			examples: [{ label: "Mark active", input: { task: "{{event.after.path}}", patch: { status: "active" } } }],
 		}),
 		taskMutationStep("task.set", "Set task fields", "Alias for task.patch.", async (api, input, context) => {
 			const record = asRecord(input);
@@ -401,7 +401,7 @@ function createDefaultSteps(): StepDefinition[] {
 					defaultValue: "TaskNotes/Review",
 				},
 			],
-			examples: [{ label: "Move triggering task", input: { task: "{{trigger.after.path}}", targetFolder: "TaskNotes/Review" } }],
+			examples: [{ label: "Move triggering task", input: { task: "{{event.after.path}}", targetFolder: "TaskNotes/Review" } }],
 		}),
 		taskMutationStep("task.archive", "Archive task", "Archives a task.", async (api, input, context) => {
 			const task = await api.tasks.archive(
@@ -572,7 +572,7 @@ function createDefaultSteps(): StepDefinition[] {
 				},
 			],
 			outputFields: [{ key: "message", label: "Message", type: "string" }],
-			examples: [{ label: "Show task title", input: { message: "Updated {{trigger.after.title}}" } }],
+			examples: [{ label: "Show task title", input: { message: "Updated {{event.after.title}}" } }],
 			mutatesTasks: false,
 			supportsDryRun: true,
 			supportsForEach: true,
@@ -610,7 +610,7 @@ function createDefaultSteps(): StepDefinition[] {
 				{ key: "path", label: "Path", type: "string" },
 				{ key: "newLeaf", label: "Open target", type: "string" },
 			],
-			examples: [{ label: "Open triggering file", input: { path: "{{trigger.path}}", newLeaf: "tab" } }],
+			examples: [{ label: "Open triggering file", input: { path: "{{event.path}}", newLeaf: "tab" } }],
 		}),
 		obsidianStep("obsidian.createNote", "Create note", "Creates a Markdown note in the vault.", async (app, input) => {
 			const record = asRecord(input);
@@ -654,7 +654,7 @@ function createDefaultSteps(): StepDefinition[] {
 				{ key: "path", label: "Path", type: "string" },
 				{ key: "length", label: "Length", type: "number" },
 			],
-			examples: [{ label: "Append to triggering file", input: { path: "{{trigger.path}}", text: "\nUpdated at {{now}}\n" } }],
+			examples: [{ label: "Append to triggering file", input: { path: "{{event.path}}", text: "\nUpdated at {{now}}\n" } }],
 		}),
 		obsidianStep(
 			"obsidian.updateFrontmatter",
@@ -688,7 +688,7 @@ function createDefaultSteps(): StepDefinition[] {
 					{ key: "path", label: "Path", type: "string" },
 					{ key: "keys", label: "Keys", type: "string[]" },
 				],
-				examples: [{ label: "Mark triggering file reviewed", input: { path: "{{trigger.path}}", frontmatter: { reviewed: true } } }],
+				examples: [{ label: "Mark triggering file reviewed", input: { path: "{{event.path}}", frontmatter: { reviewed: true } } }],
 			}
 		),
 		obsidianStep("obsidian.moveFile", "Move file", "Moves or renames a vault file.", async (app, input) => {
@@ -721,7 +721,7 @@ function createDefaultSteps(): StepDefinition[] {
 				{ key: "oldPath", label: "Old path", type: "string" },
 				{ key: "path", label: "New path", type: "string" },
 			],
-			examples: [{ label: "Archive triggering file", input: { path: "{{trigger.path}}", targetPath: "Archive/{{trigger.file.name}}" } }],
+			examples: [{ label: "Archive triggering file", input: { path: "{{event.path}}", targetPath: "Archive/{{event.file.name}}" } }],
 		}),
 		{
 			type: "workflow.stop",
@@ -786,7 +786,7 @@ function taskRelationshipListStep(
 			{ key: "tasks", label: "Tasks", type: "TaskInfo[]", description: "Related TaskNotes tasks." },
 			{ key: "count", label: "Count", type: "number", description: "Number of related tasks." },
 		],
-		examples: [{ label: "Read relationships for the triggering task", input: { task: "{{trigger.after.path}}" } }],
+		examples: [{ label: "Read relationships for the triggering task", input: { task: "{{event.after.path}}" } }],
 		mutatesTasks: false,
 		supportsDryRun: true,
 		supportsForEach: true,
@@ -909,12 +909,12 @@ function taskPathField(): WorkflowInputField {
 		label: "Task",
 		type: "taskPath",
 		required: true,
-		description: "Vault path to a TaskNotes task. Triggered task workflows usually use {{trigger.after.path}}.",
-		defaultValue: "{{trigger.after.path}}",
+		description: "Vault path to a TaskNotes task. Triggered task workflows usually use {{event.after.path}}.",
+		defaultValue: "{{event.after.path}}",
 	};
 }
 
-function filePathField(key = "path", label = "Path", defaultValue = "{{trigger.path}}"): WorkflowInputField {
+function filePathField(key = "path", label = "Path", defaultValue = "{{event.path}}"): WorkflowInputField {
 	return {
 		key,
 		label,

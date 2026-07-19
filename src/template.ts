@@ -1,3 +1,4 @@
+import { evaluateWorkflowExpression, isWorkflowExpression } from "./expressions";
 import type { WorkflowRunContext } from "./types";
 
 const TEMPLATE_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/gu;
@@ -10,6 +11,9 @@ export function resolveTemplateValue(value: unknown, context: WorkflowRunContext
 		return value.map((item) => resolveTemplateValue(item, context));
 	}
 	if (isPlainObject(value)) {
+		if (isWorkflowExpression(value)) {
+			return evaluateWorkflowExpression(value, context);
+		}
 		return Object.fromEntries(
 			Object.entries(value).map(([key, entry]) => [key, resolveTemplateValue(entry, context)])
 		);
@@ -20,12 +24,19 @@ export function resolveTemplateValue(value: unknown, context: WorkflowRunContext
 export function resolveTemplateString(value: string, context: WorkflowRunContext): unknown {
 	const fullExpression = value.match(/^\s*\{\{\s*([^{}]+?)\s*\}\}\s*$/u);
 	if (fullExpression) {
-		return readReference(context, fullExpression[1] ?? "");
+		const expression = fullExpression[1] ?? "";
+		const resolved = readReference(context, expression);
+		if (resolved === null || typeof resolved === "undefined") {
+			throw new Error(`Unresolved workflow reference: ${expression.trim()}`);
+		}
+		return resolved;
 	}
 
 	return value.replace(TEMPLATE_PATTERN, (_match, expression: string) => {
 		const resolved = readReference(context, expression);
-		if (resolved === null || typeof resolved === "undefined") return "";
+		if (resolved === null || typeof resolved === "undefined") {
+			throw new Error(`Unresolved workflow reference: ${expression.trim()}`);
+		}
 		if (typeof resolved === "object") return JSON.stringify(resolved);
 		return stringifyScalar(resolved);
 	});
@@ -33,14 +44,7 @@ export function resolveTemplateString(value: string, context: WorkflowRunContext
 
 export function readReference(root: unknown, expression: string): unknown {
 	const path = expression.trim();
-	if (!/^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z0-9_$-]+|\[[0-9]+\])*$/u.test(path)) {
-		throw new Error(`Unsupported workflow reference: ${expression}`);
-	}
-
-	const parts = path
-		.replace(/\[([0-9]+)\]/gu, ".$1")
-		.split(".")
-		.filter((part) => part.length > 0);
+	const parts = parseReferencePath(path);
 	let current = root;
 	for (const part of parts) {
 		if (current === null || typeof current === "undefined") return undefined;
@@ -52,6 +56,50 @@ export function readReference(root: unknown, expression: string): unknown {
 		current = (current as Record<string, unknown>)[part];
 	}
 	return current;
+}
+
+function parseReferencePath(path: string): string[] {
+	const parts: string[] = [];
+	let index = 0;
+	const readIdentifier = (): string | null => {
+		const match = /^[A-Za-z_$][A-Za-z0-9_$-]*/u.exec(path.slice(index));
+		if (!match) return null;
+		index += match[0].length;
+		return match[0];
+	};
+
+	const first = readIdentifier();
+	if (!first) throw new Error(`Unsupported workflow reference: ${path}`);
+	parts.push(first);
+
+	while (index < path.length) {
+		const char = path[index];
+		if (char === ".") {
+			index += 1;
+			const next = readIdentifier();
+			if (!next) throw new Error(`Unsupported workflow reference: ${path}`);
+			parts.push(next);
+			continue;
+		}
+		if (char === "[") {
+			const rest = path.slice(index);
+			const numeric = /^\[([0-9]+)\]/u.exec(rest);
+			if (numeric) {
+				parts.push(numeric[1] ?? "");
+				index += numeric[0].length;
+				continue;
+			}
+			const quoted = /^\[(['"])((?:\\.|(?!\1).)*)\1\]/u.exec(rest);
+			if (quoted) {
+				parts.push((quoted[2] ?? "").replace(/\\(['"\\])/gu, "$1"));
+				index += quoted[0].length;
+				continue;
+			}
+		}
+		throw new Error(`Unsupported workflow reference: ${path}`);
+	}
+
+	return parts;
 }
 
 export function collectTemplateReferences(value: unknown): string[] {

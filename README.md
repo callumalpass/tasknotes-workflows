@@ -15,6 +15,8 @@ Use it for things like:
 
 - Obsidian 1.8.0 or newer
 - TaskNotes installed and enabled
+- `mdbase-obsidian` is optional for local TaskNotes-only workflows and required
+  for shared runtime provider discovery, policy enforcement, and external events
 
 ## Install
 
@@ -32,6 +34,7 @@ Useful commands:
 - **New workflow**
 - **Reload workflows**
 - **Maintain default workflow files**
+- **Migrate workflow files to the mdbase runtime format**
 - `Run: <workflow name>` for enabled workflows that include a manual trigger
 
 ## Included Workflows
@@ -44,37 +47,70 @@ Enable only the workflows that match your vault. Most templates are meant to be 
 
 ```yaml
 ---
-type: tasknotes-workflow
-schemaVersion: 1
+type: workflow
 id: auto-start-time-tracking
+version: 1
 name: Auto-start time tracking
 enabled: true
 
 triggers:
   - id: status-active
-    type: tasknotes.event
     event: task.status.changed
-    to: active
+    if:
+      $expr: 'event.after.status == "active"'
+    x-tasknotes:
+      type: tasknotes.event
+      to: active
 
 steps:
   - id: start-time
-    type: time.start
+    action: time.start
     input:
-      task: "{{trigger.after.path}}"
+      task:
+        $expr: event.after.path
 
 run:
-  mode: sequential
-  noOverlap: true
+  execution:
+    mode: single_executor
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    max_items: 25
+  on_error: stop
+x-tasknotes:
+  format_version: 1
   source: tasknotes-workflows
-  onError: stop
 ---
 ```
+
+Workflows can also subscribe to events from registered mdbase runtime providers
+and require a compatible provider version before they run:
+
+```yaml
+requires:
+  providers:
+    - id: canvas-bases
+      version: ">=0.1.0 <1.0.0"
+
+triggers:
+  - id: canvas-drop
+    event: canvas.drop
+```
+
+New files and editor saves validate against the canonical mdbase runtime
+`workflow/0.1` schema. Files created by TaskNotes Workflows 0.1.x continue to
+run through the compatibility reader. The migration command shows a per-file
+diff, checks for changes after analysis, and creates a backup before rewriting
+legacy frontmatter; it never runs automatically during plugin startup.
 
 ## Editing Workflows
 
 Use the workflow Base as the primary UI. Workflow cards open a modal editor for definition fields, triggers, steps, and run policy. The modal renders typed fields from the step catalog, including TaskNotes catalog-backed status and priority options, a visual builder for canonical TaskNotes runtime task queries, and selected Obsidian file, workspace, and frontmatter actions.
 
 The Markdown note remains the source of truth. Use the card's note action when direct YAML editing is useful.
+
+Workflows are typed YAML pipelines. Advanced guards and computed input values use Obsidian Bases formulas via the same expression engine as Bases. Date fields in the editor include fixed, workflow value, relative date, and formula modes, and run history shows both the source input and resolved input for dry-run review.
 
 See [Workflow Schema](docs/workflow-schema.md) and [AI Agent Authoring Script](docs/ai-agent-authoring-script.md) for the full format.
 

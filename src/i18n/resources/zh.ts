@@ -38,7 +38,16 @@ export const zh: TranslationTree = {
 		newWorkflow: "新的工作流程",
 		reloadWorkflows: "重新加载工作流程",
 		maintainDefaultWorkflows: "维护默认工作流程文件",
+		migrateWorkflowFiles: "将工作流文件迁移到 mdbase 运行时格式",
 		runWorkflow: "运行：{name}",
+	},
+	migration: {
+		title: "迁移工作流文件",
+		summary: "可转换 {convertible} 个，已是规范格式 {canonical} 个，需要手动处理 {invalid} 个。",
+		manualAttention: "需要手动处理",
+		unrecognized: "文件不是可识别的工作流格式。",
+		apply: "迁移 {count} 个工作流",
+		completed: "已迁移 {count} 个工作流。备份：{path}",
 	},
 	notices: {
 		languageChanged: "语言更改为 {language}。",
@@ -173,6 +182,7 @@ export const zh: TranslationTree = {
 			other: "{count}步骤",
 		},
 		input: "输入",
+		sourceInput: "Source input",
 		output: "输出",
 		empty: {
 			diagnostics: "在显示运行之前必须修复工作流诊断。",
@@ -189,7 +199,7 @@ export const zh: TranslationTree = {
 		stepFailed: "步骤失败。",
 		unknownStepType: "未知步骤类型：{type}",
 		forEachNonArray: "forEach 解析为 non-array 值。",
-		forEachTooManyItems: "forEach选择了{count}项，上面是run.maxTasks {max}。",
+		forEachTooManyItems: "forEach选择了{count}项，上面是run.limits.maxItems {max}。",
 	},
 	editor: {
 		title: {
@@ -254,6 +264,7 @@ export const zh: TranslationTree = {
 			id: "ID",
 			typeLabel: "类型",
 			tasknotesEvent: "TaskNotes事件",
+			runtimeProvider: "运行时提供程序",
 			fromStatus: "从状态",
 			toStatus: "至状态",
 			pathGlob: "路径全局",
@@ -281,6 +292,10 @@ export const zh: TranslationTree = {
 				tasknotesEvent: {
 					label: "TaskNotes事件",
 					description: "当 TaskNotes 发出选定的运行时事件时运行。",
+				},
+				runtimeEvent: {
+					label: "运行时事件",
+					description: "已注册的 mdbase 运行时提供程序发出所选事件时运行。",
 				},
 				cron: {
 					label: "Cron时间表",
@@ -414,11 +429,27 @@ export const zh: TranslationTree = {
 						label: "目前状态",
 						description: "事件发生后的任务状态。",
 					},
+					scheduled: {
+						label: "Scheduled date",
+						description: "The task scheduled date after the event.",
+					},
+					due: {
+						label: "Due date",
+						description: "The task due date after the event.",
+					},
 				},
 				before: {
 					status: {
 						label: "以前的状态",
 						description: "事件发生前的任务状态。",
+					},
+					scheduled: {
+						label: "Previous scheduled date",
+						description: "The task scheduled date before the event.",
+					},
+					due: {
+						label: "Previous due date",
+						description: "The task due date before the event.",
 					},
 				},
 				changes: {
@@ -475,6 +506,7 @@ export const zh: TranslationTree = {
 			advancedDescription: "稳定的 ID 为后续步骤创建参考。批量运行对每个值使用可选值。",
 			forEach: "对于每个",
 			forEachHelp: "批处理步骤的可选数组参考。",
+			forEachAs: "循环别名",
 			inputJson: "输入JSON",
 			writes: "写",
 			needsAttention: "需要注意",
@@ -491,10 +523,18 @@ export const zh: TranslationTree = {
 		},
 		runPolicy: {
 			noOverlap: "无重叠",
+			concurrencyPolicy: "并发",
+			concurrencyPolicies: {
+				skip: "运行时跳过",
+				queue: "运行时排队",
+				replace: "替换当前运行",
+				allow: "允许并行运行",
+			},
+			concurrencyGroup: "并发组",
 			onError: "出错时",
 			advancedTitle: "高级运行限制",
 			advancedDescription: "这些值使自动运行保持可识别和有界。",
-			maxTasks: "最大任务数",
+			maxItems: "最大任务数",
 			source: "来源",
 		},
 		footer: {
@@ -509,6 +549,31 @@ export const zh: TranslationTree = {
 			triggerValue: "触发{label}",
 			stepValue: "{stepId} {label}",
 		},
+		expressions: {
+			mode: "Value mode",
+			modes: {
+				fixedDate: "Fixed date",
+				workflowValue: "Workflow value",
+				relativeDate: "Relative date",
+				advanced: "Advanced expression",
+			},
+			fixedDate: "Date",
+			sourceValue: "Source value",
+			amount: "Amount",
+			unit: "Unit",
+			units: {
+				day: "Days",
+				week: "Weeks",
+				month: "Months",
+				year: "Years",
+			},
+			advancedTitle: "Use expression",
+			advancedDescription: "Return a computed value for this field.",
+			formulaLabel: "Bases 公式",
+			openBuilder: "打开公式构建器",
+			jsonLabel: "Expression JSON",
+			helperList: "Available helpers: {helpers}",
+		},
 		validation: {
 			nameRequired: "姓名为必填项。",
 			invalidWorkflowId: "使用小写字母、数字、点、下划线或破折号。从一封信开始。",
@@ -517,6 +582,7 @@ export const zh: TranslationTree = {
 			invalidTriggerId: "触发器 ID 必须以字母开头并使用 id-safe 字符。",
 			duplicateTriggerId: "触发器 ID 必须是唯一的。",
 			tasknotesEventRequired: "选择 TaskNotes 事件。",
+			runtimeEventRequired: "输入运行时事件 ID。",
 			cronScheduleRequired: "添加 cron 计划。",
 			intervalRequired: "添加一个间隔。",
 			stepRequired: "至少添加一个步骤。",
@@ -526,6 +592,41 @@ export const zh: TranslationTree = {
 			fieldRequired: "需要 {field}。",
 			positiveNumber: "使用正数。",
 			jsonObject: "步骤输入必须是 JSON 对象。",
+			invalidExpression: "Expression is invalid.",
+		},
+		query: {
+			preview: "Preview",
+			previewUnavailable: "TaskNotes query preview is unavailable.",
+			previewResult: "Query matches {matched} of {total} tasks and returns {returned}.",
+			runtimeUnavailable: "Load TaskNotes to edit query fields from the runtime catalog.",
+			advancedOnly: "This query uses nesting or negation. Edit the JSON directly.",
+			valid: "TaskNotes accepts this query.",
+			invalid: "TaskNotes query is invalid.",
+			match: "Match",
+			matchAll: "All conditions",
+			matchAny: "Any condition",
+			addCondition: "Add condition",
+			removeCondition: "Remove condition",
+			noConditions: "No conditions. The query will match all tasks in scope.",
+			field: "Field",
+			operator: "Operator",
+			value: "Value",
+			noValue: "No value",
+			true: "True",
+			false: "False",
+			options: "Sort, group, and scope",
+			optionsDescription: "Optional result controls for this task query.",
+			sortField: "Sort by",
+			sortDirection: "Direction",
+			ascending: "Ascending",
+			descending: "Descending",
+			groupField: "Group by",
+			limit: "Limit",
+			includeArchived: "Include archived tasks",
+			none: "None",
+			jsonTitle: "Advanced JSON",
+			jsonDescription: "Use this for nested groups, negation, date math, folders, offsets, or exact API input.",
+			jsonLabel: "Runtime query JSON",
 		},
 	},
 	steps: {
@@ -539,7 +640,7 @@ export const zh: TranslationTree = {
 		common: {
 			task: {
 				label: "任务",
-				description: "TaskNotes 任务的保管库路径。触发任务工作流通常使用{{trigger.after.path}}。",
+				description: "TaskNotes 任务的保管库路径。触发任务工作流通常使用{{event.after.path}}。",
 			},
 			path: {
 				label: "路径",
@@ -581,7 +682,35 @@ export const zh: TranslationTree = {
 						},
 						count: {
 							label: "计数",
-							description: "匹配任务的数量。",
+							description: "Number of returned tasks.",
+						},
+						total: {
+							label: "Total",
+							description: "Total tasks before filtering.",
+						},
+						matched: {
+							label: "Matched",
+							description: "Tasks matching the query before offset and limit.",
+						},
+						returned: {
+							label: "Returned",
+							description: "Tasks returned after offset and limit.",
+						},
+						groups: {
+							label: "Groups",
+							description: "TaskNotes query group details.",
+						},
+						groupPaths: {
+							label: "Group paths",
+							description: "Task paths keyed by group key.",
+						},
+						query: {
+							label: "Query",
+							description: "The normalized TaskNotes runtime query.",
+						},
+						warnings: {
+							label: "Warnings",
+							description: "Non-fatal TaskNotes query warnings.",
 						},
 					},
 					examples: {

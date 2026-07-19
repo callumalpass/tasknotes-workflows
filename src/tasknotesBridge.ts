@@ -1,4 +1,13 @@
 import type { App, EventRef } from "obsidian";
+import type {
+	MdbaseRuntimeDispatchContext,
+	MdbaseRuntimeEventEnvelope,
+	MdbaseRuntimeHostApi,
+	MdbaseRuntimeProvider,
+	MdbaseRuntimeProviderRegistration,
+	MdbaseRuntimeRequirements,
+	MdbaseRuntimeValidationResult,
+} from "@callumalpass/mdbase-runtime";
 import { CORE_CAPABILITIES, PLUGIN_ID } from "./constants";
 import type {
 	TaskNotesRuntimeApi,
@@ -18,8 +27,17 @@ interface PluginWithApi {
 	api?: TaskNotesRuntimeApi;
 }
 
+interface MdbasePluginWithApi {
+	api?: {
+		apiVersion: number;
+		runtime?: MdbaseRuntimeHostApi;
+	};
+}
+
 export class TaskNotesBridge {
 	private extensionHandle: { unregister(): void } | null = null;
+	private providerHandle: MdbaseRuntimeProviderRegistration | null = null;
+	private providerRegistration: Promise<void> | null = null;
 
 	constructor(private readonly app: App) {}
 
@@ -35,6 +53,15 @@ export class TaskNotesBridge {
 
 	get available(): boolean {
 		return this.api !== null;
+	}
+
+	get runtimeHost(): MdbaseRuntimeHostApi | null {
+		const app = this.app as App & {
+			plugins?: { getPlugin(id: string): unknown };
+		};
+		const mdbase = app.plugins?.getPlugin("mdbase-obsidian") as MdbasePluginWithApi | null;
+		if (mdbase?.api?.apiVersion === 1 && mdbase.api.runtime) return mdbase.api.runtime;
+		return null;
 	}
 
 	get missingReason(): string | null {
@@ -59,6 +86,60 @@ export class TaskNotesBridge {
 	unregisterExtension(): void {
 		this.extensionHandle?.unregister();
 		this.extensionHandle = null;
+	}
+
+	registerRuntimeProvider(provider: MdbaseRuntimeProvider): void {
+		const runtime = this.runtimeHost;
+		if (!runtime || this.providerHandle || this.providerRegistration) return;
+		this.providerRegistration = runtime.registerProvider(provider)
+			.then((handle) => {
+				this.providerHandle = handle;
+			})
+			.catch((error: unknown) => {
+				console.error("TaskNotes Workflows runtime provider registration failed", error);
+			})
+			.finally(() => {
+				this.providerRegistration = null;
+			});
+	}
+
+	async replaceRuntimeProvider(provider: MdbaseRuntimeProvider): Promise<void> {
+		if (!this.runtimeHost) return;
+		await this.unregisterRuntimeProvider();
+		this.registerRuntimeProvider(provider);
+		await this.providerRegistration;
+	}
+
+	async unregisterRuntimeProvider(): Promise<void> {
+		await this.providerRegistration;
+		const handle = this.providerHandle;
+		this.providerHandle = null;
+		await handle?.unregister();
+	}
+
+	preflight(requirements?: MdbaseRuntimeRequirements): MdbaseRuntimeValidationResult | null {
+		return this.runtimeHost?.preflight(requirements) ?? null;
+	}
+
+	onRuntimeEvent(
+		event: string,
+		handler: (payload: MdbaseRuntimeEventEnvelope) => void | Promise<void>
+	): { dispose(): void | Promise<void> } | null {
+		return this.runtimeHost?.subscribe(event, handler) ?? null;
+	}
+
+	async dispatchRuntimeAction(action: string, input: unknown): Promise<unknown> {
+		const runtime = this.runtimeHost;
+		if (!runtime) throw new Error("The mdbase runtime provider host is unavailable.");
+		const id = runtimeId();
+		const context: MdbaseRuntimeDispatchContext = {
+			actor: { id: "local-user", kind: "user" },
+			origin: { provider: PLUGIN_ID },
+			run_id: `run-${id}`,
+			correlation_id: `corr-${id}`,
+			executor: "obsidian",
+		};
+		return await runtime.dispatch(action, input, context);
 	}
 
 	onTaskEvent(event: string, handler: (payload: unknown) => void): EventRef | null {
@@ -120,6 +201,10 @@ export class TaskNotesBridge {
 		if (!this.api?.query?.explain) return null;
 		return await this.api.query.explain(query);
 	}
+}
+
+function runtimeId(): string {
+	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function namedCatalogOptions(items: readonly unknown[]): WorkflowFieldOption[] {

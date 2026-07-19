@@ -10,6 +10,7 @@ import type {
 export const TRIGGER_TYPES: Array<WorkflowTrigger["type"]> = [
 	"manual",
 	"tasknotes.event",
+	"runtime.event",
 	"cron",
 	"interval",
 	"obsidian.vault",
@@ -25,7 +26,7 @@ export function createWorkflowDefinition(input: {
 	stepType?: string;
 }): WorkflowDefinition {
 	return {
-		type: "tasknotes-workflow",
+		type: "workflow",
 		schemaVersion: 1,
 		id: input.id,
 		name: input.name,
@@ -37,9 +38,14 @@ export function createWorkflowDefinition(input: {
 		steps: [createDefaultStep(input.stepType ?? "notice.show", new Set())],
 		run: {
 			mode: "sequential",
-			noOverlap: true,
+			concurrency: {
+				group: "workflow",
+				policy: "skip",
+			},
 			source: DEFAULT_SOURCE,
-			maxTasks: 25,
+			limits: {
+				maxItems: 25,
+			},
 			onError: "stop",
 		},
 	};
@@ -52,6 +58,9 @@ export function createDefaultTrigger(
 	const ids = new Set(existing.map((trigger) => trigger.id));
 	if (type === "tasknotes.event") {
 		return { id: uniqueId("status-active", ids), type, event: "task.status.changed", to: "active" };
+	}
+	if (type === "runtime.event") {
+		return { id: uniqueId("canvas-drop", ids), type, event: "canvas.drop", provider: "canvas-bases" };
 	}
 	if (type === "cron") {
 		return { id: uniqueId("daily", ids), type, schedule: "0 9 * * *", timezone: "local" };
@@ -93,31 +102,31 @@ export function defaultInputForStep(type: string): Record<string, unknown> {
 		type === "task.blocking" ||
 		type === "task.relationships"
 	) {
-		return { task: "{{trigger.after.path}}" };
+		return { task: "{{event.after.path}}" };
 	}
 	if (type === "task.patch" || type === "task.set") {
-		return { task: "{{trigger.after.path}}", patch: { status: "active" } };
+		return { task: "{{event.after.path}}", patch: { status: "active" } };
 	}
-	if (type === "task.move") return { task: "{{trigger.after.path}}", targetFolder: "TaskNotes/Review" };
+	if (type === "task.move") return { task: "{{event.after.path}}", targetFolder: "TaskNotes/Review" };
 	if (type === "task.complete" || type === "task.uncomplete" || type === "task.archive" || type === "task.unarchive") {
-		return { task: "{{trigger.after.path}}" };
+		return { task: "{{event.after.path}}" };
 	}
-	if (type === "task.reschedule") return { task: "{{trigger.after.path}}", date: "{{today}}" };
-	if (type === "task.setDue" || type === "task.setScheduled") return { task: "{{trigger.after.path}}", date: "{{today}}" };
-	if (type === "task.clearDue" || type === "task.clearScheduled") return { task: "{{trigger.after.path}}" };
-	if (type === "task.addTag" || type === "task.removeTag") return { task: "{{trigger.after.path}}", tag: "#review" };
-	if (type === "task.addProject" || type === "task.removeProject") return { task: "{{trigger.after.path}}", project: "Project" };
-	if (type === "task.addContext" || type === "task.removeContext") return { task: "{{trigger.after.path}}", context: "Context" };
-	if (type === "task.addDependency") return { task: "{{trigger.after.path}}", dependency: { path: "Tasks/example.md" } };
-	if (type === "task.removeDependency") return { task: "{{trigger.after.path}}", uid: "dependency-id" };
-	if (type === "time.start") return { task: "{{trigger.after.path}}", options: { description: "Started by {{workflow.name}}" } };
-	if (type === "time.stop") return { task: "{{trigger.after.path}}" };
-	if (type === "time.appendEntry") return { task: "{{trigger.after.path}}", entry: { minutes: 25, date: "{{today}}" } };
-	if (type === "obsidian.openFile") return { path: "{{trigger.path}}", newLeaf: "tab" };
+	if (type === "task.reschedule") return { task: "{{event.after.path}}", date: "{{today}}" };
+	if (type === "task.setDue" || type === "task.setScheduled") return { task: "{{event.after.path}}", date: "{{today}}" };
+	if (type === "task.clearDue" || type === "task.clearScheduled") return { task: "{{event.after.path}}" };
+	if (type === "task.addTag" || type === "task.removeTag") return { task: "{{event.after.path}}", tag: "#review" };
+	if (type === "task.addProject" || type === "task.removeProject") return { task: "{{event.after.path}}", project: "Project" };
+	if (type === "task.addContext" || type === "task.removeContext") return { task: "{{event.after.path}}", context: "Context" };
+	if (type === "task.addDependency") return { task: "{{event.after.path}}", dependency: { path: "Tasks/example.md" } };
+	if (type === "task.removeDependency") return { task: "{{event.after.path}}", uid: "dependency-id" };
+	if (type === "time.start") return { task: "{{event.after.path}}", options: { description: "Started by {{workflow.name}}" } };
+	if (type === "time.stop") return { task: "{{event.after.path}}" };
+	if (type === "time.appendEntry") return { task: "{{event.after.path}}", entry: { minutes: 25, date: "{{today}}" } };
+	if (type === "obsidian.openFile") return { path: "{{event.path}}", newLeaf: "tab" };
 	if (type === "obsidian.createNote") return { path: "Notes/new-note.md", content: "" };
-	if (type === "obsidian.appendNote") return { path: "{{trigger.path}}", text: "\n- Workflow ran at {{now}}\n" };
-	if (type === "obsidian.updateFrontmatter") return { path: "{{trigger.path}}", frontmatter: { reviewed: true } };
-	if (type === "obsidian.moveFile") return { path: "{{trigger.path}}", targetPath: "Archive/example.md", updateLinks: true };
+	if (type === "obsidian.appendNote") return { path: "{{event.path}}", text: "\n- Workflow ran at {{now}}\n" };
+	if (type === "obsidian.updateFrontmatter") return { path: "{{event.path}}", frontmatter: { reviewed: true } };
+	if (type === "obsidian.moveFile") return { path: "{{event.path}}", targetPath: "Archive/example.md", updateLinks: true };
 	if (type === "workflow.stop") return { reason: "Stopped by workflow." };
 	return { message: "Workflow ran." };
 }

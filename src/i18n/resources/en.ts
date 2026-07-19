@@ -38,7 +38,16 @@ export const en: TranslationTree = {
 		newWorkflow: "New workflow",
 		reloadWorkflows: "Reload workflows",
 		maintainDefaultWorkflows: "Maintain default workflow files",
+		migrateWorkflowFiles: "Migrate workflow files to the mdbase runtime format",
 		runWorkflow: "Run: {name}",
+	},
+	migration: {
+		title: "Migrate workflow files",
+		summary: "{convertible} convertible, {canonical} already canonical, {invalid} requiring manual attention.",
+		manualAttention: "Manual attention",
+		unrecognized: "The file is not a recognized workflow.",
+		apply: "Migrate {count} workflows",
+		completed: "Migrated {count} workflows. Backup: {path}",
 	},
 	notices: {
 		languageChanged: "Language changed to {language}.",
@@ -173,6 +182,7 @@ export const en: TranslationTree = {
 			other: "{count} steps",
 		},
 		input: "Input",
+		sourceInput: "Source input",
 		output: "Output",
 		empty: {
 			diagnostics: "Workflow diagnostics must be fixed before runs can be shown.",
@@ -189,7 +199,7 @@ export const en: TranslationTree = {
 		stepFailed: "Step failed.",
 		unknownStepType: "Unknown step type: {type}",
 		forEachNonArray: "forEach resolved to a non-array value.",
-		forEachTooManyItems: "forEach selected {count} items, above run.maxTasks {max}.",
+		forEachTooManyItems: "forEach selected {count} items, above run.limits.maxItems {max}.",
 	},
 	editor: {
 		title: {
@@ -254,6 +264,7 @@ export const en: TranslationTree = {
 			id: "ID",
 			typeLabel: "Type",
 			tasknotesEvent: "TaskNotes event",
+			runtimeProvider: "Runtime provider",
 			fromStatus: "From status",
 			toStatus: "To status",
 			pathGlob: "Path glob",
@@ -281,6 +292,10 @@ export const en: TranslationTree = {
 				tasknotesEvent: {
 					label: "TaskNotes event",
 					description: "Runs when TaskNotes emits the selected runtime event.",
+				},
+				runtimeEvent: {
+					label: "Runtime event",
+					description: "Runs when a registered mdbase runtime provider emits the selected event.",
 				},
 				cron: {
 					label: "Cron schedule",
@@ -414,11 +429,27 @@ export const en: TranslationTree = {
 						label: "Current status",
 						description: "The task status after the event.",
 					},
+					scheduled: {
+						label: "Scheduled date",
+						description: "The task scheduled date after the event.",
+					},
+					due: {
+						label: "Due date",
+						description: "The task due date after the event.",
+					},
 				},
 				before: {
 					status: {
 						label: "Previous status",
 						description: "The task status before the event.",
+					},
+					scheduled: {
+						label: "Previous scheduled date",
+						description: "The task scheduled date before the event.",
+					},
+					due: {
+						label: "Previous due date",
+						description: "The task due date before the event.",
 					},
 				},
 				changes: {
@@ -475,6 +506,7 @@ export const en: TranslationTree = {
 			advancedDescription: "Stable ids create references for later steps. Batch runs use the optional for each value.",
 			forEach: "For each",
 			forEachHelp: "Optional array reference for batch steps.",
+			forEachAs: "Loop alias",
 			inputJson: "Input JSON",
 			writes: "writes",
 			needsAttention: "Needs attention",
@@ -491,10 +523,18 @@ export const en: TranslationTree = {
 		},
 		runPolicy: {
 			noOverlap: "No overlap",
+			concurrencyPolicy: "Concurrency",
+			concurrencyPolicies: {
+				skip: "Skip while running",
+				queue: "Queue while running",
+				replace: "Replace running run",
+				allow: "Allow overlap",
+			},
+			concurrencyGroup: "Concurrency group",
 			onError: "On error",
 			advancedTitle: "Advanced run limits",
 			advancedDescription: "These values keep automated runs identifiable and bounded.",
-			maxTasks: "Max tasks",
+			maxItems: "Max items",
 			source: "Source",
 		},
 		footer: {
@@ -509,6 +549,31 @@ export const en: TranslationTree = {
 			triggerValue: "Trigger {label}",
 			stepValue: "{stepId} {label}",
 		},
+		expressions: {
+			mode: "Value mode",
+			modes: {
+				fixedDate: "Fixed date",
+				workflowValue: "Workflow value",
+				relativeDate: "Relative date",
+				advanced: "Advanced expression",
+			},
+			fixedDate: "Date",
+			sourceValue: "Source value",
+			amount: "Amount",
+			unit: "Unit",
+			units: {
+				day: "Days",
+				week: "Weeks",
+				month: "Months",
+				year: "Years",
+			},
+			advancedTitle: "Use expression",
+			advancedDescription: "Return a computed value for this field.",
+			formulaLabel: "Bases formula",
+			openBuilder: "Open formula builder",
+			jsonLabel: "Expression JSON",
+			helperList: "Available helpers: {helpers}",
+		},
 		validation: {
 			nameRequired: "Name is required.",
 			invalidWorkflowId: "Use lowercase letters, numbers, dots, underscores, or dashes. Start with a letter.",
@@ -517,6 +582,7 @@ export const en: TranslationTree = {
 			invalidTriggerId: "Trigger id must start with a letter and use id-safe characters.",
 			duplicateTriggerId: "Trigger ids must be unique.",
 			tasknotesEventRequired: "Choose a TaskNotes event.",
+			runtimeEventRequired: "Enter a runtime event id.",
 			cronScheduleRequired: "Add a cron schedule.",
 			intervalRequired: "Add an interval.",
 			stepRequired: "Add at least one step.",
@@ -526,6 +592,7 @@ export const en: TranslationTree = {
 			fieldRequired: "{field} is required.",
 			positiveNumber: "Use a positive number.",
 			jsonObject: "Step input must be a JSON object.",
+			invalidExpression: "Expression is invalid.",
 		},
 		query: {
 			preview: "Preview",
@@ -573,7 +640,7 @@ export const en: TranslationTree = {
 		common: {
 			task: {
 				label: "Task",
-				description: "Vault path to a TaskNotes task. Triggered task workflows usually use {{trigger.after.path}}.",
+				description: "Vault path to a TaskNotes task. Triggered task workflows usually use {{event.after.path}}.",
 			},
 			path: {
 				label: "Path",

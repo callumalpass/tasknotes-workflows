@@ -112,9 +112,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "9b6bf7121a18f77041fe5ff2b1c87f40aa62ef25"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "639d5b84e1914e31a2591d942c91f8a043968261"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "395e64631b44875af43b45b564b8abf50240db49"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "ed1e443258f26ce20002a803fbeb3a63ee80025d"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "811c38478599eb624ce802473f587a51be548ba2"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "b9dc58632dcdd352e3afba2f8025324f41488e3e"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "b60e8ab30d18dbb889e2691f126fade2547089ee"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "f53e7bfaf21e6263a31f20b01802584fa226dabf"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "306b29497def42dec6a3a8b1695f260249718c5d"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -436,6 +464,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "d3a77fb1143ea4a3ba74fec1606d43cfb4820065"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "dbeb8b997aa3ca4fd445f017100208f2f6f1cfc3"
@@ -485,8 +517,8 @@
       "translation": "ef71dfc00093ca1fe79397f3663238d904847925"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "d20ad9be9ca409daba50d865536861950fc64b19"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "58fd3d87d7e1c3b506f60fd808c318bf6eca3a40"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -652,6 +684,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "b44b8ce4b7c764fa1f15834ec1b41087462b1012"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "c40d0ff862772bcaf1f39c05b847f14be7fbb4d8"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "20a4d717f493b5bcd7e5e3d9b712a2f71a0ee421"
@@ -735,6 +771,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "7d6f6642352a6640aac7497b3f77a664e0f9cd17"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "b22e03f0ea48ed93de0c7ca301fcd3086982e64f"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "564cc2783dfec99bb2dbef730301401dfd48fb00"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -1012,6 +1056,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "de7bb4daa9472331f66c6cb7b2a7d5fb21963ed9"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "d298423a266ce6f7fce8bcb80fe3028945b0f9cf"
@@ -1019,6 +1079,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "69e2658853b44e4d4aef1364846cfe367f5dd779"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -1136,6 +1212,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "43b7f1b259338693cd23b92f791ae9f958776eab"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "c234d2e37dd3b5df4258ce9cead44b1604db63fc"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "9a08665438542e2d64f397f4585c95d3e353d168"
@@ -1176,6 +1256,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "c0da13a0ff64f2a0abbf4e0c8740896cbbfd22d3"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "d4908212a5fc45a4d3342dc3592e35f75fbb4e4b"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "e36c5b7c82bb837be127e789727efa24d9202819"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "c98d07bd4ac00e026de0e870da217473e8b5c2e1"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "4f319018a192a1d930db348ff60771a9874ff97e"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "52a3009dbd048b8c57e15d1eb28bf92b35ea08b8"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "ab284429b0176880477a5162b136bb38c3fd81b0"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "844fe3b8456f6bd1e7c11414ff816f2f7aea1a1a"
@@ -1188,8 +1292,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "75f6d780f9d1cd5b33b6918717aa42c45dd8dff2"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "8c255edffae399e1b1b4beaa001518ba1591d11c"
     },
     "editor.runPolicy.source": {
@@ -1228,6 +1332,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "9ee4cc35a7f1d77a2bebeec92384533406297a2c"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "62cd9f63def044557af97d717c02118d831b0d44"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "649b434fe3cebc638ce922e36ce39ed76ed922d4"
@@ -1255,6 +1435,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "c53359ccfe4954766653d2dfb2b7e5daeb6ae9da"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "0a6c70c7f7d3cc3470de28916d697d33e151111a"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -1292,6 +1476,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "50b63418debacabd274d72bf9f70b7cddc15a91f"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -1317,8 +1633,8 @@
       "translation": "7964532fe02bd0c75575a3dc972e330982de2590"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "4afe65011803e87f67b5125ff3663f71ad7a0780"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "a80719828292d43168122681035e467f52e836b6"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -1361,16 +1677,16 @@
       "translation": "b4ef76ff1b1248d858384365215048f5ea09c631"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "4c1c822a2f7403c1ce1fce83175a859657feb0ac"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "f7110b134442169d959307393b0d5abffdc83227"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "303a5849da7798223d46c4dbd2f0b92b471aafb2"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "9cd13c4931aed7edff545d391bdf88f53a97a463"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "c3dcc9717c16e3a24bc3d3002dcbbbddb9615cbb"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -1385,8 +1701,64 @@
       "translation": "549a166cd777ed8db89d96e192a6d7885ff3395e"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "14063536341c5b124694a880c7d67c15246389df"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -2142,9 +2514,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "9c7273435512fdc5dcd736c747ee038abdda0184"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "7415006ef5df69eb96711a4fcc6de94baacdfabb"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "6590f2bdc78b6b58e75fc0584d5750add6efaadc"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "84a25e7fba79a60b0956e2a0d47035e8e8e5f711"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "9e062a5db395666663f9beb0440fb40ce022b72f"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "ddc75f70babdb46f692afdc3bfccca5ec3b63bb4"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "10ee935c9ea7dbb74eac01d64fa5f89ea5fdc26d"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "5c28eaba18efd2c357d16ec9142b461057823c06"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "d48bac17211bf1f6e27718d47ed755bb694e0b4e"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -2466,6 +2866,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "73f83108cf33f7fdc82ed79f8d089498b771c7b8"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "13058e583d23e792aeadbe15e075271e1dfbe8d9"
@@ -2515,8 +2919,8 @@
       "translation": "4e32f1281d56fa9e02b04a02bca1402369cbfb91"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "cd181d78b1ed97252d585e5c2845989ac80602f7"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "28fe91c2f0bde1647201f5dea06f27f888c336d4"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -2682,6 +3086,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "e9cc76827dc9d64cd2d155f3cf0c65da45f3b1de"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "eae49a7919157d7639b622c649308705e0816171"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "2269ba9a9353bb7da964a1bc265625f7ff375e65"
@@ -2765,6 +3173,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "a65ccd5074eaeaa1da8970d2c87f9a2963ea11c9"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "5d3be31e2c15ad9732da0d76084771018020bea7"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "71749f66688167023c4882893d4be9f20c1a6775"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -3042,6 +3458,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "7548e20fff1742093c5b355b7c348f07780ee162"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "2b2047f3c931e886f47d3bcc3d37e133d26e275e"
@@ -3049,6 +3481,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "1bb3968ffde9cada1c2b231209bc3a8063c43f3e"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -3166,6 +3614,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "6e5aa40bc80b33520ea4ff9e42dad14af603ca29"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "13bf158dcfd3f6455c7b5a654785a350fa321def"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "6359d1c68fbe14089b76f7bf337f6da0ec61c177"
@@ -3206,6 +3658,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "47f1f1889ceac4748a81a4d13c9d3d5e7c31fad7"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "532bcc066fc838cdeffef9792b1c12e668b34225"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "58b4d6127aeee45498bba6675c80d1e1f9a19e42"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "479596d9174366e8efec1668c810dd8e514b0517"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "18d519e052bd8a62c78b9010bbc2c8a00fffaaca"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "189638d1b47e043bdec72d3c0ba75efd5e3a5dbd"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "b1a8939fc24a441dfdcc45abe713102675f777d2"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "167251f6c974a08306e3e3bb70ac920cbdbf0842"
@@ -3218,8 +3694,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "6a7326034df665703b0ab90cb927af284e87a8dc"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "e5ac5e3d697d977a856ddceb9ecd8f06114d8728"
     },
     "editor.runPolicy.source": {
@@ -3258,6 +3734,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "372ba40aadeb959253c9977282ac0fcd8338fc02"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "86c585fdea6629164c30237b83ae0ed7fc5f35b7"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "af52e7d05bbb1f39588a22be904cda77bb15a0c3"
@@ -3285,6 +3837,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "17bf5ceca39eb5cb89683126a40bee3b46a461d7"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "f1aa159a4eb08c9fd21c557e0c767a1f1eda3aa5"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -3322,6 +3878,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "062a0cd27452377d818df0f36e035929705c9ee9"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -3347,8 +4035,8 @@
       "translation": "0e06d640f2910bc96d689befcf38434781dd05c5"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "03e7767cbbbfb612984988a41af20a37795adfb2"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "4d5481c51c95c505f65878e0647ec437b8ea5f51"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -3391,16 +4079,16 @@
       "translation": "cb590dcf0bf8ac5f065a3b332044e6bce8a122b3"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "fb3ce3922bad8aa00fd391c6e0c83fb442ff1687"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "e4da3f350abe71a5e76c866fbd8cd6927db6f096"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "4feb517baded4839b55d81bbbbf7db67f08dfce6"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "96cc14a19904480275c93bd996160e21f1ab902d"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "20f345d259255efd947dd4bd927c20519cb3b6b1"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -3415,8 +4103,64 @@
       "translation": "42f51a59081c5bd3fdcb0ffb3359320046f97765"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "d9ba2a8dc59a741289f5d436d2e837c2f597d781"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -4172,9 +4916,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "31216e67a16a8c6557c516ca89b72d1cb0c68306"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "9b534eb15a5688bdedaa451f38f39a7d97d8a30e"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "df39fb0a432a729af236f0c712336343d9f8a769"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "6559f2f16e1fe66a1d8e8d316725599f34a59828"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "ac17900207b3a2caa88fc08e00812513bb642124"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "1e09e3d1b75c25a6e8d6f78db2a5f76bade33cc9"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "7422123914d28ed672aae8cf299b927a4c3bceb8"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "4615a663efc747ce7da809658f9be94ba5b96533"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "cf2915f7d76b3d68c2e28d95d246da38fbd0d3df"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -4496,6 +5268,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "0ab59cb96804bec877e148c9bab70b1cf2813d52"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "fbd00e76b7576ec1a2bf249b5e25d1250d94261a"
@@ -4545,8 +5321,8 @@
       "translation": "5a93010b0a30ac31628fd9a0471f49195aa4f089"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "565b624a80cb08cacff22ec4ce68ed741ceaaf95"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "55c488b39f306bc0bdd23d76f14fcb3795511c4c"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -4712,6 +5488,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "d26d9e5f513f721325192eafaca59b75abf70c74"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "a9cf6d0c51c595ae3c981611423af11c23c41a54"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "3ac0cbf9c8b973a3b5840648f5cc2152990ae5ab"
@@ -4795,6 +5575,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "a09bcee46d0cd912e34e7eb32a0476ce4d685bea"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "27e17f7ddac59b8580606b2bfe4e90c71190f1f0"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "67977583198f0fdb750f7bc76934470a7dff8d8a"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -5072,6 +5860,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "a36d37f1bf6d3623b8f868d8d54996b9678594b6"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "e5f04526d644fc9461080ccdbb3da2aac48929b0"
@@ -5079,6 +5883,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "b324710e6b173d72b08b6ce2e0fdba939814056b"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -5196,6 +6016,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "e8031efc7d1ab84d2723ac80abc2dd097576a74e"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "19bbd63b74cd5c02291ebfeae63b22ec8a2c72a6"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "d90ecce0ef9ac9e21e1bb287cffacb5ee98835e5"
@@ -5236,6 +6060,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "4b3ad3cf9ce84e24c1ca63ab0bc5484f9b0d11ad"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "60014bf21723832fcd770695f34a2ac6aec40c31"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "fe5f9953320b6853dc7e6357f4d4cba4ae82f2c3"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "848fa2ccc9f580dbcd1e3890c4757eb277190b80"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "95836ea0225d17bf6651005fa425032debfdad98"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "5347bebc2dd184f490b78e114e85e327fc575ac0"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "3a080f849636031d78d72ad90790201dc231a312"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "686e5e7fa86d2997ec66517c311ddf58d01ec99a"
@@ -5248,8 +6096,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "8e4baa0e143eaf87bfb1ffb46b6804ecac43a4d6"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "a3f7448ba0b135bd87838fbc88d9bbd8885ff317"
     },
     "editor.runPolicy.source": {
@@ -5288,6 +6136,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "9b9b5f6fe3a7ca42f50ea80a36de442c008e8e46"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "31d777b63f9df991e9d8e037a335e21e04cf995b"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "e288c4b1ec0e0544b334983ad4bc2111331b2070"
@@ -5315,6 +6239,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "252abc6461712c7262b9de88414eac6c942d5c7b"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "b2925f224cc89307d9b5b1de7f32c4ff8c0228ef"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -5352,6 +6280,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "da11820d4b73e7bc750155446b45ee4744b3b62d"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -5377,8 +6437,8 @@
       "translation": "43c8425cb1d9b67e4c759dab0d64a9de904501d5"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "51716240a4a8fabce0a27ccc74e92763b864c828"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "39cddc7e9515bd5723810821996c316e67a884f4"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -5421,16 +6481,16 @@
       "translation": "5d1ce42e466c913a057cf055920c4aacbcc058a1"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "98eb338dbe7958cdad4d43aa9f2ad962aaf112b6"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "c4904d3e891b91cc2c29625b742ef4e5015b07d5"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "15968bd96bc459c7a924ea5a10dc1e2a7d0595e4"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "733d7d241ea592609759763429805903e52bfbff"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "e51f446ff8b5d287c3359b06af7bd444d83f5933"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -5445,8 +6505,64 @@
       "translation": "4b821dedd553b2999154fb97a8f5497fc9ee97e9"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "69fd28aa970c15ca0065d8ac3164dbf5e4a7c0ef"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -6202,9 +7318,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "4bfff0e2eff87f604a3d626debaab168d1a4f320"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "0b75e047170fc8495dac8fa1f6e9699c35bdee44"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "e5f9f3155052d4cbd7d46297a29b6c9b37759af5"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "12021c9e8f3f35a2704e66c2bc7de81c4f6893a9"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "522ff668697fab49ba392bef667b6f6d59f1fbbb"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "48186f1f0cebe3d68ba474659ed7b719f3ad048a"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "f03bebece25664fb8322e76356252b4c196c202f"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "3f65c99301b9cfd4854a41aecd292f9e104b43a5"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "8a6b41178bf458c3a1d82a6da598cd53381eece1"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -6526,6 +7670,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "ae5ceeefcdb573d15e82f440f8fd68bbda074dd9"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "d37e7f9a501ad7d8f69c172e2d74b2aa3bc95d21"
@@ -6575,8 +7723,8 @@
       "translation": "16a1f777a7dcf88d0ed6d06aa37d2ef73a08b8f2"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "c2d6c1be1d74d38175890338fb012dde02c73091"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "40affd4897915bbcccc442850dd97358d2639cad"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -6742,6 +7890,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "aac279c36c25f45b9685f9a88794fe2ed2bb0c91"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "9ec5ba05a3e87c07cd70bb719e651405569cffc0"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "d5de37efd143a88e99275a360a934648bc58a2a6"
@@ -6825,6 +7977,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "634bd15846a9a87fd441c1608f3091651092ef17"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "4d85ed2f4ce41c45dddb49986b3ebe9efb0863b2"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "9a67bd7158547579b7587e7ffb18eca33604fcfa"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -7102,6 +8262,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "33bb5fe38391c3f176ace64198b9392b74215658"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "437fd5effba922dd0365594b940ae0e9ea881cb8"
@@ -7109,6 +8285,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "d2ddf09fc787cb83f11bec76834aac9222535a93"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -7226,6 +8418,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "9b56c89b6f3533b76134e928443ee2c1df371246"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "357f34e847d086a8f4721689667b75a076deb274"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "0171000377ae7348c242a8d95b8d09761c17f9a0"
@@ -7266,6 +8462,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "eda566de67b90cc78e3f513b339b7f9bd778c543"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "a71d893ec180d10d98d2c27188810daab0492703"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "5ec0b208842e5731c0ea7a17f7142c2cddc95624"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "91e24a9c3fce36b21e8a50218048f6e4b84be9c6"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "8d0bbcc2d92a9da157be1e002f0e4471407fb493"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "cdb3b2c52bded5c636eeaaea891a38a19ac4020b"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "6fd31056c621a63626a9dd8d1a832e4668efc445"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "f5a76b3c7cc44c6d46df9841293ff5c25548b696"
@@ -7278,8 +8498,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "ac1156254a6da0819668092ed370de88ca1d6496"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "77103ee9ef82fd40034afb23b48154b309b9b828"
     },
     "editor.runPolicy.source": {
@@ -7318,6 +8538,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "23dad85cee2d506fa63edb3767b4d3fab714e505"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "2d6cda885df09468f2548a796a5eaac619707b2d"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "2a748d9b66382f5ddce2cc4c9e727500c3cda1ac"
@@ -7345,6 +8641,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "724ef44ac252c53a4e68a303200b486cb72abd5b"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "2c9ec2fedf0a5b3035e98e7a97afe0dc86c60fcc"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -7382,6 +8682,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "2e8562daeff06833478cfa5ff37549aeeb18014e"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -7407,8 +8839,8 @@
       "translation": "2b79c0b9423d706444ac2a504d6157f503834d4f"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "a0ebdd280ce4d990fb826eee48e9e74ea30e9bdd"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "f2295f236a41c3cf42eedb0f38b349e8cedabcc6"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -7451,16 +8883,16 @@
       "translation": "cb6739e3cf4cb95f519a8c8aeef7d42becd9ae44"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "85f182d5651365978e6d6b9005d77a6421ad8e90"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "030529dc6509177a25fbe51bb9341eefb5e38224"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "82735c569b49b8f24e7a4f860acf10a9b0443e2f"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "27aa94aa9cedb33c36fb488014959370e7b16998"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "fcfe8e0587eeaed1e23c3cf08ca88c1180dfb0df"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -7475,8 +8907,64 @@
       "translation": "8f68899770e7f5b41b75c8a7c88577bf34641903"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "ccc2cdc3957a265ebf99e5242ceedff7f908b9a1"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -8232,9 +9720,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "7c2762563b960fac4079e2997ae888f869ddb923"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "8c617f900dd8f04fdef87ec938853b237986f3e0"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "3245b9016c2c7514ed15ad68f9d209fecfbc446b"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "191fb39bcea96c58bf71706314754585d7cf4902"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "d4028579c8a14bea7076c94d03ca827b6d98472d"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "1ec9ff4b1c50bc6b908fa673766543a9120f9b4a"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "506e1f7bf27381a327ecabfdc72c033f834d077a"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "b8f9cc70e4663a91985124201261fa9ea776bd22"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "edccac69b8d26cf3fc67880ec7230cc815ea1206"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -8556,6 +10072,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "f390b3311c0d2f3c695556b94b38ed464d3ae506"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "2df41b9a3adc3599e279612e65bbf4d9d4a23141"
@@ -8605,8 +10125,8 @@
       "translation": "44f02e2a72ac54ccef28e63b09d69e1ca190ceb1"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "da95476a244c1287504f92b334595a44b4959f14"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "99d622c21064035355704641c649fb8dfbab593b"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -8772,6 +10292,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "899387f05c8aaed31960caa5e8c03cb568f75db1"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "0e36ca9007e9825343512804d15a9caf34cd084e"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "0fb2a088e00366d25a823a4114489b01d3d405dd"
@@ -8855,6 +10379,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "279a74267e3a693f8ff3d71737dcf65393d37fb7"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "6d2684d72440e12bbac7a825c3e6922f5c01f70e"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "86131ca016ef93d4bcd1b70eac2a808679c1ce22"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -9132,6 +10664,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "2a1f87c080ef3618aea3185652e92501b5919cd0"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "433980c0a4e868b987d0452ddc945bfeff1e4e2a"
@@ -9139,6 +10687,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "4c04bf6742ed7c359ada7e0a71681968b8583d2f"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -9256,6 +10820,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "06790eba5960f714b5dfa172bf4bf10a81ca1bdb"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "5adfbdab0e568ccabb600a6605304a4326e1ae5b"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "b5111c802811ac15493bdc69ede5157ecf9a00df"
@@ -9296,6 +10864,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "b5b22f30cb5f2a858bf6d21bd42c1f31fd12e825"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "5bf2d13b0c3d22407ec326538c8428ecd5906a16"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "e6e4abe2440e8b8e2be1fa88535b153aabd92fcd"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "cd3e944ac26d8e612a76865740c07857db534971"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "80d62d1506803b50918502a31f43f662a822b08c"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "6a33c3a191d5e2c7344b07076cae0e4020a04d1d"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "9d6d122316254846db3ad18367d5bb1f1a5ec8b3"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "86eab2729bb93e1b56f5111c850d8c85df953cbd"
@@ -9308,8 +10900,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "a8eeedbad6ae53c5e5be67f164b8ecb0bdf2d12a"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "77a34d3273de0e4b1a2f1e1b44bbe110193d7a38"
     },
     "editor.runPolicy.source": {
@@ -9348,6 +10940,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "2c2cd2c2dfe7a2a6509aac9c1c62353fd56eee45"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "0e3d35fb056230bc0de4732aaef328d357c9937e"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "160a5fe63b4ca4611bfb71f94483828632a9e6c8"
@@ -9375,6 +11043,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "9c0d50a15c461c451339c6988f1783b6439bf722"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "6ab6c8d0596ffa9c1be2e3764a28f94abd3281f9"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -9412,6 +11084,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "3888c401e0497c079929897a0c93c807485b730f"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -9437,8 +11241,8 @@
       "translation": "9d9bf438ff1aa4be040a318fb253cfdb8f09cd26"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "49f8d2424b1d37011202ebaf05b177ade75e1889"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "cb3f26b56f1658d0614203e0aefd01af41985cce"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -9481,16 +11285,16 @@
       "translation": "df230fe4da9e686caa6aa5fca9f3557976a5c9bf"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "8c0a3c0a60f8d4c50cf837443b0545c648951e0e"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "ecf778baf6ae35519389ece902e77073e8e42455"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "5dd76b761e29a55ebcadaf269e8a41f42bf5ac33"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "9420b2625c6c4de3bd55d931deda6bb81f7cb5db"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "614b625ff7ddb1cf78abe59fee672f0fc9b63580"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -9505,8 +11309,64 @@
       "translation": "ca2a046fcd636d1021ef5b36e3f66c019c642e86"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "3426e4b12c79e0b70977d7343382b1403dcdb22e"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -10262,9 +12122,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "6e746aa210dd8675c6135426901b72516b157fbb"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "1633413bc4771baa0f9fa3dc4780dc8b777ae9ee"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "48b587193830eaf06b8e3dcfd2efa6f0f2beff7b"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "362a83fe5ba183de97509c203f299ddc1c485c1f"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "63c5d5516a40aac6d6f5adfcfd6d51836580fd22"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "848b4fdde84f2ad758cb791da9b4781fb466481c"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "dc348feece14b261eb42d3088dd791a014c2e3e8"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "d3ff00fa6fd43d8aff171efc062e7e2d44902c80"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "d4cde7947ab72b9944d053e962c71457068dd947"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -10586,6 +12474,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "73f83108cf33f7fdc82ed79f8d089498b771c7b8"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "70db5e34eb96d9d53cddebbf6cdce695d7d25128"
@@ -10635,8 +12527,8 @@
       "translation": "4644a7113773ff7724c17be0dbe558b261843327"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "e44701b2b5ff86317d26af08c3b6ba987da5c4ba"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "19b7842ff17ef312b0d38b389b1b0766a0ed1001"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -10802,6 +12694,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "e9cc76827dc9d64cd2d155f3cf0c65da45f3b1de"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "d8df31760ec2cdc50fe2a8d6ce6e7bbb1e7cbd8e"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "3b9b8f2dc5986357c91bf4252bb44bd24d0fdc9b"
@@ -10885,6 +12781,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "addf40304677be1b1ff1f1907ade94ce27b45df3"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "a5e40ef71328404cf193f175cb6ea788c703dbe5"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "01f9249cffddfefa42ac9983315a75a457fd1933"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -11162,6 +13066,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "defcbdb2a031a9f3b974104992829eb2a811bd68"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "2b2047f3c931e886f47d3bcc3d37e133d26e275e"
@@ -11169,6 +13089,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "30be26499b08c0d41bd71302d9ad85f5bb0b6f34"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -11286,6 +13222,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "917ba2673f55477bb455428492e72912c56b70b0"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "1a732530aeac9277c0ccc60e4fb39bb9e6d61e7e"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "f44b391541d427d06f7b1400ca51933e20a6a97d"
@@ -11326,6 +13266,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "352fa9481381ff86b36792b6b7b8a4ec3302e7ab"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "31f0bc3742273dbefbce4d5b0b3789b7ea334da4"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "d72c2fd1b77a4f22f7bf1ca1dcaab58f8404a992"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "fc40412134bc6b4f24c3cecf57c1e85e5920c45e"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "d40d9aaf439bd4f8e488c521abc70efb094c720a"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "6bd0e778c5671558cc6044348010b8a05f33eaa2"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "96ec2f89f92a0bcf675eca3c6cff2b9d678f922b"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "98461a8914dbac5277afa278b3687ff4c110dec4"
@@ -11338,8 +13302,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "6e1bd518fa3c1cf2939a80fb24e4b869401de2bf"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "bfcc5c2db150acf108ea2ab1f9a67c889b9f2396"
     },
     "editor.runPolicy.source": {
@@ -11378,6 +13342,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "d19e15249a3749213906a53b5c4492dfe32dcd23"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "86c585fdea6629164c30237b83ae0ed7fc5f35b7"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "58c69ced39e6ca5f34f0d775444a256859550cad"
@@ -11405,6 +13445,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "907bfef085af1b96431122eb7e1c0164b9a22774"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "305cdd96b8097dfd6a90834d4b2aa7b293972593"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -11442,6 +13486,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "efc26e1fc8fded5049ff99a247e8839ba51cda61"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -11467,8 +13643,8 @@
       "translation": "8399050162e5c0d268352d71b844c45f089b4aa5"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "0db8488b5de19d16c0132011a183823a5bea5fd9"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "835c1e083e28aed43a6954ea4fb938c8564a3457"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -11511,16 +13687,16 @@
       "translation": "7418a7561275418a4e8316cb2b3ae56605e5744d"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "e51a15e0483cd995fe0d55386c1cac72554e75c9"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "dcc5fbc13dbce988b44bf0b1b3bc7a8f5f58fe16"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "4feb517baded4839b55d81bbbbf7db67f08dfce6"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "09c96e0151f2b8eff3052ee42baa5335abe438bb"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "1e80838b389bfcd813a5c588602b3ef9c232cdf3"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -11535,8 +13711,64 @@
       "translation": "4092997e543e16a1d9236f7bec504980d39d576b"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "8448ca352c82724102b25aed60a9b2bb560e47e4"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -12292,9 +14524,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "e560b4a4a334b0d8e034959ce3cfb79c748811ae"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "47a92da8cf3a2f087c712ed59596d3fd349eb079"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "f1cb8095b5db8b69709730921f6c29cb2ff939f4"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "83cc7dd791d1dee910c274a480baf81068ae13e9"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "b8e8992c13a5c50b06d1f54506bad9bbbc695811"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "ab17db34cde0f9b29977e51c2076286462639f12"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "2aff94e0e360deaa5826369714e442847f3e9c50"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "62c8f1ec4d41d1e4f42847437cdf868085e3838a"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "be4f56a844d1827c1f7388390f39ff111d3a490a"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -12616,6 +14876,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "c15522ef341209b70af0403a6010a1784b7ac4d6"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "c42457057d1ab7950cea00719cbe0b078891775f"
@@ -12665,8 +14929,8 @@
       "translation": "4b343542c519da4bcb4f23462b195e6dad40cffe"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "d963acbca0a45268aec42b1e0ff6468842a94e19"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "d53dc736c2efe193cbd301f2eddd91b36603d3eb"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -12832,6 +15096,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "e42d060933b2b4e6dd8a52bf2dd1f82cd02384f1"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "2974c0e723a9a5891e341b23220e644cef75c2f2"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "f44acc7e8dd7b95d55f296837c64662e8a2c8760"
@@ -12915,6 +15183,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "138b9dd37cecc4d8aa7ad2195006ab9f8c5379e8"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "641d73d67b118f346183a8fa8de0a6d692355147"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "40abc282711bdbf7a5102f0a2603a4928efe1265"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -13192,6 +15468,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "2fcc8885ffd07913a57559a440f40b7313e7796b"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "f1e694546bbd26db5eb2a96471a3ec7546137c38"
@@ -13199,6 +15491,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "d5c9bca30274755dd226c1ab064d1caa8c2b9901"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -13316,6 +15624,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "37976febc97dc8486ac95d7f1c4637942a2721e9"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "1c36f96b083d906d2a89179f544ab37ff68d9da7"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "6c6cfbd0a01515181c23b1c5899a172141f3854a"
@@ -13356,6 +15668,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "c21447af5aab15bff7863c745e65ba6078b1e1ef"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "2b8e94405a78d13d0f22b88c457d1dbcac2ad463"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "edc2b67dddeec44db3b75ceecba23ef320b52f42"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "b98a995171ed8f6254068b7fe002ed19b66bba04"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "e4e34a861edc795eb79fc83733c323d11231c6c6"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "7dcbd4d6ea5b1da3d700f447c6741c737627002b"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "e431330fdbd620c6377cc61bb00d1cc32cac0326"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "a063a248657bb1da79bf9c428615036a98ed062e"
@@ -13368,8 +15704,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "17d7ed50e06e71e78af3c1951e90d6d5a84649d3"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "95929a74a73b4bf80e3e12353a17c835f940cb25"
     },
     "editor.runPolicy.source": {
@@ -13408,6 +15744,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "868df640219978ac0962edfca9c19a266f4f0918"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "fc2b78605f7045b955a6de1b863e77c181cec6a9"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "82978c3abe4eb930400d05f3db32e7a7228b9bee"
@@ -13435,6 +15847,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "4f53ddcfee5ec80f81c6daeb0bbaa88b9dcdf154"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "b6e0e5f3c878c03e8f6a9a7ac540b74c9edda32e"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -13472,6 +15888,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "e265c7d2d307953022051688d126e3ecaeab07e4"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -13497,8 +16045,8 @@
       "translation": "4a19af3408f3c13788719992d413ba7b0aa5f12c"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "7d228305e2f464a526cd71a7e3735c074bd370a9"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "dcef88d6351329331fc1efda323dbac58f18f921"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -13541,16 +16089,16 @@
       "translation": "4f119310ab25c1947190a8772d40132cbe1952f8"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "211ad5725bf0c8ede351cb1b5ca344629f5c52ed"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "15eb3d97a7a122b1993794358d8c96e922815032"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "5c196ee8576211dbf4d10d84475d5ecbc8f8e0ce"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "0870593c437b8ee323fcf75ffd987c66d862828e"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "fc52c4a0ae1ae259c73bbc4b1bd8a256d6315c6f"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -13565,8 +16113,64 @@
       "translation": "477829edba9d14e201be70e1010139f952c04ddb"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "6df91d9bf2b6ba53591393264cf5a8c825b0bfd8"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",
@@ -14322,9 +16926,37 @@
       "source": "23936fef86ee8e8cd5b13b9eee245d59cdfa7c16",
       "translation": "fda24327f13b9c1ea7812e1191b67e459f86bde1"
     },
+    "commands.migrateWorkflowFiles": {
+      "source": "f33bb2a8b66ab4d8368a6c15fd144c78b4872caa",
+      "translation": "cc92155a236a5e37f0cc34b06d2411d06eeb8689"
+    },
     "commands.runWorkflow": {
       "source": "a117d1ec912831a4fe43a9ec9597f15bf445c105",
       "translation": "4f0c79e9e119f8941075ba0a1c0b81811d1c64ce"
+    },
+    "migration.title": {
+      "source": "3260a2f18bccefabf9ff8d41840aa11b57ae96a1",
+      "translation": "3181544e3c191f580ecba6691f7f2526f10084f0"
+    },
+    "migration.summary": {
+      "source": "58723dba7cb90039749da3d2feb6a880a2843d05",
+      "translation": "caa18109466e21b79a4b455f86d9a439b25221d6"
+    },
+    "migration.manualAttention": {
+      "source": "19bed538fd2013898d6696ca33967a5ec377f224",
+      "translation": "1ddf85c98eeb6e7e11c09d14b9854ba18c28c734"
+    },
+    "migration.unrecognized": {
+      "source": "55e034e503676294930f8502539db1d5478167cd",
+      "translation": "5f077d85e5e892dc2b8bcc9fcddc3c23a137b669"
+    },
+    "migration.apply": {
+      "source": "cb4334ada85a82c05c90b351a85a27b6b61bfa98",
+      "translation": "207eb3c6a17e97f9cb12568c7683d11513c2b637"
+    },
+    "migration.completed": {
+      "source": "236e3a13b48eaf62cf448a1517bf1a4e29a5c670",
+      "translation": "8ee6276afe91a59747bd8cb6de3a84be152382cf"
     },
     "notices.languageChanged": {
       "source": "05282acf7678258da0d996e5fbee70a567b92187",
@@ -14646,6 +17278,10 @@
       "source": "b568d47f2e244743b1fd7472db836ef9769c21f8",
       "translation": "e8850440f247d88665971a9d58c730be4a2d55a2"
     },
+    "runHistory.sourceInput": {
+      "source": "3c19a997344d93042493c70c084dba968d39c12d",
+      "translation": "3c19a997344d93042493c70c084dba968d39c12d"
+    },
     "runHistory.output": {
       "source": "4bed336194a9a5c86b6a734f03b3570d2aae1a68",
       "translation": "ded698ae1e7e36a370c151b53da125d7ea116400"
@@ -14695,8 +17331,8 @@
       "translation": "f0b9bf60f7a9eb3ed75b0c14c004e3ddf9b10b64"
     },
     "engine.forEachTooManyItems": {
-      "source": "8d6e9eca6e205ac93e78b862482ff5384f2edbad",
-      "translation": "44c9d03ce05079ecfdf4bf5f7e2d0616714e4d98"
+      "source": "f4373a3e78754aad30d5866434c39805373e7da4",
+      "translation": "725531fd0f368de7bb634e31720b8d65f30051fd"
     },
     "editor.title.edit": {
       "source": "ea3c7a8650f66184bb9d77feeed529d13fbf1796",
@@ -14862,6 +17498,10 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "738378b536af1e4298b280e0f91459b319c858e1"
     },
+    "editor.triggers.runtimeProvider": {
+      "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
+      "translation": "0baf8fe6ed5d97807b070297360fb66d6f06d288"
+    },
     "editor.triggers.fromStatus": {
       "source": "847b0d58e124226fcc2167e6761ea997ee20ddbd",
       "translation": "a28aff6eb57108742a7dcfa47b87fee92a32f666"
@@ -14945,6 +17585,14 @@
     "editor.triggers.types.tasknotesEvent.description": {
       "source": "93aaaf97be2b27d6069d176b17bf11c4f3ba9127",
       "translation": "7e49eaeabd8af35fe723ecdf0968f514c3efe189"
+    },
+    "editor.triggers.types.runtimeEvent.label": {
+      "source": "67f896d31d6d4894c5080272ae9390400491b074",
+      "translation": "3afbe9f94491350f978545f6a06fa0472aff4504"
+    },
+    "editor.triggers.types.runtimeEvent.description": {
+      "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
+      "translation": "141b640023c07b47e6dfac4f8719804ef30e49fb"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -15222,6 +17870,22 @@
       "source": "a10533d022b663ebeac1eacd88f1877cd9628690",
       "translation": "e2a33a6aff29e544cb18788ff9c1f4c42da43130"
     },
+    "editor.triggers.outputs.after.scheduled.label": {
+      "source": "b41cf063eca8243b7b8039af57f2b039fc868668",
+      "translation": "b41cf063eca8243b7b8039af57f2b039fc868668"
+    },
+    "editor.triggers.outputs.after.scheduled.description": {
+      "source": "a314f42b1159f8cca9fceefde395aa17cf8501c6",
+      "translation": "a314f42b1159f8cca9fceefde395aa17cf8501c6"
+    },
+    "editor.triggers.outputs.after.due.label": {
+      "source": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8",
+      "translation": "4c1aeebc433bcb8eb4b05434619ea3136b785ea8"
+    },
+    "editor.triggers.outputs.after.due.description": {
+      "source": "7ce7c007066fed51f100525a5aad334d6086fd04",
+      "translation": "7ce7c007066fed51f100525a5aad334d6086fd04"
+    },
     "editor.triggers.outputs.before.status.label": {
       "source": "2583b796620d3d823616d2cf86b48799ed2e214d",
       "translation": "9b6e894a66257458d27b42e5cc60c4f4ccc25458"
@@ -15229,6 +17893,22 @@
     "editor.triggers.outputs.before.status.description": {
       "source": "7c4b643f91e29badf77f94e7649bd6217ce25e7c",
       "translation": "a8fd3e9d4f6c94ff31dd5dc182c68e92fa44b5c9"
+    },
+    "editor.triggers.outputs.before.scheduled.label": {
+      "source": "962ed57ddc427be3375e16959be928740280b518",
+      "translation": "962ed57ddc427be3375e16959be928740280b518"
+    },
+    "editor.triggers.outputs.before.scheduled.description": {
+      "source": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2",
+      "translation": "dc3b095c4ae1242ecdc27ede192850143bf6fbf2"
+    },
+    "editor.triggers.outputs.before.due.label": {
+      "source": "69d1380b927fe432a4ca845dc321801b3a7bdb22",
+      "translation": "69d1380b927fe432a4ca845dc321801b3a7bdb22"
+    },
+    "editor.triggers.outputs.before.due.description": {
+      "source": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367",
+      "translation": "e79b1e68c811a3b3f6cf373e6c01ceb56e9ef367"
     },
     "editor.triggers.outputs.changes.label": {
       "source": "8aa57de6dce6ee1c35c6aba7426503281876b258",
@@ -15346,6 +18026,10 @@
       "source": "88a999b9ba327074de9713991bf30725ed256b2b",
       "translation": "0a213009fa88331f2fc7eb1418f91b45501e56d5"
     },
+    "editor.steps.forEachAs": {
+      "source": "f9845cab5f7c62b17b806ae3ff412ad98a45be1c",
+      "translation": "79cca440c71d2611644e20b770335fa8f7362a75"
+    },
     "editor.steps.inputJson": {
       "source": "cd877d83769f13a58e1ebbca3b18e92bd1bbe8e7",
       "translation": "7caf4446bc59359417f6e503e05fea8da0180a07"
@@ -15386,6 +18070,30 @@
       "source": "19273cca453a069fc2fcfb0e855a6c87bbdfaf76",
       "translation": "3b2494eecca87424805290dd4945228f0bf78275"
     },
+    "editor.runPolicy.concurrencyPolicy": {
+      "source": "2ec390bfae82ff5b921e55c4ae832ef41eb12f05",
+      "translation": "09d869d15def9637778ef8e6223caf9e303587c4"
+    },
+    "editor.runPolicy.concurrencyPolicies.skip": {
+      "source": "e36e1a42407875c6b4068873dcde97f2ec284094",
+      "translation": "78f175c0eebb3cdcc5a315b6237936c6e78c2115"
+    },
+    "editor.runPolicy.concurrencyPolicies.queue": {
+      "source": "56b842057518eb2fdb68beb4270b4baa148545a4",
+      "translation": "d4cc201233f3911804ee071c3ca0b7c6ddb5d0bd"
+    },
+    "editor.runPolicy.concurrencyPolicies.replace": {
+      "source": "8d5ebcb4cc7c28930319c0fc1dbe1edb4965b90c",
+      "translation": "801f9ee1ef46290b7cf813f4d480c7e52a74d0bd"
+    },
+    "editor.runPolicy.concurrencyPolicies.allow": {
+      "source": "7b05200ae6c611f5a1ebcd05689a767510038fc0",
+      "translation": "1dce8fa02749168abc816306bf8b33b51a5cd7fc"
+    },
+    "editor.runPolicy.concurrencyGroup": {
+      "source": "925076acdea74905d398adc67d6dbe4b4303d98d",
+      "translation": "43d476bdf2320012bed3e0be294af7dc7e12da17"
+    },
     "editor.runPolicy.onError": {
       "source": "64bd57aa8397cde61c14dd0b126e74bbd203134e",
       "translation": "f148413d77cb35b356372bc924fd78bc09986eb0"
@@ -15398,8 +18106,8 @@
       "source": "f4902e529d10f925276c1d4d25e9e5f114bfb80a",
       "translation": "1f5bfb36123368a0c97248e76aa5e3d4bb0fb07a"
     },
-    "editor.runPolicy.maxTasks": {
-      "source": "87933d76dad6b2c1356d75fbaa9b8d596c0c271e",
+    "editor.runPolicy.maxItems": {
+      "source": "f4efe00e771b135d223ebb0fcaf5f4287fa73d2a",
       "translation": "7fec60dd1da5466542303e2e720fa81a77647956"
     },
     "editor.runPolicy.source": {
@@ -15438,6 +18146,82 @@
       "source": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913",
       "translation": "2de2cbe0b9a5c9b3057ffa25e1cae6a75dd46913"
     },
+    "editor.expressions.mode": {
+      "source": "d86adc7ce80e195a0aed99d87503f7d8470cc90b",
+      "translation": "d86adc7ce80e195a0aed99d87503f7d8470cc90b"
+    },
+    "editor.expressions.modes.fixedDate": {
+      "source": "1c63b411209cc7ab9c8f120e7cf06316856e1f06",
+      "translation": "1c63b411209cc7ab9c8f120e7cf06316856e1f06"
+    },
+    "editor.expressions.modes.workflowValue": {
+      "source": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68",
+      "translation": "3b1d0cd05f7378359f9b672d6d9ed263ff2fdd68"
+    },
+    "editor.expressions.modes.relativeDate": {
+      "source": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75",
+      "translation": "6d11ed897abef8f4afa9b4ebcb8e2cf203cc3d75"
+    },
+    "editor.expressions.modes.advanced": {
+      "source": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90",
+      "translation": "f742c3c266b24b7bc3665dd0e99763c1e6d9ae90"
+    },
+    "editor.expressions.fixedDate": {
+      "source": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d",
+      "translation": "eb9a4bc1c0c153e4e4b042a79113b815b7e3021d"
+    },
+    "editor.expressions.sourceValue": {
+      "source": "50382129234b420eb12070a435f12956f598e85b",
+      "translation": "50382129234b420eb12070a435f12956f598e85b"
+    },
+    "editor.expressions.amount": {
+      "source": "43dc8532f7e57be250d7397de3d14085d51516f0",
+      "translation": "43dc8532f7e57be250d7397de3d14085d51516f0"
+    },
+    "editor.expressions.unit": {
+      "source": "f6b935ab337145efdeadda28cae18aa89a845e36",
+      "translation": "f6b935ab337145efdeadda28cae18aa89a845e36"
+    },
+    "editor.expressions.units.day": {
+      "source": "f6bb0f468a8569c67b3d6826e57e62c5500c3681",
+      "translation": "f6bb0f468a8569c67b3d6826e57e62c5500c3681"
+    },
+    "editor.expressions.units.week": {
+      "source": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1",
+      "translation": "7d75266a53b99ce4d80d337862ea1edd8ba1b1a1"
+    },
+    "editor.expressions.units.month": {
+      "source": "200dcdce9b5a0627b291634c6a82ae25ce09f789",
+      "translation": "200dcdce9b5a0627b291634c6a82ae25ce09f789"
+    },
+    "editor.expressions.units.year": {
+      "source": "96f997bcecb36502ed4b296a795f72aff9d6bfe7",
+      "translation": "96f997bcecb36502ed4b296a795f72aff9d6bfe7"
+    },
+    "editor.expressions.advancedTitle": {
+      "source": "74ebb320ee4bf998796b5aab1d88310d46d23daa",
+      "translation": "74ebb320ee4bf998796b5aab1d88310d46d23daa"
+    },
+    "editor.expressions.advancedDescription": {
+      "source": "4b632851b7df7c1bd87c4b202c3c0f60637e6072",
+      "translation": "4b632851b7df7c1bd87c4b202c3c0f60637e6072"
+    },
+    "editor.expressions.formulaLabel": {
+      "source": "e69fc3f75f40fe14e4d1d319de9ee30b9b8997d2",
+      "translation": "5a68d973511a41fd4a3b9dff6f7d78617d15d77b"
+    },
+    "editor.expressions.openBuilder": {
+      "source": "32afb37472c23871614a5aa255fd6b8c550767b3",
+      "translation": "8d3c9048e9408f7870bae9c93bf8722269c45852"
+    },
+    "editor.expressions.jsonLabel": {
+      "source": "284ec10e92f646fff1d5acf68f28616458248e7e",
+      "translation": "284ec10e92f646fff1d5acf68f28616458248e7e"
+    },
+    "editor.expressions.helperList": {
+      "source": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a",
+      "translation": "a688dbdd7d673ee515f48d7727a2d76d10f3ca9a"
+    },
     "editor.validation.nameRequired": {
       "source": "d7659e2c4af20a35375510634997a133eefa08f2",
       "translation": "c1f7e80e6f6b8dc4ec46387bd9802992aaae9b0e"
@@ -15465,6 +18249,10 @@
     "editor.validation.tasknotesEventRequired": {
       "source": "1a938e120d38bf0665f91de397335639d0bc0ba3",
       "translation": "6b1f4ea191b897d3336eeb1f9726ec1f1a8e3cf0"
+    },
+    "editor.validation.runtimeEventRequired": {
+      "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
+      "translation": "f7f677cee54ecf65baf36ed8ad79fa742a75a280"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -15502,6 +18290,138 @@
       "source": "99881298c0a076a64408cd086a1e9eaed770e7ec",
       "translation": "37d589f33ea5cc4688d9d7db309c539eea237bc8"
     },
+    "editor.validation.invalidExpression": {
+      "source": "10d3c7d475308ce8bb1e42a419c09e262e04f982",
+      "translation": "10d3c7d475308ce8bb1e42a419c09e262e04f982"
+    },
+    "editor.query.preview": {
+      "source": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1",
+      "translation": "f1fbb2b43dca281d0138f4fcc92543ad143ef0b1"
+    },
+    "editor.query.previewUnavailable": {
+      "source": "63fa297f1e1dc98510509fcaa00f2af2e6199d32",
+      "translation": "63fa297f1e1dc98510509fcaa00f2af2e6199d32"
+    },
+    "editor.query.previewResult": {
+      "source": "41f9f6bea31b000c9ec2859009870d15499d25b4",
+      "translation": "41f9f6bea31b000c9ec2859009870d15499d25b4"
+    },
+    "editor.query.runtimeUnavailable": {
+      "source": "a828911bd28f3cdfea4050ab06b802581e47c464",
+      "translation": "a828911bd28f3cdfea4050ab06b802581e47c464"
+    },
+    "editor.query.advancedOnly": {
+      "source": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777",
+      "translation": "0f7d46bdf74ff9cc1303a25a0ee37b5b57976777"
+    },
+    "editor.query.valid": {
+      "source": "2449969073c2471072c0119262b01cc56192d0e5",
+      "translation": "2449969073c2471072c0119262b01cc56192d0e5"
+    },
+    "editor.query.invalid": {
+      "source": "62da45e62882bf063d80c54e902f5816f76b266a",
+      "translation": "62da45e62882bf063d80c54e902f5816f76b266a"
+    },
+    "editor.query.match": {
+      "source": "0335207f5e840d81afa158c6c2bb6e3fa02653b4",
+      "translation": "0335207f5e840d81afa158c6c2bb6e3fa02653b4"
+    },
+    "editor.query.matchAll": {
+      "source": "771ea079b86f8d408fc119d489c97d305e52bee2",
+      "translation": "771ea079b86f8d408fc119d489c97d305e52bee2"
+    },
+    "editor.query.matchAny": {
+      "source": "424666a81d3e72e4b924eda0ddf45b62a4182fac",
+      "translation": "424666a81d3e72e4b924eda0ddf45b62a4182fac"
+    },
+    "editor.query.addCondition": {
+      "source": "42fe695d7308dc7b1481a15d3f587127f37767d7",
+      "translation": "42fe695d7308dc7b1481a15d3f587127f37767d7"
+    },
+    "editor.query.removeCondition": {
+      "source": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb",
+      "translation": "858fb149fb4a9e2ac055b6b790aa06a1bc6e32bb"
+    },
+    "editor.query.noConditions": {
+      "source": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa",
+      "translation": "78f903ad8901402bea1e8a4d54c2eb9e4457dbfa"
+    },
+    "editor.query.field": {
+      "source": "c326a4660b674d2f6ea82687a1e1abae2337541f",
+      "translation": "c326a4660b674d2f6ea82687a1e1abae2337541f"
+    },
+    "editor.query.operator": {
+      "source": "d0e687b079fb70f2208d1f8d2c75d64d74925496",
+      "translation": "d0e687b079fb70f2208d1f8d2c75d64d74925496"
+    },
+    "editor.query.value": {
+      "source": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb",
+      "translation": "8dce170de238b1feda2ecd9674ea3ca0d068fbcb"
+    },
+    "editor.query.noValue": {
+      "source": "1d402441c3b972c1257d41a23a0cf7d56800bfb6",
+      "translation": "1d402441c3b972c1257d41a23a0cf7d56800bfb6"
+    },
+    "editor.query.true": {
+      "source": "88b33e4e12f75ac8bf792aebde41f1a090f3a612",
+      "translation": "88b33e4e12f75ac8bf792aebde41f1a090f3a612"
+    },
+    "editor.query.false": {
+      "source": "97cdbdc7feff827efb082a6b6dd2727237cd49fd",
+      "translation": "97cdbdc7feff827efb082a6b6dd2727237cd49fd"
+    },
+    "editor.query.options": {
+      "source": "3c365860d2676e684bb7558148432cf926bbf691",
+      "translation": "3c365860d2676e684bb7558148432cf926bbf691"
+    },
+    "editor.query.optionsDescription": {
+      "source": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27",
+      "translation": "7bb4cb040ee8a22e03446e6d22a7a6876a47ca27"
+    },
+    "editor.query.sortField": {
+      "source": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2",
+      "translation": "a2a5bdeca9391be1e0cdff1c19895bae7fadc2c2"
+    },
+    "editor.query.sortDirection": {
+      "source": "fd8e45bac7d354790ec0a82d8a61341bf8acd055",
+      "translation": "fd8e45bac7d354790ec0a82d8a61341bf8acd055"
+    },
+    "editor.query.ascending": {
+      "source": "2b226c7948b48ad8f6ece8d91270c6915aba6b73",
+      "translation": "2b226c7948b48ad8f6ece8d91270c6915aba6b73"
+    },
+    "editor.query.descending": {
+      "source": "36377adf43984d298439110cf96f95529471c501",
+      "translation": "36377adf43984d298439110cf96f95529471c501"
+    },
+    "editor.query.groupField": {
+      "source": "8f0d8d8348ecece67b163e99912fe3575e408ea9",
+      "translation": "8f0d8d8348ecece67b163e99912fe3575e408ea9"
+    },
+    "editor.query.limit": {
+      "source": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e",
+      "translation": "24d948e4bdbe5b8224bbc0dfbab1923fab00b98e"
+    },
+    "editor.query.includeArchived": {
+      "source": "d5a344f639610d03cb52a9d4a5b916ef7416aab8",
+      "translation": "d5a344f639610d03cb52a9d4a5b916ef7416aab8"
+    },
+    "editor.query.none": {
+      "source": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7",
+      "translation": "6eef6648406c333a4035cd5e60d0bf2ecf2606d7"
+    },
+    "editor.query.jsonTitle": {
+      "source": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1",
+      "translation": "866269a1fc6f68619be9a0fd0af1a06e6fb88cd1"
+    },
+    "editor.query.jsonDescription": {
+      "source": "db7d749539f356573d8fe2373efb2c4a15081f90",
+      "translation": "db7d749539f356573d8fe2373efb2c4a15081f90"
+    },
+    "editor.query.jsonLabel": {
+      "source": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e",
+      "translation": "46cbb893ba03a35ff6ffddeeff481da58f2c6f7e"
+    },
     "steps.categories.tasknotes": {
       "source": "6458145fdd07ad08ff52a2e72d531588936bdca6",
       "translation": "6458145fdd07ad08ff52a2e72d531588936bdca6"
@@ -15527,8 +18447,8 @@
       "translation": "3172b317f9fc809f3aee467c0446384de4cc9255"
     },
     "steps.common.task.description": {
-      "source": "f9bd0001554c07f1fcd1202ad5140c19262db63d",
-      "translation": "feb2cab2425362692350cb0e788c26b850f88c7d"
+      "source": "7db219b8c4f95e2c16c6b23433193d138aa71a98",
+      "translation": "b37614b9779104852fb4975d4f605daab260d9b2"
     },
     "steps.common.path.label": {
       "source": "519e39132bb98418cc0483cc446ccf5f3c8dcffe",
@@ -15571,16 +18491,16 @@
       "translation": "12f04d53a894ac5a2cbb754ede403d5fbdf2d970"
     },
     "steps.definitions.task.query.description": {
-      "source": "961dade068e94a25c3ae1774d098f13c1dcaaebc",
-      "translation": "791d5ca86581290eb7bf6096456c06f5c4753a11"
+      "source": "f087aa91a6ed96a7ea2174ba3ef1873a3a89adf6",
+      "translation": "7ecdf46ce69eeefe95f8e303ef421aa8f924adf4"
     },
     "steps.definitions.task.query.input.query.label": {
       "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
       "translation": "711363c4247457a07f83742af92b4324679dc812"
     },
     "steps.definitions.task.query.input.query.description": {
-      "source": "30f4dbe353aa9482814521400dbffddba3b9e6b3",
-      "translation": "d67641bec5e4da06bcb688c75050d5c1ec929f49"
+      "source": "feb16ff41af93f10047c66d152f514c3c9c39603",
+      "translation": "129056aa8e5b1eb2771eb1ece10a281a94a189df"
     },
     "steps.definitions.task.query.output.tasks.label": {
       "source": "090ec5f560fc50377fcd95e5cda128e91b276e98",
@@ -15595,8 +18515,64 @@
       "translation": "37802b1dfc26911af29f609661670d38ce40fc09"
     },
     "steps.definitions.task.query.output.count.description": {
-      "source": "aa37d780e802854be3e059ae0812ea1ae34bd934",
-      "translation": "9cdf736f96f57088089dca1fa7306386cbbd5a25"
+      "source": "205479d0ae9f58786f7a12af4270724cce947a1a",
+      "translation": "205479d0ae9f58786f7a12af4270724cce947a1a"
+    },
+    "steps.definitions.task.query.output.total.label": {
+      "source": "b25928c69902557b0ef0a628490a3a1768d7b82f",
+      "translation": "b25928c69902557b0ef0a628490a3a1768d7b82f"
+    },
+    "steps.definitions.task.query.output.total.description": {
+      "source": "0ef648087cb6d1cffd02168d6989afa9ff377e40",
+      "translation": "0ef648087cb6d1cffd02168d6989afa9ff377e40"
+    },
+    "steps.definitions.task.query.output.matched.label": {
+      "source": "1bf3ec5bf8dd834856a85afc299eee60391430d1",
+      "translation": "1bf3ec5bf8dd834856a85afc299eee60391430d1"
+    },
+    "steps.definitions.task.query.output.matched.description": {
+      "source": "4479a76a3f1fcf31709097acb25c9bfd02990d8e",
+      "translation": "4479a76a3f1fcf31709097acb25c9bfd02990d8e"
+    },
+    "steps.definitions.task.query.output.returned.label": {
+      "source": "870770a9de45cd1b7aa67b2d098582300b46a9c8",
+      "translation": "870770a9de45cd1b7aa67b2d098582300b46a9c8"
+    },
+    "steps.definitions.task.query.output.returned.description": {
+      "source": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1",
+      "translation": "942f79aa29c2e0d9b15abdd0befc3220e2a49de1"
+    },
+    "steps.definitions.task.query.output.groups.label": {
+      "source": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6",
+      "translation": "ae9629f4ebb82c6331c0809fa9a0e54b00e578e6"
+    },
+    "steps.definitions.task.query.output.groups.description": {
+      "source": "ecaa811b992ddcd9dfddf31e80b684a06334c214",
+      "translation": "ecaa811b992ddcd9dfddf31e80b684a06334c214"
+    },
+    "steps.definitions.task.query.output.groupPaths.label": {
+      "source": "ffad345cc33752b9885942c31d12e42d65c70e6f",
+      "translation": "ffad345cc33752b9885942c31d12e42d65c70e6f"
+    },
+    "steps.definitions.task.query.output.groupPaths.description": {
+      "source": "1c0c2abc9585ffbbb813470afca9be486788df1a",
+      "translation": "1c0c2abc9585ffbbb813470afca9be486788df1a"
+    },
+    "steps.definitions.task.query.output.query.label": {
+      "source": "a618b4be8d3ac72545f3085fe616d342b7139fba",
+      "translation": "a618b4be8d3ac72545f3085fe616d342b7139fba"
+    },
+    "steps.definitions.task.query.output.query.description": {
+      "source": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a",
+      "translation": "0b494de60394cf1a91e8f8e639b5bc9cfbb8733a"
+    },
+    "steps.definitions.task.query.output.warnings.label": {
+      "source": "1430f976c596795274458abcfbc4f280cbfcebac",
+      "translation": "1430f976c596795274458abcfbc4f280cbfcebac"
+    },
+    "steps.definitions.task.query.output.warnings.description": {
+      "source": "de0f749608fcf05cd64279b8485a3218cc6e6e73",
+      "translation": "de0f749608fcf05cd64279b8485a3218cc6e6e73"
     },
     "steps.definitions.task.query.examples.0.label": {
       "source": "ef2960c6f737924fb0f48e910b58aeb7af91553e",

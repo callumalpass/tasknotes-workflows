@@ -38,7 +38,16 @@ export const pt: TranslationTree = {
 		newWorkflow: "Novo fluxo de trabalho",
 		reloadWorkflows: "Recarregar fluxos de trabalho",
 		maintainDefaultWorkflows: "Manter arquivos de fluxo de trabalho padrão",
+		migrateWorkflowFiles: "Migrar arquivos de fluxo de trabalho para o formato de runtime mdbase",
 		runWorkflow: "Execute: {name}",
+	},
+	migration: {
+		title: "Migrar arquivos de fluxo de trabalho",
+		summary: "{convertible} conversíveis, {canonical} já canônicos e {invalid} exigindo atenção manual.",
+		manualAttention: "Atenção manual",
+		unrecognized: "O arquivo não está em um formato de fluxo de trabalho reconhecido.",
+		apply: "Migrar {count} fluxos de trabalho",
+		completed: "{count} fluxos de trabalho migrados. Backup: {path}",
 	},
 	notices: {
 		languageChanged: "Idioma alterado para {language}.",
@@ -173,6 +182,7 @@ export const pt: TranslationTree = {
 			other: "Etapas {count}",
 		},
 		input: "Entrada",
+		sourceInput: "Source input",
 		output: "Saída",
 		empty: {
 			diagnostics: "O diagnóstico do fluxo de trabalho deve ser corrigido antes que as execuções possam ser mostradas.",
@@ -189,7 +199,7 @@ export const pt: TranslationTree = {
 		stepFailed: "Falha na etapa.",
 		unknownStepType: "Tipo de etapa desconhecido: {type}",
 		forEachNonArray: "forEach resolvido para um valor non-array.",
-		forEachTooManyItems: "forEach selecionou itens {count}, acima de run.maxTasks {max}.",
+		forEachTooManyItems: "forEach selecionou itens {count}, acima de run.limits.maxItems {max}.",
 	},
 	editor: {
 		title: {
@@ -254,6 +264,7 @@ export const pt: TranslationTree = {
 			id: "ID",
 			typeLabel: "Tipo",
 			tasknotesEvent: "Evento TaskNotes",
+			runtimeProvider: "Provedor de runtime",
 			fromStatus: "Do status",
 			toStatus: "Para status",
 			pathGlob: "Globo de caminho",
@@ -281,6 +292,10 @@ export const pt: TranslationTree = {
 				tasknotesEvent: {
 					label: "Evento TaskNotes",
 					description: "Executa quando TaskNotes emite o evento de tempo de execução selecionado.",
+				},
+				runtimeEvent: {
+					label: "Evento de runtime",
+					description: "Executa quando um provedor de runtime mdbase registrado emite o evento selecionado.",
 				},
 				cron: {
 					label: "Cron cronograma",
@@ -414,11 +429,27 @@ export const pt: TranslationTree = {
 						label: "Estado atual",
 						description: "O status da tarefa após o evento.",
 					},
+					scheduled: {
+						label: "Scheduled date",
+						description: "The task scheduled date after the event.",
+					},
+					due: {
+						label: "Due date",
+						description: "The task due date after the event.",
+					},
 				},
 				before: {
 					status: {
 						label: "Estado anterior",
 						description: "O status da tarefa antes do evento.",
+					},
+					scheduled: {
+						label: "Previous scheduled date",
+						description: "The task scheduled date before the event.",
+					},
+					due: {
+						label: "Previous due date",
+						description: "The task due date before the event.",
 					},
 				},
 				changes: {
@@ -475,6 +506,7 @@ export const pt: TranslationTree = {
 			advancedDescription: "IDs estáveis criam referências para etapas posteriores. As execuções em lote usam o opcional para cada valor.",
 			forEach: "Para cada",
 			forEachHelp: "Referência de matriz opcional para etapas em lote.",
+			forEachAs: "Alias do loop",
 			inputJson: "Insira JSON",
 			writes: "escreve",
 			needsAttention: "Precisa de atenção",
@@ -491,10 +523,18 @@ export const pt: TranslationTree = {
 		},
 		runPolicy: {
 			noOverlap: "Sem sobreposição",
+			concurrencyPolicy: "Concorrência",
+			concurrencyPolicies: {
+				skip: "Ignorar durante uma execução ativa",
+				queue: "Enfileirar durante uma execução ativa",
+				replace: "Substituir a execução ativa",
+				allow: "Permitir execuções paralelas",
+			},
+			concurrencyGroup: "Grupo de concorrência",
 			onError: "Em caso de erro",
 			advancedTitle: "Limites avançados de execução",
 			advancedDescription: "Esses valores mantêm as execuções automatizadas identificáveis e limitadas.",
-			maxTasks: "Máximo de tarefas",
+			maxItems: "Máximo de tarefas",
 			source: "Fonte",
 		},
 		footer: {
@@ -509,6 +549,31 @@ export const pt: TranslationTree = {
 			triggerValue: "Gatilho {label}",
 			stepValue: "{stepId} {label}",
 		},
+		expressions: {
+			mode: "Value mode",
+			modes: {
+				fixedDate: "Fixed date",
+				workflowValue: "Workflow value",
+				relativeDate: "Relative date",
+				advanced: "Advanced expression",
+			},
+			fixedDate: "Date",
+			sourceValue: "Source value",
+			amount: "Amount",
+			unit: "Unit",
+			units: {
+				day: "Days",
+				week: "Weeks",
+				month: "Months",
+				year: "Years",
+			},
+			advancedTitle: "Use expression",
+			advancedDescription: "Return a computed value for this field.",
+			formulaLabel: "Fórmula do Bases",
+			openBuilder: "Abrir editor de fórmulas",
+			jsonLabel: "Expression JSON",
+			helperList: "Available helpers: {helpers}",
+		},
 		validation: {
 			nameRequired: "O nome é obrigatório.",
 			invalidWorkflowId: "Use letras minúsculas, números, pontos, sublinhados ou travessões. Comece com uma carta.",
@@ -517,6 +582,7 @@ export const pt: TranslationTree = {
 			invalidTriggerId: "O ID do gatilho deve começar com uma letra e usar caracteres id-safe.",
 			duplicateTriggerId: "Os IDs de gatilho devem ser exclusivos.",
 			tasknotesEventRequired: "Escolha um evento TaskNotes.",
+			runtimeEventRequired: "Insira um id de evento de runtime.",
 			cronScheduleRequired: "Adicione uma programação cron.",
 			intervalRequired: "Adicione um intervalo.",
 			stepRequired: "Adicione pelo menos uma etapa.",
@@ -526,6 +592,41 @@ export const pt: TranslationTree = {
 			fieldRequired: "{field} é obrigatório.",
 			positiveNumber: "Use um número positivo.",
 			jsonObject: "A entrada da etapa deve ser um objeto JSON.",
+			invalidExpression: "Expression is invalid.",
+		},
+		query: {
+			preview: "Preview",
+			previewUnavailable: "TaskNotes query preview is unavailable.",
+			previewResult: "Query matches {matched} of {total} tasks and returns {returned}.",
+			runtimeUnavailable: "Load TaskNotes to edit query fields from the runtime catalog.",
+			advancedOnly: "This query uses nesting or negation. Edit the JSON directly.",
+			valid: "TaskNotes accepts this query.",
+			invalid: "TaskNotes query is invalid.",
+			match: "Match",
+			matchAll: "All conditions",
+			matchAny: "Any condition",
+			addCondition: "Add condition",
+			removeCondition: "Remove condition",
+			noConditions: "No conditions. The query will match all tasks in scope.",
+			field: "Field",
+			operator: "Operator",
+			value: "Value",
+			noValue: "No value",
+			true: "True",
+			false: "False",
+			options: "Sort, group, and scope",
+			optionsDescription: "Optional result controls for this task query.",
+			sortField: "Sort by",
+			sortDirection: "Direction",
+			ascending: "Ascending",
+			descending: "Descending",
+			groupField: "Group by",
+			limit: "Limit",
+			includeArchived: "Include archived tasks",
+			none: "None",
+			jsonTitle: "Advanced JSON",
+			jsonDescription: "Use this for nested groups, negation, date math, folders, offsets, or exact API input.",
+			jsonLabel: "Runtime query JSON",
 		},
 	},
 	steps: {
@@ -539,7 +640,7 @@ export const pt: TranslationTree = {
 		common: {
 			task: {
 				label: "Tarefa",
-				description: "Caminho do vault para uma tarefa TaskNotes. Os fluxos de trabalho de tarefas acionadas geralmente usam {{trigger.after.path}}.",
+				description: "Caminho do vault para uma tarefa TaskNotes. Os fluxos de trabalho de tarefas acionadas geralmente usam {{event.after.path}}.",
 			},
 			path: {
 				label: "Caminho",
@@ -581,7 +682,35 @@ export const pt: TranslationTree = {
 						},
 						count: {
 							label: "Contar",
-							description: "Número de tarefas correspondentes.",
+							description: "Number of returned tasks.",
+						},
+						total: {
+							label: "Total",
+							description: "Total tasks before filtering.",
+						},
+						matched: {
+							label: "Matched",
+							description: "Tasks matching the query before offset and limit.",
+						},
+						returned: {
+							label: "Returned",
+							description: "Tasks returned after offset and limit.",
+						},
+						groups: {
+							label: "Groups",
+							description: "TaskNotes query group details.",
+						},
+						groupPaths: {
+							label: "Group paths",
+							description: "Task paths keyed by group key.",
+						},
+						query: {
+							label: "Query",
+							description: "The normalized TaskNotes runtime query.",
+						},
+						warnings: {
+							label: "Warnings",
+							description: "Non-fatal TaskNotes query warnings.",
 						},
 					},
 					examples: {

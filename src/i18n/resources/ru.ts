@@ -38,7 +38,16 @@ export const ru: TranslationTree = {
 		newWorkflow: "Новый рабочий процесс",
 		reloadWorkflows: "Перезагрузить рабочие процессы",
 		maintainDefaultWorkflows: "Сохранение файлов рабочего процесса по умолчанию",
+		migrateWorkflowFiles: "Перенести файлы рабочих процессов в формат среды выполнения mdbase",
 		runWorkflow: "Запустить: {name}",
+	},
+	migration: {
+		title: "Перенос файлов рабочих процессов",
+		summary: "Можно преобразовать: {convertible}; уже канонические: {canonical}; требуют ручной проверки: {invalid}.",
+		manualAttention: "Требуется ручная проверка",
+		unrecognized: "Формат рабочего процесса в файле не распознан.",
+		apply: "Перенести рабочие процессы: {count}",
+		completed: "Перенесено рабочих процессов: {count}. Резервная копия: {path}",
 	},
 	notices: {
 		languageChanged: "Язык изменен на {language}.",
@@ -173,6 +182,7 @@ export const ru: TranslationTree = {
 			other: "{count} шаги",
 		},
 		input: "Ввод",
+		sourceInput: "Source input",
 		output: "Выход",
 		empty: {
 			diagnostics: "Диагностика рабочего процесса должна быть исправлена, прежде чем можно будет отобразить прогоны.",
@@ -189,7 +199,7 @@ export const ru: TranslationTree = {
 		stepFailed: "Шаг не удался.",
 		unknownStepType: "Неизвестный тип шага: {type}.",
 		forEachNonArray: "forEach преобразуется в значение non-array.",
-		forEachTooManyItems: "forEach выбрал элементы {count} выше run.maxTasks {max}.",
+		forEachTooManyItems: "forEach выбрал элементы {count} выше run.limits.maxItems {max}.",
 	},
 	editor: {
 		title: {
@@ -254,6 +264,7 @@ export const ru: TranslationTree = {
 			id: "ID",
 			typeLabel: "Тип",
 			tasknotesEvent: "Событие TaskNotes",
+			runtimeProvider: "Поставщик среды выполнения",
 			fromStatus: "Из статуса",
 			toStatus: "К статусу",
 			pathGlob: "Объединённый путь",
@@ -281,6 +292,10 @@ export const ru: TranslationTree = {
 				tasknotesEvent: {
 					label: "Событие TaskNotes",
 					description: "Запускается, когда TaskNotes генерирует выбранное событие времени выполнения.",
+				},
+				runtimeEvent: {
+					label: "Событие среды выполнения",
+					description: "Запускается, когда зарегистрированный поставщик среды выполнения mdbase отправляет выбранное событие.",
 				},
 				cron: {
 					label: "Расписание Cron",
@@ -414,11 +429,27 @@ export const ru: TranslationTree = {
 						label: "Текущий статус",
 						description: "Статус задачи после события.",
 					},
+					scheduled: {
+						label: "Scheduled date",
+						description: "The task scheduled date after the event.",
+					},
+					due: {
+						label: "Due date",
+						description: "The task due date after the event.",
+					},
 				},
 				before: {
 					status: {
 						label: "Предыдущий статус",
 						description: "Статус задачи до события.",
+					},
+					scheduled: {
+						label: "Previous scheduled date",
+						description: "The task scheduled date before the event.",
+					},
+					due: {
+						label: "Previous due date",
+						description: "The task due date before the event.",
 					},
 				},
 				changes: {
@@ -475,6 +506,7 @@ export const ru: TranslationTree = {
 			advancedDescription: "Стабильные идентификаторы создают ссылки для последующих шагов. Пакетные запуски используют необязательный параметр для каждого значения.",
 			forEach: "Для каждого",
 			forEachHelp: "Необязательная ссылка на массив для шагов пакета.",
+			forEachAs: "Псевдоним цикла",
 			inputJson: "Ввод JSON",
 			writes: "пишет",
 			needsAttention: "Требует внимания",
@@ -491,10 +523,18 @@ export const ru: TranslationTree = {
 		},
 		runPolicy: {
 			noOverlap: "Нет перекрытия",
+			concurrencyPolicy: "Параллельность",
+			concurrencyPolicies: {
+				skip: "Пропустить при активном запуске",
+				queue: "Поставить в очередь при активном запуске",
+				replace: "Заменить активный запуск",
+				allow: "Разрешить параллельные запуски",
+			},
+			concurrencyGroup: "Группа параллельности",
 			onError: "При ошибке",
 			advancedTitle: "Расширенные ограничения пробега",
 			advancedDescription: "Эти значения делают автоматические прогоны идентифицируемыми и ограниченными.",
-			maxTasks: "Макс задач",
+			maxItems: "Макс задач",
 			source: "Источник",
 		},
 		footer: {
@@ -509,6 +549,31 @@ export const ru: TranslationTree = {
 			triggerValue: "Триггер {label}",
 			stepValue: "{stepId} {label}",
 		},
+		expressions: {
+			mode: "Value mode",
+			modes: {
+				fixedDate: "Fixed date",
+				workflowValue: "Workflow value",
+				relativeDate: "Relative date",
+				advanced: "Advanced expression",
+			},
+			fixedDate: "Date",
+			sourceValue: "Source value",
+			amount: "Amount",
+			unit: "Unit",
+			units: {
+				day: "Days",
+				week: "Weeks",
+				month: "Months",
+				year: "Years",
+			},
+			advancedTitle: "Use expression",
+			advancedDescription: "Return a computed value for this field.",
+			formulaLabel: "Формула Bases",
+			openBuilder: "Открыть редактор формул",
+			jsonLabel: "Expression JSON",
+			helperList: "Available helpers: {helpers}",
+		},
 		validation: {
 			nameRequired: "Требуется имя.",
 			invalidWorkflowId: "Используйте строчные буквы, цифры, точки, подчеркивания или тире. Начните с письма.",
@@ -517,6 +582,7 @@ export const ru: TranslationTree = {
 			invalidTriggerId: "Идентификатор триггера должен начинаться с буквы и содержать символы id-safe.",
 			duplicateTriggerId: "Идентификаторы триггеров должны быть уникальными.",
 			tasknotesEventRequired: "Выберите событие TaskNotes.",
+			runtimeEventRequired: "Введите идентификатор события среды выполнения.",
 			cronScheduleRequired: "Добавьте расписание cron.",
 			intervalRequired: "Добавьте интервал.",
 			stepRequired: "Добавьте хотя бы один шаг.",
@@ -526,6 +592,41 @@ export const ru: TranslationTree = {
 			fieldRequired: "{field} является обязательным.",
 			positiveNumber: "Используйте положительное число.",
 			jsonObject: "Входные данные шага должны быть объектом JSON.",
+			invalidExpression: "Expression is invalid.",
+		},
+		query: {
+			preview: "Preview",
+			previewUnavailable: "TaskNotes query preview is unavailable.",
+			previewResult: "Query matches {matched} of {total} tasks and returns {returned}.",
+			runtimeUnavailable: "Load TaskNotes to edit query fields from the runtime catalog.",
+			advancedOnly: "This query uses nesting or negation. Edit the JSON directly.",
+			valid: "TaskNotes accepts this query.",
+			invalid: "TaskNotes query is invalid.",
+			match: "Match",
+			matchAll: "All conditions",
+			matchAny: "Any condition",
+			addCondition: "Add condition",
+			removeCondition: "Remove condition",
+			noConditions: "No conditions. The query will match all tasks in scope.",
+			field: "Field",
+			operator: "Operator",
+			value: "Value",
+			noValue: "No value",
+			true: "True",
+			false: "False",
+			options: "Sort, group, and scope",
+			optionsDescription: "Optional result controls for this task query.",
+			sortField: "Sort by",
+			sortDirection: "Direction",
+			ascending: "Ascending",
+			descending: "Descending",
+			groupField: "Group by",
+			limit: "Limit",
+			includeArchived: "Include archived tasks",
+			none: "None",
+			jsonTitle: "Advanced JSON",
+			jsonDescription: "Use this for nested groups, negation, date math, folders, offsets, or exact API input.",
+			jsonLabel: "Runtime query JSON",
 		},
 	},
 	steps: {
@@ -539,7 +640,7 @@ export const ru: TranslationTree = {
 		common: {
 			task: {
 				label: "Задача",
-				description: "Путь хранилища к задаче TaskNotes. Рабочие процессы с триггерными задачами обычно используют {{trigger.after.path}}.",
+				description: "Путь хранилища к задаче TaskNotes. Рабочие процессы с триггерными задачами обычно используют {{event.after.path}}.",
 			},
 			path: {
 				label: "Путь",
@@ -581,7 +682,35 @@ export const ru: TranslationTree = {
 						},
 						count: {
 							label: "Граф",
-							description: "Количество совпадающих задач.",
+							description: "Number of returned tasks.",
+						},
+						total: {
+							label: "Total",
+							description: "Total tasks before filtering.",
+						},
+						matched: {
+							label: "Matched",
+							description: "Tasks matching the query before offset and limit.",
+						},
+						returned: {
+							label: "Returned",
+							description: "Tasks returned after offset and limit.",
+						},
+						groups: {
+							label: "Groups",
+							description: "TaskNotes query group details.",
+						},
+						groupPaths: {
+							label: "Group paths",
+							description: "Task paths keyed by group key.",
+						},
+						query: {
+							label: "Query",
+							description: "The normalized TaskNotes runtime query.",
+						},
+						warnings: {
+							label: "Warnings",
+							description: "Non-fatal TaskNotes query warnings.",
 						},
 					},
 					examples: {

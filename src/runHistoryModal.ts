@@ -152,6 +152,7 @@ export class RunHistoryModal extends Modal {
 		if (step.error) item.createDiv({ cls: "tnw-run-error", text: step.error });
 
 		const data = item.createDiv({ cls: "tnw-run-step-data" });
+		renderJsonDetails(data, this.plugin.t("runHistory.sourceInput"), step.sourceInput);
 		renderJsonDetails(data, this.plugin.t("runHistory.input"), step.input);
 		renderJsonDetails(data, this.plugin.t("runHistory.output"), step.output);
 	}

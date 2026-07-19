@@ -1,266 +1,255 @@
 # Workflow Schema
 
-Workflow files are Markdown notes with YAML frontmatter.
+TaskNotes Workflows persists canonical mdbase runtime `workflow/0.1` records.
+The normative JSON Schema is shipped by `@callumalpass/mdbase-runtime`; the
+plugin validates every newly created, edited, or migrated record before writing
+it.
 
-The default workflow folder is `TaskNotes/Workflows/`. The default workflow Base file is `TaskNotes/Views/workflows.base` and uses the custom Bases view type `tasknotesWorkflows`.
+Workflow notes live in `TaskNotes/Workflows/` by default. The Markdown body is
+user-owned documentation and is preserved when frontmatter is edited or
+migrated.
 
-## Required Fields
+## Core Record
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| `type` | string | Must be `tasknotes-workflow`. |
-| `schemaVersion` | number | Must be `1`. |
-| `id` | string | Stable lowercase id. Use letters, numbers, dots, underscores, and dashes. |
-| `name` | string | Human-readable name shown in the Base view. |
-| `enabled` | boolean | Disabled workflows can be edited and dry-run but do not run automatically. |
-| `triggers` | array | One or more trigger definitions. |
-| `steps` | array | Linear typed step pipeline. |
-| `run` | object | Run policy. |
+```yaml
+type: workflow
+id: auto-start-time
+version: 1
+name: Auto-start time tracking
+description: Start a timer when a task becomes active.
+enabled: false
+
+requires:
+  providers:
+    - id: tasknotes
+      version: ">=4.0.0 <5.0.0"
+  capabilities:
+    - time.write
+
+triggers:
+  - id: status-active
+    event: task.status.changed
+    if:
+      $expr: 'event.after.status == "active" && has(event.after.path)'
+    x-tasknotes:
+      type: tasknotes.event
+      to: active
+
+steps:
+  - id: start-time
+    action: time.start
+    input:
+      path:
+        $expr: event.after.path
+
+run:
+  execution:
+    mode: single_executor
+  concurrency:
+    group:
+      $expr: event.after.path
+    policy: skip
+  limits:
+    max_items: 1
+    timeout: 30s
+  on_error: stop
+
+x-tasknotes:
+  format_version: 1
+  source: tasknotes-workflows
+```
+
+Required core fields are `type`, `id`, `version`, `name`, `enabled`,
+`triggers`, and `steps`. Unknown core fields are invalid unless their name
+starts with `x-`.
 
 ## Triggers
 
+Every trigger has a unique `id` and references a runtime `event` contract.
+Generic provider events need no TaskNotes extension:
+
 ```yaml
 triggers:
-  - id: status-active
-    type: tasknotes.event
-    event: task.status.changed
-    from: open
-    to: active
-
-  - id: every-morning
-    type: cron
-    schedule: "0 9 * * *"
-    timezone: local
-
-  - id: every-half-hour
-    type: interval
-    every: 30m
-
-  - id: manual
-    type: manual
+  - id: canvas-drop
+    event: canvas.drop
+    if:
+      $expr: 'has(event.payload.record.path)'
 ```
 
-Enabled workflows with a `manual` trigger are also registered as Obsidian commands named `Run: <workflow name>`, so they can be launched from the command palette or assigned a hotkey. The generated command id is based on the workflow `id`; changing the workflow id creates a different command.
-
-Advanced Obsidian triggers are opt-in in settings:
+TaskNotes Workflows stores executor-specific scheduling and filters under
+`x-tasknotes` while retaining a canonical event ID:
 
 ```yaml
 triggers:
-  - id: project-note-opened
-    type: obsidian.workspace
-    event: file-open
-    path:
-      glob: "Projects/**/*.md"
+  - id: every-morning
+    event: tasknotes-workflows.schedule.cron
+    x-tasknotes:
+      type: cron
+      schedule: "0 9 * * *"
+      timezone: local
 
-  - id: active-note-changed
-    type: obsidian.workspace
-    event: active-leaf-change
-    path:
-      glob: "Projects/**/*.md"
+  - id: every-half-hour
+    event: tasknotes-workflows.schedule.interval
+    x-tasknotes:
+      type: interval
+      every: 30m
 
-  - id: metadata-indexed
-    type: obsidian.metadata
-    event: changed
-    path:
-      glob: "Projects/**/*.md"
+  - id: manual
+    event: tasknotes-workflows.manual
+    x-tasknotes:
+      type: manual
+
+  - id: note-modified
+    event: obsidian.vault.modify
+    x-tasknotes:
+      type: obsidian.vault
+      event: modify
+      path:
+        glob: "Projects/**/*.md"
+```
+
+Supported TaskNotes executor trigger types are `tasknotes.event`,
+`runtime.event`, `cron`, `interval`, `manual`, `obsidian.vault`,
+`obsidian.metadata`, and `obsidian.workspace`.
+
+## Steps
+
+Every step has a unique `id` and references an `action` contract. Input values
+are literals unless represented by an expression object.
+
+```yaml
+steps:
+  - id: schedule-task
+    action: task.setScheduled
+    input:
+      task:
+        $expr: event.after.path
+      date:
+        $expr: 'date(event.after.due) - duration("7d")'
+```
+
+TaskNotes Workflows provides its typed local action catalog and dispatches a
+registered action through the shared mdbase host when that action is available.
+A host policy denial is terminal and is never bypassed through the local
+compatibility adapter.
+
+The current TaskNotes action catalog includes task reads and mutations, task
+relationships, time tracking, notices, selected Obsidian file operations, and
+workflow control. Inspect the exact installed catalog through the TaskNotes
+extension API:
+
+```js
+const workflows = app.plugins.getPlugin("tasknotes")?.api.extensions.get("tasknotes-workflows");
+workflows?.listStepDefinitions();
+```
+
+## Expressions
+
+Only `{ $expr: "..." }` objects are evaluated. Plain strings are literals.
+Expressions receive `workflow`, `trigger`, `event`, `vars`, `steps`, `item`,
+`today`, and `now`.
+
+```yaml
+input:
+  path:
+    $expr: event.after.path
+  message:
+    $expr: '"Review " + workflow.name'
+```
+
+Step results use the canonical wrapper:
+
+```text
+steps.query.status
+steps.query.output.tasks
+steps.query.error
 ```
 
 ## Conditions
 
-Conditions can appear at workflow level or step level.
+Workflow, trigger, and step guards use the canonical `if` expression:
 
 ```yaml
-conditions:
-  - field: trigger.after.status
-    operator: is
-    value: active
+if:
+  $expr: 'event.after.due != null && event.after.status != "done"'
 ```
 
-Operators:
+The visual editor may retain its structured condition representation under
+`x-tasknotes.conditions`. It also writes the equivalent canonical `if` field,
+so generic tools can inspect the guard.
 
-- `is`
-- `isNot`
-- `in`
-- `notIn`
-- `exists`
-- `missing`
-- `contains`
-- `startsWith`
-- `before`
-- `after`
-- `onOrBefore`
-- `onOrAfter`
+## Iteration
 
-## References
-
-References use constrained template expressions. Arbitrary JavaScript is not evaluated.
-
-```text
-{{workflow.id}}
-{{trigger.after.path}}
-{{steps.query.tasks}}
-{{item.path}}
-{{today}}
-{{now}}
-```
-
-If a string is exactly one reference, the underlying value is preserved. If the reference is embedded in other text, the value is stringified.
-
-## Steps
-
-Initial step types:
-
-- `task.query`
-- `task.get`
-- `task.parents`
-- `task.subtasks`
-- `task.dependencies`
-- `task.blocking`
-- `task.relationships`
-- `task.create`
-- `task.patch`
-- `task.set`
-- `task.move`
-- `task.archive`
-- `task.unarchive`
-- `task.complete`
-- `task.uncomplete`
-- `task.reschedule`
-- `task.setDue`
-- `task.clearDue`
-- `task.setScheduled`
-- `task.clearScheduled`
-- `task.addTag`
-- `task.removeTag`
-- `task.addProject`
-- `task.removeProject`
-- `task.addContext`
-- `task.removeContext`
-- `task.addDependency`
-- `task.removeDependency`
-- `time.start`
-- `time.stop`
-- `time.appendEntry`
-- `notice.show`
-- `obsidian.openFile`
-- `obsidian.createNote`
-- `obsidian.appendNote`
-- `obsidian.updateFrontmatter`
-- `obsidian.moveFile`
-- `workflow.stop`
-
-Use `forEach` for batch steps:
+Use canonical `for_each` for bounded batch work:
 
 ```yaml
 steps:
-  - id: overdue
-    type: task.query
+  - id: patch-each
+    action: task.patch
+    for_each:
+      items:
+        $expr: steps.query.output.tasks
+      as: task
     input:
-      query:
-        where:
-          all:
-            - field: task.due
-              op: lt
-              value:
-                fn: today
-            - field: task.status
-              op: notIn
-              value:
-                - done
-                - cancelled
-        sort:
-          - field: task.due
-            direction: asc
-        scope:
-          includeArchived: false
-
-  - id: mark-high
-    type: task.patch
-    forEach: "{{steps.overdue.tasks}}"
-    input:
-      task: "{{item.path}}"
+      task:
+        $expr: task.path
       patch:
-        priority: high
+        status: open
 ```
 
-`task.query` accepts the canonical TaskNotes runtime task query DTO and delegates to `api.query.tasks()`. The workflow editor provides a visual builder for simple `all`/`any` condition lists, sort, group, limit, and archived scope; use the advanced JSON field for nested predicates, negation, date math, folder scopes, and offsets.
-
-```yaml
-steps:
-  - id: active
-    type: task.query
-    input:
-      query:
-        where:
-          field: task.status
-          op: eq
-          value: active
-        group:
-          - field: task.status
-        limit: 25
-```
-
-The output is available as `tasks`, `count`, `total`, `matched`, `returned`, `groups`, `groupPaths`, `query`, and `warnings`.
-
-Runtime task queries use this shape:
-
-```yaml
-query:
-  where:
-    all:
-      - field: task.status
-        op: ne
-        value: done
-      - any:
-          - field: task.due
-            op: lte
-            value:
-              fn: today
-          - field: task.priority
-            op: eq
-            value: high
-  sort:
-    - field: task.due
-      direction: asc
-  group:
-    - field: task.status
-  limit: 25
-  offset: 0
-  scope:
-    includeArchived: false
-    folders:
-      - Tasks
-```
-
-`where` can be a condition (`field`, `op`, optional `value`) or a nested `all`, `any`, or `not` predicate. Operators are `eq`, `ne`, `contains`, `notContains`, `in`, `notIn`, `exists`, `missing`, `lt`, `lte`, `gt`, `gte`, `isTrue`, and `isFalse`. Common fields include `task.status`, `task.priority`, `task.due`, `task.scheduled`, `task.projects`, `task.contexts`, `task.tags`, `task.isBlocked`, and `file.path`. Date values can use `{ fn: today }`, `{ fn: now }`, `{ fn: date, value: "2026-06-01" }`, or `{ fn: dateAdd, value: { fn: today }, amount: 1, unit: day }`.
+`for_each.items` must resolve to an array. TaskNotes Workflows stops the step
+when the item count exceeds `run.limits.max_items`.
 
 ## Run Policy
 
 ```yaml
 run:
-  mode: sequential
+  execution:
+    mode: single_executor
+  idempotency:
+    key:
+      $expr: 'workflow.id + ":" + event.id + ":" + trigger.id'
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    max_items: 50
+    timeout: 5m
+  on_error: stop
+```
+
+Side-effecting workflows should use `single_executor`. Executor selection is
+deployment policy and does not belong in the workflow record.
+
+## Compatibility And Migration
+
+TaskNotes Workflows 0.1.x used an incompatible product format with fields such
+as:
+
+```yaml
+type: tasknotes-workflow
+schemaVersion: 1
+steps:
+  - id: notify
+    type: notice.show
+run:
   noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  maxTasks: 25
   onError: stop
 ```
 
-Run logs are stored under the plugin's Obsidian config folder by default. Workflow notes are not modified when workflows run.
+The compatibility parser continues to execute these files and the later
+noncanonical `type: workflow` plus `schemaVersion: 1` variant. Loading a legacy
+file never rewrites it.
 
-When TaskNotes exposes typed runtime API errors, failed task steps store the API error code, status, and details in the run detail alongside the readable error message.
+Use **Migrate workflow files to the mdbase runtime format** to produce a
+non-mutating analysis. The review modal shows every changed block and every
+invalid file. Applying the report:
 
-## Step Catalog
+1. verifies that no candidate changed after analysis
+2. writes originals and a manifest under `.obsidian/tasknotes-workflows/workflow-migrations/`
+3. replaces only analyzed frontmatter while preserving Markdown bodies
+4. restores already changed files if a later write fails
 
-The plugin keeps a typed catalog for all built-in steps. Each catalog entry includes:
-
-- `type`, `label`, `category`, and `description`
-- `inputFields` with field keys, field types, required flags, defaults, and optional dynamic TaskNotes option sources
-- `outputFields` describing values available under `{{steps.stepId.*}}`
-- examples for generated scaffolding
-
-The workflow editor uses this catalog instead of forcing raw JSON for common step inputs. Companion plugins can read the same catalog from the TaskNotes runtime extension:
-
-```ts
-const workflows = app.plugins.getPlugin("tasknotes")?.api.extensions.get("tasknotes-workflows");
-const stepDefinitions = workflows?.listStepDefinitions();
-```
+Saving an individual legacy workflow through the visual editor also writes the
+canonical format, because that save is already an explicit user action.

@@ -1,6 +1,7 @@
 export const PLUGIN_ID = "tasknotes-workflows";
 export const WORKFLOW_BASE_VIEW_TYPE = "tasknotesWorkflows";
-export const WORKFLOW_TYPE = "tasknotes-workflow";
+export const WORKFLOW_TYPE = "workflow";
+export const LEGACY_WORKFLOW_TYPE = "tasknotes-workflow";
 export const DEFAULT_WORKFLOW_FOLDER = "TaskNotes/Workflows";
 export const DEFAULT_WORKFLOW_VIEW_PATH = "TaskNotes/Views/workflows.base";
 export const DEFAULT_SOURCE = "tasknotes-workflows";

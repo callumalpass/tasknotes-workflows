@@ -1,12 +1,13 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"$id": "https://tasknotes.dev/schemas/tasknotes-workflow.schema.json",
-	"title": "TaskNotes Workflow",
+	"$id": "https://tasknotes.dev/schemas/legacy/tasknotes-workflow.schema.json",
+	"title": "Legacy TaskNotes Workflow Input",
+	"$comment": "Compatibility schema only. New and migrated files use the canonical mdbase runtime workflow schema shipped by @callumalpass/mdbase-runtime.",
 	"type": "object",
 	"additionalProperties": true,
 	"required": ["type", "schemaVersion", "id", "name", "enabled", "triggers", "steps", "run"],
 	"properties": {
-		"type": { "const": "tasknotes-workflow" },
+		"type": { "enum": ["workflow", "tasknotes-workflow"] },
 		"schemaVersion": { "const": 1 },
 		"id": {
 			"type": "string",
@@ -15,6 +16,11 @@
 		"name": { "type": "string", "minLength": 1 },
 		"description": { "type": "string" },
 		"enabled": { "type": "boolean" },
+		"requires": { "$ref": "#/$defs/requires" },
+		"vars": {
+			"type": "object",
+			"additionalProperties": true
+		},
 		"triggers": {
 			"type": "array",
 			"minItems": 1,
@@ -29,18 +35,56 @@
 			"minItems": 1,
 			"items": { "$ref": "#/$defs/step" }
 		},
-		"run": { "$ref": "#/$defs/runPolicy" }
+		"run": { "$ref": "#/$defs/runPolicy" },
+		"debug": {
+			"type": "object",
+			"additionalProperties": true,
+			"properties": {
+				"logToVault": { "type": "boolean" },
+				"folder": { "type": "string" },
+				"console": { "type": "boolean" }
+			}
+		}
 	},
 	"$defs": {
+		"requires": {
+			"type": "object",
+			"additionalProperties": true,
+			"properties": {
+				"capabilities": {
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"providers": {
+					"type": "array",
+					"items": {
+						"oneOf": [
+							{ "type": "string", "minLength": 1 },
+							{
+								"type": "object",
+								"required": ["id"],
+								"additionalProperties": false,
+								"properties": {
+									"id": { "type": "string", "minLength": 1 },
+									"version": { "type": "string", "minLength": 1 }
+								}
+							}
+						]
+					}
+				}
+			}
+		},
 		"trigger": {
 			"type": "object",
 			"required": ["id", "type"],
+			"additionalProperties": true,
 			"properties": {
 				"id": { "type": "string" },
 				"type": {
 					"enum": [
 						"tasknotes.event",
 						"task.event",
+						"runtime.event",
 						"cron",
 						"interval",
 						"manual",
@@ -50,25 +94,38 @@
 					]
 				},
 				"event": { "type": "string" },
+				"provider": { "type": "string" },
 				"schedule": { "type": "string" },
 				"every": { "type": "string" },
 				"timezone": { "type": "string" },
 				"from": {},
 				"to": {},
 				"path": { "$ref": "#/$defs/pathFilter" },
-				"allowSelfTrigger": { "type": "boolean" }
+				"debounce": { "type": "string" },
+				"minimumInterval": { "type": "string" },
+				"allowSelfTrigger": { "type": "boolean" },
+				"catchUp": { "type": "boolean" },
+				"data": {}
 			}
 		},
 		"pathFilter": {
 			"type": "object",
+			"additionalProperties": true,
 			"properties": {
 				"glob": { "type": "string" },
 				"extension": { "type": "string" }
 			}
 		},
 		"condition": {
+			"oneOf": [
+				{ "$ref": "#/$defs/expression" },
+				{ "$ref": "#/$defs/fieldCondition" }
+			]
+		},
+		"fieldCondition": {
 			"type": "object",
 			"required": ["field", "operator"],
+			"additionalProperties": true,
 			"properties": {
 				"id": { "type": "string" },
 				"field": { "type": "string" },
@@ -82,6 +139,7 @@
 						"missing",
 						"contains",
 						"startsWith",
+						"endsWith",
 						"before",
 						"after",
 						"onOrBefore",
@@ -94,28 +152,77 @@
 		"step": {
 			"type": "object",
 			"required": ["id", "type"],
+			"additionalProperties": true,
 			"properties": {
 				"id": { "type": "string" },
 				"type": { "type": "string" },
-				"input": { "type": "object" },
+				"name": { "type": "string" },
+				"input": {
+					"type": "object",
+					"additionalProperties": true
+				},
 				"if": {
 					"oneOf": [
 						{ "$ref": "#/$defs/condition" },
 						{ "type": "array", "items": { "$ref": "#/$defs/condition" } }
 					]
 				},
-				"forEach": { "type": "string" }
+				"forEach": {
+					"oneOf": [
+						{ "$ref": "#/$defs/forEach" },
+						{ "type": "string" },
+						{ "$ref": "#/$defs/expression" }
+					]
+				},
+				"requires": { "$ref": "#/$defs/requires" }
+			}
+		},
+		"forEach": {
+			"type": "object",
+			"required": ["items"],
+			"additionalProperties": true,
+			"properties": {
+				"items": {},
+				"as": {
+					"type": "string",
+					"pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+				}
+			}
+		},
+		"expression": {
+			"type": "object",
+			"required": ["$expr"],
+			"additionalProperties": true,
+			"properties": {
+				"$expr": { "type": "string", "minLength": 1 }
 			}
 		},
 		"runPolicy": {
 			"type": "object",
-			"required": ["mode", "noOverlap", "source", "onError"],
+			"required": ["mode", "source", "onError"],
+			"additionalProperties": true,
 			"properties": {
 				"mode": { "const": "sequential" },
-				"noOverlap": { "type": "boolean" },
+				"concurrency": {
+					"type": "object",
+					"additionalProperties": true,
+					"properties": {
+						"group": { "type": "string" },
+						"policy": { "enum": ["skip", "queue", "replace", "allow"] }
+					}
+				},
+				"limits": {
+					"type": "object",
+					"additionalProperties": true,
+					"properties": {
+						"maxItems": { "type": "number", "exclusiveMinimum": 0 },
+						"timeout": { "type": "string" }
+					}
+				},
 				"source": { "type": "string" },
-				"maxTasks": { "type": "number" },
 				"onError": { "enum": ["stop", "continue"] },
+				"noOverlap": { "type": "boolean" },
+				"maxTasks": { "type": "number" },
 				"timeout": { "type": "string" }
 			}
 		}

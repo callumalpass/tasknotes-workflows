@@ -3,10 +3,10 @@ import { DEFAULT_WORKFLOW_FOLDER, DEFAULT_WORKFLOW_VIEW_PATH } from "./constants
 import type TaskNotesWorkflowsPlugin from "../main";
 
 export class WorkflowsSettingsTab extends PluginSettingTab {
-	constructor(app: App, private readonly plugin: TaskNotesWorkflowsPlugin) {
-		super(app, plugin);
-		this.plugin.registerEvent(
-			this.plugin.i18n.on("locale-changed", () => {
+	constructor(app: App, private readonly workflowsPlugin: TaskNotesWorkflowsPlugin) {
+		super(app, workflowsPlugin);
+		this.workflowsPlugin.registerEvent(
+			this.workflowsPlugin.i18n.on("locale-changed", () => {
 				if (this.containerEl.isConnected) this.renderSettings();
 			})
 		);
@@ -21,179 +21,179 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 		containerEl.addClass("tnw-settings");
 
-		new Setting(containerEl).setName(this.plugin.t("settings.workflowFiles.heading")).setHeading();
+		new Setting(containerEl).setName(this.workflowsPlugin.t("settings.workflowFiles.heading")).setHeading();
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.workflowFiles.folder.name"))
-			.setDesc(this.plugin.t("settings.workflowFiles.folder.description"))
+			.setName(this.workflowsPlugin.t("settings.workflowFiles.folder.name"))
+			.setDesc(this.workflowsPlugin.t("settings.workflowFiles.folder.description"))
 			.addText((text) => {
-				text.setValue(this.plugin.settings.workflowFolder);
+				text.setValue(this.workflowsPlugin.settings.workflowFolder);
 				this.commitTextOnFinish(text, (value) => {
 					this.updateWorkflowFolder(value);
 				});
 			});
 
 			new Setting(containerEl)
-				.setName(this.plugin.t("settings.workflowFiles.base.name"))
-				.setDesc(this.plugin.t("settings.workflowFiles.base.description"))
+				.setName(this.workflowsPlugin.t("settings.workflowFiles.base.name"))
+				.setDesc(this.workflowsPlugin.t("settings.workflowFiles.base.description"))
 			.addText((text) =>
-				text.setValue(this.plugin.settings.workflowViewPath).onChange((value) => {
-					this.plugin.settings.workflowViewPath = value.trim() || DEFAULT_WORKFLOW_VIEW_PATH;
-					void this.plugin.saveSettings();
+				text.setValue(this.workflowsPlugin.settings.workflowViewPath).onChange((value) => {
+					this.workflowsPlugin.settings.workflowViewPath = value.trim() || DEFAULT_WORKFLOW_VIEW_PATH;
+					void this.workflowsPlugin.saveSettings();
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.workflowFiles.createDefaults.name"))
-			.setDesc(this.plugin.t("settings.workflowFiles.createDefaults.description"))
+			.setName(this.workflowsPlugin.t("settings.workflowFiles.createDefaults.name"))
+			.setDesc(this.workflowsPlugin.t("settings.workflowFiles.createDefaults.description"))
 			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.autoCreateDefaultWorkflows).onChange((value) => {
-					this.plugin.settings.autoCreateDefaultWorkflows = value;
-					void this.plugin.saveSettings();
+				toggle.setValue(this.workflowsPlugin.settings.autoCreateDefaultWorkflows).onChange((value) => {
+					this.workflowsPlugin.settings.autoCreateDefaultWorkflows = value;
+					void this.workflowsPlugin.saveSettings();
 				})
 			);
 
 			new Setting(containerEl)
-				.setName(this.plugin.t("settings.workflowFiles.createBase.name"))
-				.setDesc(this.plugin.t("settings.workflowFiles.createBase.description"))
+				.setName(this.workflowsPlugin.t("settings.workflowFiles.createBase.name"))
+				.setDesc(this.workflowsPlugin.t("settings.workflowFiles.createBase.description"))
 			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.autoCreateWorkflowView).onChange((value) => {
-					this.plugin.settings.autoCreateWorkflowView = value;
-					void this.plugin.saveSettings();
+				toggle.setValue(this.workflowsPlugin.settings.autoCreateWorkflowView).onChange((value) => {
+					this.workflowsPlugin.settings.autoCreateWorkflowView = value;
+					void this.workflowsPlugin.saveSettings();
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.workflowFiles.maintainDefaults.name"))
-			.setDesc(this.plugin.t("settings.workflowFiles.maintainDefaults.description"))
+			.setName(this.workflowsPlugin.t("settings.workflowFiles.maintainDefaults.name"))
+			.setDesc(this.workflowsPlugin.t("settings.workflowFiles.maintainDefaults.description"))
 			.addButton((button) =>
 				button
-					.setButtonText(this.plugin.t("common.maintain"))
+					.setButtonText(this.workflowsPlugin.t("common.maintain"))
 					.setCta()
 					.onClick(() => {
-						void this.plugin.ensureDefaultFiles().then((result) => {
-							this.plugin.showDefaultFilesNotice(result);
+						void this.workflowsPlugin.ensureDefaultFiles().then((result) => {
+							this.workflowsPlugin.showDefaultFilesNotice(result);
 						});
 					})
 			);
 
-		new Setting(containerEl).setName(this.plugin.t("settings.triggers.heading")).setHeading();
+		new Setting(containerEl).setName(this.workflowsPlugin.t("settings.triggers.heading")).setHeading();
 
 			new Setting(containerEl)
-				.setName(this.plugin.t("settings.triggers.tasknotesEvents.name"))
-				.setDesc(this.plugin.t("settings.triggers.tasknotesEvents.description"))
+				.setName(this.workflowsPlugin.t("settings.triggers.tasknotesEvents.name"))
+				.setDesc(this.workflowsPlugin.t("settings.triggers.tasknotesEvents.description"))
 			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.enableTaskEventTriggers).onChange((value) => {
-					this.plugin.settings.enableTaskEventTriggers = value;
-					void this.plugin.saveSettingsAndReload();
+				toggle.setValue(this.workflowsPlugin.settings.enableTaskEventTriggers).onChange((value) => {
+					this.workflowsPlugin.settings.enableTaskEventTriggers = value;
+					void this.workflowsPlugin.saveSettingsAndReload();
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.triggers.scheduled.name"))
-			.setDesc(this.plugin.t("settings.triggers.scheduled.description"))
+			.setName(this.workflowsPlugin.t("settings.triggers.scheduled.name"))
+			.setDesc(this.workflowsPlugin.t("settings.triggers.scheduled.description"))
 			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.enableScheduledTriggers).onChange((value) => {
-					this.plugin.settings.enableScheduledTriggers = value;
-					void this.plugin.saveSettingsAndReload();
+				toggle.setValue(this.workflowsPlugin.settings.enableScheduledTriggers).onChange((value) => {
+					this.workflowsPlugin.settings.enableScheduledTriggers = value;
+					void this.workflowsPlugin.saveSettingsAndReload();
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.triggers.obsidian.name"))
-			.setDesc(this.plugin.t("settings.triggers.obsidian.description"))
+			.setName(this.workflowsPlugin.t("settings.triggers.obsidian.name"))
+			.setDesc(this.workflowsPlugin.t("settings.triggers.obsidian.description"))
 			.addToggle((toggle) =>
-				toggle.setValue(this.plugin.settings.enableObsidianTriggers).onChange((value) => {
-					this.plugin.settings.enableObsidianTriggers = value;
-					void this.plugin.saveSettingsAndReload();
+				toggle.setValue(this.workflowsPlugin.settings.enableObsidianTriggers).onChange((value) => {
+					this.workflowsPlugin.settings.enableObsidianTriggers = value;
+					void this.workflowsPlugin.saveSettingsAndReload();
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.triggers.minInterval.name"))
-			.setDesc(this.plugin.t("settings.triggers.minInterval.description"))
+			.setName(this.workflowsPlugin.t("settings.triggers.minInterval.name"))
+			.setDesc(this.workflowsPlugin.t("settings.triggers.minInterval.description"))
 			.addText((text) =>
-				text.setValue(String(this.plugin.settings.minIntervalMs)).onChange((value) => {
+				text.setValue(String(this.workflowsPlugin.settings.minIntervalMs)).onChange((value) => {
 					const next = Number(value);
 					if (Number.isFinite(next)) {
-						this.plugin.settings.minIntervalMs = Math.max(30_000, next);
-						void this.plugin.saveSettingsAndReload();
+						this.workflowsPlugin.settings.minIntervalMs = Math.max(30_000, next);
+						void this.workflowsPlugin.saveSettingsAndReload();
 					}
 				})
 			);
 
-		new Setting(containerEl).setName(this.plugin.t("settings.runLogs.heading")).setHeading();
+		new Setting(containerEl).setName(this.workflowsPlugin.t("settings.runLogs.heading")).setHeading();
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.runLogs.folder.name"))
-			.setDesc(this.plugin.t("settings.runLogs.folder.description"))
+			.setName(this.workflowsPlugin.t("settings.runLogs.folder.name"))
+			.setDesc(this.workflowsPlugin.t("settings.runLogs.folder.description"))
 			.addText((text) =>
-				text.setValue(this.plugin.settings.runLogRoot).onChange((value) => {
-					this.plugin.settings.runLogRoot = value.trim();
-					void this.plugin.saveSettings();
+				text.setValue(this.workflowsPlugin.settings.runLogRoot).onChange((value) => {
+					this.workflowsPlugin.settings.runLogRoot = value.trim();
+					void this.workflowsPlugin.saveSettings();
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.runLogs.level.name"))
-			.setDesc(this.plugin.t("settings.runLogs.level.description"))
+			.setName(this.workflowsPlugin.t("settings.runLogs.level.name"))
+			.setDesc(this.workflowsPlugin.t("settings.runLogs.level.description"))
 			.addDropdown((dropdown) =>
 				dropdown
-					.addOption("summary", this.plugin.t("settings.runLogs.level.options.summary"))
-					.addOption("inputs", this.plugin.t("settings.runLogs.level.options.inputs"))
-					.addOption("inputs-and-outputs", this.plugin.t("settings.runLogs.level.options.inputsAndOutputs"))
-					.setValue(this.plugin.settings.runLogLevel)
+					.addOption("summary", this.workflowsPlugin.t("settings.runLogs.level.options.summary"))
+					.addOption("inputs", this.workflowsPlugin.t("settings.runLogs.level.options.inputs"))
+					.addOption("inputs-and-outputs", this.workflowsPlugin.t("settings.runLogs.level.options.inputsAndOutputs"))
+					.setValue(this.workflowsPlugin.settings.runLogLevel)
 					.onChange((value) => {
-						this.plugin.settings.runLogLevel = value as typeof this.plugin.settings.runLogLevel;
-						void this.plugin.saveSettings();
+						this.workflowsPlugin.settings.runLogLevel = value as typeof this.workflowsPlugin.settings.runLogLevel;
+						void this.workflowsPlugin.saveSettings();
 					})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.runLogs.retention.name"))
-			.setDesc(this.plugin.t("settings.runLogs.retention.description"))
+			.setName(this.workflowsPlugin.t("settings.runLogs.retention.name"))
+			.setDesc(this.workflowsPlugin.t("settings.runLogs.retention.description"))
 			.addText((text) =>
-				text.setValue(String(this.plugin.settings.maxRunsPerWorkflow)).onChange((value) => {
+				text.setValue(String(this.workflowsPlugin.settings.maxRunsPerWorkflow)).onChange((value) => {
 					const next = Number(value);
 					if (Number.isFinite(next)) {
-						this.plugin.settings.maxRunsPerWorkflow = Math.max(10, next);
-						void this.plugin.saveSettings();
+						this.workflowsPlugin.settings.maxRunsPerWorkflow = Math.max(10, next);
+						void this.workflowsPlugin.saveSettings();
 					}
 				})
 			);
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.runLogs.clear.name"))
-			.setDesc(this.plugin.t("settings.runLogs.clear.description"))
+			.setName(this.workflowsPlugin.t("settings.runLogs.clear.name"))
+			.setDesc(this.workflowsPlugin.t("settings.runLogs.clear.description"))
 			.addButton((button) =>
-				button.setButtonText(this.plugin.t("common.clear")).onClick(() => {
-					void this.plugin.clearRunHistory().then(() => new Notice(this.plugin.t("notices.runHistoryCleared")));
+				button.setButtonText(this.workflowsPlugin.t("common.clear")).onClick(() => {
+					void this.workflowsPlugin.clearRunHistory().then(() => new Notice(this.workflowsPlugin.t("notices.runHistoryCleared")));
 				})
 			);
 
-		new Setting(containerEl).setName(this.plugin.t("settings.language.heading")).setHeading();
+		new Setting(containerEl).setName(this.workflowsPlugin.t("settings.language.heading")).setHeading();
 
 		new Setting(containerEl)
-			.setName(this.plugin.t("settings.language.name"))
-			.setDesc(this.plugin.t("settings.language.dropdownDescription"))
+			.setName(this.workflowsPlugin.t("settings.language.name"))
+			.setDesc(this.workflowsPlugin.t("settings.language.dropdownDescription"))
 			.addDropdown((dropdown) => {
-				dropdown.addOption("system", this.plugin.t("common.systemDefault"));
-				for (const code of this.plugin.i18n.getAvailableLocales()) {
-					dropdown.addOption(code, this.plugin.i18n.getNativeLanguageName(code));
+				dropdown.addOption("system", this.workflowsPlugin.t("common.systemDefault"));
+				for (const code of this.workflowsPlugin.i18n.getAvailableLocales()) {
+					dropdown.addOption(code, this.workflowsPlugin.i18n.getNativeLanguageName(code));
 				}
-				dropdown.setValue(this.plugin.settings.uiLanguage ?? "system").onChange((value) => {
-					this.plugin.settings.uiLanguage = value;
-					this.plugin.i18n.setLocale(value);
-					void this.plugin.saveSettings();
+				dropdown.setValue(this.workflowsPlugin.settings.uiLanguage ?? "system").onChange((value) => {
+					this.workflowsPlugin.settings.uiLanguage = value;
+					this.workflowsPlugin.i18n.setLocale(value);
+					void this.workflowsPlugin.saveSettings();
 				});
 			});
 	}
 
 	private updateWorkflowFolder(value: string): void {
 		const next = value.trim() || DEFAULT_WORKFLOW_FOLDER;
-		if (next === this.plugin.settings.workflowFolder) return;
-		this.plugin.settings.workflowFolder = next;
-		void this.plugin.saveSettingsAndReload();
+		if (next === this.workflowsPlugin.settings.workflowFolder) return;
+		this.workflowsPlugin.settings.workflowFolder = next;
+		void this.workflowsPlugin.saveSettingsAndReload();
 	}
 
 	private commitTextOnFinish(text: TextComponent, onCommit: (value: string) => void): void {

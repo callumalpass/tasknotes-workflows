@@ -15,6 +15,10 @@ import { buildWorkflowBasesViewFactory, WorkflowBasesView } from "./src/workflow
 import { refreshWorkflowNoteCards, registerWorkflowNoteCards } from "./src/workflowNoteCard";
 import { WorkflowEditModal } from "./src/workflowEditModal";
 import { createI18nService, I18nService, type InterpolationValues } from "./src/i18n";
+import { createWorkflowsRuntimeProvider, WORKFLOW_RUN_ACTION } from "./src/runtimeProvider";
+import { WorkflowMigrationService } from "./src/workflowMigration";
+import { WorkflowMigrationModal } from "./src/workflowMigrationModal";
+import { workflowToRuntimeRecord } from "./src/workflowFormat";
 import type {
 	LoadedWorkflow,
 	RunSummary,
@@ -25,6 +29,7 @@ import type {
 	TaskNotesRuntimeQueryValidationResult,
 	TaskNotesWorkflowsSettings,
 	WorkflowDynamicFieldOptions,
+	WorkflowDefinition,
 	WorkflowFieldOption,
 	WorkflowRunDetail,
 	WorkflowRunOptions,
@@ -42,6 +47,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	private engine!: WorkflowEngine;
 	private scheduler!: WorkflowScheduler;
 	private defaults!: DefaultWorkflowsService;
+	private workflowMigrations!: WorkflowMigrationService;
 	private loadedWorkflows: LoadedWorkflow[] = [];
 	private workflowBaseViews = new Set<WorkflowBasesView>();
 	private staticWorkflowCommandIds = new Set<string>();
@@ -79,7 +85,8 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			this.stepRegistry,
 			() => this.bridge.api,
 			() => this.app,
-			(key, params) => this.t(key, params)
+			(key, params) => this.t(key, params),
+			() => this.bridge.runtimeHost
 		);
 		this.scheduler = new WorkflowScheduler(
 			this,
@@ -89,6 +96,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			(workflow, options) => this.executeWorkflow(workflow, options)
 		);
 		this.defaults = new DefaultWorkflowsService(this.app, () => this.settings);
+		this.workflowMigrations = new WorkflowMigrationService(this.app, this.repository);
 
 		this.addSettingTab(new WorkflowsSettingsTab(this.app, this));
 		this.registerWorkflowBasesView();
@@ -120,6 +128,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		this.unregisterManualWorkflowCommands();
 		this.scheduler.stop();
 		this.bridge.unregisterExtension();
+		void this.bridge.unregisterRuntimeProvider();
 	}
 
 	async loadSettings(): Promise<void> {
@@ -151,6 +160,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	async reloadWorkflows(): Promise<void> {
 		this.loadedWorkflows = await this.repository.reload();
 		this.loadedWorkflows = await this.withLastRunSummaries(this.loadedWorkflows);
+		if (this.bridge?.runtimeHost) await this.refreshRuntimeProvider();
 		this.scheduler.start();
 		this.refreshManualWorkflowCommands();
 		await this.renderWorkflowBaseViews();
@@ -166,6 +176,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		return await this.executeWorkflow(workflow, {
 			trigger: {
 				type: options.dryRun ? "dry-run" : "manual",
+				triggerType: "manual",
 				event: options.dryRun ? "dry-run" : "manual",
 				manual: true,
 				actualAt: new Date().toISOString(),
@@ -313,6 +324,26 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			},
 		});
 		this.staticWorkflowCommandIds.add("maintain-default-workflows");
+
+		this.addCommand({
+			id: "migrate-workflow-files",
+			name: this.t("commands.migrateWorkflowFiles"),
+			icon: "replace-all",
+			callback: () => {
+				void this.workflowMigrations.analyze()
+					.then((report) => {
+						new WorkflowMigrationModal(
+							this.app,
+							this.workflowMigrations,
+							report,
+							() => this.reloadWorkflows(),
+							(key, params) => this.t(key, params)
+						).open();
+					})
+					.catch((error: unknown) => new Notice(error instanceof Error ? error.message : String(error)));
+			},
+		});
+		this.staticWorkflowCommandIds.add("migrate-workflow-files");
 	}
 
 	private refreshStaticWorkflowCommands(): void {
@@ -475,6 +506,23 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	private registerRuntimeExtension(): void {
 		this.bridge.registerExtension(this.runtimeApi(), this.manifest.version, this.t("common.appName"));
+		this.bridge.registerRuntimeProvider(this.createRuntimeProvider());
+	}
+
+	private createRuntimeProvider(): ReturnType<typeof createWorkflowsRuntimeProvider> {
+		return createWorkflowsRuntimeProvider({
+			version: this.manifest.version,
+			workflows: this.loadedWorkflows
+				.filter((loaded): loaded is LoadedWorkflow & { workflow: WorkflowDefinition } =>
+					loaded.sourceFormat === "runtime-v0.1" && loaded.workflow !== null
+				)
+				.map((loaded) => workflowToRuntimeRecord(loaded.workflow)),
+			runWorkflow: (workflowId, input) => this.runWorkflowById(workflowId, input),
+		});
+	}
+
+	private async refreshRuntimeProvider(): Promise<void> {
+		await this.bridge.replaceRuntimeProvider(this.createRuntimeProvider());
 	}
 
 	private refreshTaskNotesRuntimeState(): void {
@@ -482,6 +530,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		if (!available) {
 			if (this.tasknotesRuntimeAvailable) {
 				this.bridge.unregisterExtension();
+				void this.bridge.unregisterRuntimeProvider();
 				this.tasknotesLifecycleRegistered = false;
 			}
 			this.tasknotesRuntimeAvailable = false;
@@ -543,9 +592,17 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 					supportsForEach: step.supportsForEach,
 				})),
 			runWorkflow: async (workflowId, input) =>
-				await this.runWorkflowById(workflowId, { ...input, dryRun: false }),
+				await this.bridge.dispatchRuntimeAction(WORKFLOW_RUN_ACTION, {
+					workflow_id: workflowId,
+					trigger: input?.trigger,
+					dry_run: false,
+				}) as WorkflowRunDetail,
 			dryRunWorkflow: async (workflowId, input) =>
-				await this.runWorkflowById(workflowId, { ...input, dryRun: true }),
+				await this.bridge.dispatchRuntimeAction(WORKFLOW_RUN_ACTION, {
+					workflow_id: workflowId,
+					trigger: input?.trigger,
+					dry_run: true,
+				}) as WorkflowRunDetail,
 			reloadWorkflows: async () => await this.reloadWorkflows(),
 			validateWorkflows: async () => {
 				await this.reloadWorkflows();
@@ -578,6 +635,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 				...step,
 				output: this.settings.runLogLevel === "summary" ? undefined : step.output,
 				input: this.settings.runLogLevel === "summary" ? undefined : step.input,
+				sourceInput: this.settings.runLogLevel === "summary" ? undefined : step.sourceInput,
 			})),
 		};
 	}

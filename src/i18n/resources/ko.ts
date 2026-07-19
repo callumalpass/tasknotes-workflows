@@ -38,7 +38,16 @@ export const ko: TranslationTree = {
 		newWorkflow: "새로운 작업 흐름",
 		reloadWorkflows: "워크플로 다시 로드",
 		maintainDefaultWorkflows: "기본 워크플로우 파일 유지",
+		migrateWorkflowFiles: "워크플로 파일을 mdbase 런타임 형식으로 마이그레이션",
 		runWorkflow: "실행: {name}",
+	},
+	migration: {
+		title: "워크플로 파일 마이그레이션",
+		summary: "변환 가능 {convertible}개, 이미 표준 형식 {canonical}개, 수동 확인 필요 {invalid}개.",
+		manualAttention: "수동 확인",
+		unrecognized: "인식할 수 있는 워크플로 형식이 아닙니다.",
+		apply: "워크플로 {count}개 마이그레이션",
+		completed: "워크플로 {count}개를 마이그레이션했습니다. 백업: {path}",
 	},
 	notices: {
 		languageChanged: "언어가 {language}로 변경되었습니다.",
@@ -173,6 +182,7 @@ export const ko: TranslationTree = {
 			other: "{count} 단계",
 		},
 		input: "입력",
+		sourceInput: "Source input",
 		output: "출력",
 		empty: {
 			diagnostics: "실행을 표시하려면 먼저 워크플로 진단을 수정해야 합니다.",
@@ -189,7 +199,7 @@ export const ko: TranslationTree = {
 		stepFailed: "단계가 실패했습니다.",
 		unknownStepType: "알 수 없는 단계 유형: {type}",
 		forEachNonArray: "forEach는 non-array 값으로 확인되었습니다.",
-		forEachTooManyItems: "forEach는 run.maxTasks {max}보다 높은 {count} 항목을 선택했습니다.",
+		forEachTooManyItems: "forEach는 run.limits.maxItems {max}보다 높은 {count} 항목을 선택했습니다.",
 	},
 	editor: {
 		title: {
@@ -254,6 +264,7 @@ export const ko: TranslationTree = {
 			id: "ID",
 			typeLabel: "유형",
 			tasknotesEvent: "TaskNotes 이벤트",
+			runtimeProvider: "런타임 공급자",
 			fromStatus: "상태에서",
 			toStatus: "상태로",
 			pathGlob: "경로 글로브",
@@ -281,6 +292,10 @@ export const ko: TranslationTree = {
 				tasknotesEvent: {
 					label: "TaskNotes 이벤트",
 					description: "TaskNotes가 선택한 런타임 이벤트를 내보낼 때 실행됩니다.",
+				},
+				runtimeEvent: {
+					label: "런타임 이벤트",
+					description: "등록된 mdbase 런타임 공급자가 선택한 이벤트를 보낼 때 실행합니다.",
 				},
 				cron: {
 					label: "Cron 일정",
@@ -414,11 +429,27 @@ export const ko: TranslationTree = {
 						label: "현황",
 						description: "이벤트 후 작업 상태입니다.",
 					},
+					scheduled: {
+						label: "Scheduled date",
+						description: "The task scheduled date after the event.",
+					},
+					due: {
+						label: "Due date",
+						description: "The task due date after the event.",
+					},
 				},
 				before: {
 					status: {
 						label: "이전 상태",
 						description: "이벤트 전 작업 상태입니다.",
+					},
+					scheduled: {
+						label: "Previous scheduled date",
+						description: "The task scheduled date before the event.",
+					},
+					due: {
+						label: "Previous due date",
+						description: "The task due date before the event.",
 					},
 				},
 				changes: {
@@ -475,6 +506,7 @@ export const ko: TranslationTree = {
 			advancedDescription: "안정적인 ID는 이후 단계에 대한 참조를 생성합니다. 일괄 실행에서는 각 값에 대해 선택 사항을 사용합니다.",
 			forEach: "각각에 대해",
 			forEachHelp: "일괄 단계에 대한 선택적 배열 참조입니다.",
+			forEachAs: "루프 별칭",
 			inputJson: "JSON를 입력하세요",
 			writes: "쓴다",
 			needsAttention: "주의가 필요함",
@@ -491,10 +523,18 @@ export const ko: TranslationTree = {
 		},
 		runPolicy: {
 			noOverlap: "중복 없음",
+			concurrencyPolicy: "동시 실행",
+			concurrencyPolicies: {
+				skip: "실행 중이면 건너뛰기",
+				queue: "실행 중이면 대기열에 추가",
+				replace: "활성 실행 교체",
+				allow: "병렬 실행 허용",
+			},
+			concurrencyGroup: "동시 실행 그룹",
 			onError: "오류 발생 시",
 			advancedTitle: "고급 실행 제한",
 			advancedDescription: "이러한 값은 자동화된 실행을 식별 가능하고 제한적으로 유지합니다.",
-			maxTasks: "최대 작업",
+			maxItems: "최대 작업",
 			source: "소스",
 		},
 		footer: {
@@ -509,6 +549,31 @@ export const ko: TranslationTree = {
 			triggerValue: "{label} 트리거",
 			stepValue: "{stepId} {label}",
 		},
+		expressions: {
+			mode: "Value mode",
+			modes: {
+				fixedDate: "Fixed date",
+				workflowValue: "Workflow value",
+				relativeDate: "Relative date",
+				advanced: "Advanced expression",
+			},
+			fixedDate: "Date",
+			sourceValue: "Source value",
+			amount: "Amount",
+			unit: "Unit",
+			units: {
+				day: "Days",
+				week: "Weeks",
+				month: "Months",
+				year: "Years",
+			},
+			advancedTitle: "Use expression",
+			advancedDescription: "Return a computed value for this field.",
+			formulaLabel: "Bases 수식",
+			openBuilder: "수식 빌더 열기",
+			jsonLabel: "Expression JSON",
+			helperList: "Available helpers: {helpers}",
+		},
 		validation: {
 			nameRequired: "이름은 필수입니다.",
 			invalidWorkflowId: "소문자, 숫자, 점, 밑줄, 대시를 사용하세요. 편지로 시작하세요.",
@@ -517,6 +582,7 @@ export const ko: TranslationTree = {
 			invalidTriggerId: "트리거 ID는 문자로 시작하고 id-safe 문자를 사용해야 합니다.",
 			duplicateTriggerId: "트리거 ID는 고유해야 합니다.",
 			tasknotesEventRequired: "TaskNotes 이벤트를 선택하세요.",
+			runtimeEventRequired: "런타임 이벤트 ID를 입력하세요.",
 			cronScheduleRequired: "cron 일정을 추가합니다.",
 			intervalRequired: "간격을 추가합니다.",
 			stepRequired: "단계를 하나 이상 추가하세요.",
@@ -526,6 +592,41 @@ export const ko: TranslationTree = {
 			fieldRequired: "{field}가 필요합니다.",
 			positiveNumber: "양수를 사용하세요.",
 			jsonObject: "단계 입력은 JSON 객체여야 합니다.",
+			invalidExpression: "Expression is invalid.",
+		},
+		query: {
+			preview: "Preview",
+			previewUnavailable: "TaskNotes query preview is unavailable.",
+			previewResult: "Query matches {matched} of {total} tasks and returns {returned}.",
+			runtimeUnavailable: "Load TaskNotes to edit query fields from the runtime catalog.",
+			advancedOnly: "This query uses nesting or negation. Edit the JSON directly.",
+			valid: "TaskNotes accepts this query.",
+			invalid: "TaskNotes query is invalid.",
+			match: "Match",
+			matchAll: "All conditions",
+			matchAny: "Any condition",
+			addCondition: "Add condition",
+			removeCondition: "Remove condition",
+			noConditions: "No conditions. The query will match all tasks in scope.",
+			field: "Field",
+			operator: "Operator",
+			value: "Value",
+			noValue: "No value",
+			true: "True",
+			false: "False",
+			options: "Sort, group, and scope",
+			optionsDescription: "Optional result controls for this task query.",
+			sortField: "Sort by",
+			sortDirection: "Direction",
+			ascending: "Ascending",
+			descending: "Descending",
+			groupField: "Group by",
+			limit: "Limit",
+			includeArchived: "Include archived tasks",
+			none: "None",
+			jsonTitle: "Advanced JSON",
+			jsonDescription: "Use this for nested groups, negation, date math, folders, offsets, or exact API input.",
+			jsonLabel: "Runtime query JSON",
 		},
 	},
 	steps: {
@@ -539,7 +640,7 @@ export const ko: TranslationTree = {
 		common: {
 			task: {
 				label: "작업",
-				description: "TaskNotes 작업에 대한 Vault 경로입니다. 트리거된 작업 워크플로는 일반적으로 {{trigger.after.path}}를 사용합니다.",
+				description: "TaskNotes 작업에 대한 Vault 경로입니다. 트리거된 작업 워크플로는 일반적으로 {{event.after.path}}를 사용합니다.",
 			},
 			path: {
 				label: "경로",
@@ -581,7 +682,35 @@ export const ko: TranslationTree = {
 						},
 						count: {
 							label: "개수",
-							description: "일치하는 작업 수입니다.",
+							description: "Number of returned tasks.",
+						},
+						total: {
+							label: "Total",
+							description: "Total tasks before filtering.",
+						},
+						matched: {
+							label: "Matched",
+							description: "Tasks matching the query before offset and limit.",
+						},
+						returned: {
+							label: "Returned",
+							description: "Tasks returned after offset and limit.",
+						},
+						groups: {
+							label: "Groups",
+							description: "TaskNotes query group details.",
+						},
+						groupPaths: {
+							label: "Group paths",
+							description: "Task paths keyed by group key.",
+						},
+						query: {
+							label: "Query",
+							description: "The normalized TaskNotes runtime query.",
+						},
+						warnings: {
+							label: "Warnings",
+							description: "Non-fatal TaskNotes query warnings.",
 						},
 					},
 					examples: {

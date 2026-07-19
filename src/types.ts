@@ -1,4 +1,8 @@
 import type { App, EventRef, TFile } from "obsidian";
+import type {
+	MdbaseProviderRequirement,
+	MdbaseRuntimeEventEnvelope,
+} from "@callumalpass/mdbase-runtime";
 
 export interface TaskNotesWorkflowsSettings {
 	workflowFolder: string;
@@ -29,10 +33,13 @@ export interface LoadedWorkflow {
 	file: TFile;
 	body: string;
 	source: string;
+	sourceFormat: WorkflowSourceFormat;
 	workflow: WorkflowDefinition | null;
 	diagnostics: WorkflowDiagnostic[];
 	lastRun?: RunSummary;
 }
+
+export type WorkflowSourceFormat = "runtime-v0.1" | "tasknotes-v1" | "tasknotes-v0.1" | "unknown";
 
 export interface WorkflowDiagnostic {
 	severity: "error" | "warning";
@@ -41,12 +48,13 @@ export interface WorkflowDiagnostic {
 }
 
 export interface WorkflowDefinition {
-	type: "tasknotes-workflow";
+	type: "workflow";
 	schemaVersion: 1;
 	id: string;
 	name: string;
 	enabled: boolean;
 	description?: string;
+	requires?: WorkflowRequires;
 	triggers: WorkflowTrigger[];
 	vars: Record<string, unknown>;
 	query?: Record<string, unknown>;
@@ -54,10 +62,17 @@ export interface WorkflowDefinition {
 	steps: WorkflowStep[];
 	run: WorkflowRunPolicy;
 	debug?: WorkflowDebugSettings;
+	extensions?: Record<`x-${string}`, unknown>;
+}
+
+export interface WorkflowRequires {
+	capabilities?: string[];
+	providers?: MdbaseProviderRequirement[];
 }
 
 export type WorkflowTrigger =
 	| TaskNotesEventTrigger
+	| MdbaseRuntimeEventTrigger
 	| CronTrigger
 	| IntervalTrigger
 	| ManualTrigger
@@ -70,6 +85,7 @@ export interface WorkflowTriggerBase {
 	type: string;
 	debounce?: string;
 	minimumInterval?: string;
+	extensions?: Record<`x-${string}`, unknown>;
 }
 
 export interface TaskNotesEventTrigger extends WorkflowTriggerBase {
@@ -79,6 +95,13 @@ export interface TaskNotesEventTrigger extends WorkflowTriggerBase {
 	to?: unknown;
 	path?: PathFilter;
 	allowSelfTrigger?: boolean;
+}
+
+export interface MdbaseRuntimeEventTrigger extends WorkflowTriggerBase {
+	type: "runtime.event";
+	event: string;
+	provider?: string;
+	path?: PathFilter;
 }
 
 export interface CronTrigger extends WorkflowTriggerBase {
@@ -120,7 +143,18 @@ export interface PathFilter {
 	extension?: string;
 }
 
-export interface WorkflowCondition {
+export type WorkflowExpressionValue = {
+	$expr: string;
+	[key: string]: unknown;
+};
+
+export type WorkflowCondition = WorkflowExpressionCondition | WorkflowFieldCondition;
+
+export interface WorkflowExpressionCondition extends WorkflowExpressionValue {
+	id?: string;
+}
+
+export interface WorkflowFieldCondition {
 	id?: string;
 	field: string;
 	operator: ConditionOperator;
@@ -144,17 +178,34 @@ export type ConditionOperator =
 export interface WorkflowStep {
 	id: string;
 	type: string;
+	name?: string;
 	input?: Record<string, unknown>;
 	if?: WorkflowCondition | WorkflowCondition[];
-	forEach?: string;
+	forEach?: WorkflowForEach;
+	requires?: WorkflowRequires;
+	extensions?: Record<`x-${string}`, unknown>;
+}
+
+export interface WorkflowForEach {
+	items: unknown;
+	as?: string;
 }
 
 export interface WorkflowRunPolicy {
 	mode: "sequential";
-	noOverlap: boolean;
+	concurrency: WorkflowRunConcurrency;
+	limits: WorkflowRunLimits;
 	source: string;
-	maxTasks: number;
 	onError: "stop" | "continue";
+}
+
+export interface WorkflowRunConcurrency {
+	group: string;
+	policy: "skip" | "queue" | "replace" | "allow";
+}
+
+export interface WorkflowRunLimits {
+	maxItems: number;
 	timeout?: string;
 }
 
@@ -166,6 +217,7 @@ export interface WorkflowDebugSettings {
 export interface WorkflowTriggerPayload {
 	type: string;
 	id?: string;
+	triggerType?: string;
 	event?: string;
 	task?: Record<string, unknown>;
 	before?: Record<string, unknown>;
@@ -189,17 +241,25 @@ export interface WorkflowRunOptions {
 }
 
 export interface WorkflowRunContext {
+	[key: string]: unknown;
 	workflow: {
 		id: string;
 		name: string;
 		filePath: string;
 	};
-	trigger: WorkflowTriggerPayload;
+	trigger: WorkflowTrigger | { id?: string; type: string };
+	event: WorkflowTriggerPayload;
 	vars: Record<string, unknown>;
-	steps: Record<string, unknown>;
+	steps: Record<string, WorkflowStepResult>;
 	now: string;
 	today: string;
 	item?: unknown;
+}
+
+export interface WorkflowStepResult {
+	status: WorkflowStepStatus;
+	output?: unknown;
+	error?: string;
 }
 
 export interface WorkflowRunDetail {
@@ -218,14 +278,16 @@ export interface WorkflowRunDetail {
 }
 
 export type WorkflowRunStatus = "success" | "failed" | "skipped" | "stopped";
+export type WorkflowStepStatus = "pending" | "running" | "success" | "skipped" | "failed" | "cancelled";
 
 export interface StepRunDetail {
 	id: string;
 	type: string;
-	status: WorkflowRunStatus;
+	status: WorkflowStepStatus;
 	startedAt: string;
 	endedAt?: string;
 	durationMs?: number;
+	sourceInput?: unknown;
 	input?: unknown;
 	output?: unknown;
 	error?: string;
@@ -426,6 +488,8 @@ export interface TaskNotesRuntimeApi {
 		}): { unregister(): void };
 	};
 }
+
+export type TaskNotesMdbaseRuntimeEventEnvelope = MdbaseRuntimeEventEnvelope;
 
 export interface TaskNotesRuntimeCatalogOption {
 	id?: string;

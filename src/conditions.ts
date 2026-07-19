@@ -1,3 +1,4 @@
+import { evaluateWorkflowExpression, isWorkflowExpression } from "./expressions";
 import { readReference, resolveTemplateValue } from "./template";
 import type { ConditionOperator, WorkflowCondition, WorkflowRunContext } from "./types";
 
@@ -9,6 +10,10 @@ export function conditionsMatch(
 }
 
 export function conditionMatches(condition: WorkflowCondition, context: WorkflowRunContext): boolean {
+	if (isWorkflowExpression(condition)) {
+		return isTruthy(evaluateWorkflowExpression(condition, context));
+	}
+
 	const actual = readReference(context, condition.field);
 	const expected = resolveTemplateValue(condition.value, context);
 
@@ -40,6 +45,11 @@ export function conditionMatches(condition: WorkflowCondition, context: Workflow
 		default:
 			assertNever(condition.operator);
 	}
+}
+
+function isTruthy(value: unknown): boolean {
+	if (Array.isArray(value)) return value.length > 0;
+	return Boolean(value);
 }
 
 export function isConditionOperator(value: unknown): value is ConditionOperator {

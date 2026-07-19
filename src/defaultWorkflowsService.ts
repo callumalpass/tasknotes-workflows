@@ -1,5 +1,7 @@
 import { normalizePath, type App } from "obsidian";
 import { DEFAULT_WORKFLOW_FOLDER, DEFAULT_WORKFLOW_VIEW_PATH, WORKFLOW_BASE_VIEW_TYPE } from "./constants";
+import { parseMarkdownFrontmatter, replaceMarkdownFrontmatter } from "./frontmatter";
+import { parseWorkflowDefinition, workflowToFrontmatter } from "./workflowParser";
 import type { TaskNotesWorkflowsSettings } from "./types";
 
 interface DefaultWorkflow {
@@ -25,7 +27,7 @@ export class DefaultWorkflowsService {
 		const written: string[] = [];
 		for (const workflow of defaultWorkflows(folder)) {
 			if (await this.app.vault.adapter.exists(workflow.path)) continue;
-			await this.app.vault.create(workflow.path, workflow.content);
+			await this.app.vault.create(workflow.path, canonicalWorkflowMarkdown(workflow.content));
 			written.push(workflow.path);
 		}
 		return written;
@@ -53,11 +55,21 @@ export class DefaultWorkflowsService {
 	}
 }
 
+function canonicalWorkflowMarkdown(markdown: string): string {
+	const parsed = parseMarkdownFrontmatter(markdown);
+	if (parsed.error) throw new Error(parsed.error);
+	const result = parseWorkflowDefinition(parsed.data, markdown);
+	if (!result.workflow) {
+		throw new Error(result.diagnostics.map((diagnostic) => `${diagnostic.path}: ${diagnostic.message}`).join("; "));
+	}
+	return replaceMarkdownFrontmatter(markdown, workflowToFrontmatter(result.workflow));
+}
+
 function workflowViewFile(workflowFolder: string): string {
 	const folder = normalizePath(workflowFolder || DEFAULT_WORKFLOW_FOLDER);
 	return `filters:
   and:
-    - note["type"] == "tasknotes-workflow"
+    - note["type"] == "workflow" || note["type"] == "tasknotes-workflow"
     - file.inFolder("${escapeBasesString(folder)}")
 
 views:
@@ -79,7 +91,7 @@ function defaultWorkflows(folder: string): DefaultWorkflow[] {
 		{
 			path: `${folder}/auto-start-time-tracking.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: auto-start-time-tracking
 name: Auto-start time tracking
@@ -91,21 +103,24 @@ triggers:
     event: task.status.changed
     to: active
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
 steps:
   - id: start-time
     type: time.start
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
       options:
         description: "Started by {{workflow.name}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 1
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 1
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Auto-start time tracking
@@ -116,7 +131,7 @@ Enable this workflow to start time tracking when a TaskNotes task moves to \`act
 		{
 			path: `${folder}/clear-scheduled-when-started.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: clear-scheduled-when-started
 name: Clear scheduled when started
@@ -132,21 +147,24 @@ triggers:
     event: task.status.changed
     to: in-progress
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.scheduled
+  - field: event.after.scheduled
     operator: exists
 steps:
   - id: clear-scheduled
     type: task.clearScheduled
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 1
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 1
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Clear scheduled when started
@@ -158,7 +176,7 @@ Adjust the status trigger values to match your TaskNotes status names before ena
 		{
 			path: `${folder}/stamp-started-at.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: stamp-started-at
 name: Stamp started timestamp
@@ -174,23 +192,26 @@ triggers:
     event: task.status.changed
     to: in-progress
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.startedAt
+  - field: event.after.startedAt
     operator: missing
 steps:
   - id: stamp-started
     type: task.patch
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
       patch:
         startedAt: "{{now}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 1
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 1
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Stamp started timestamp
@@ -202,7 +223,7 @@ Rename the field or remove the missing-field condition if your workflow should u
 		{
 			path: `${folder}/morning-overdue-review.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: morning-overdue-review
 name: Morning overdue review
@@ -237,17 +258,23 @@ steps:
           includeArchived: false
   - id: mark-high
     type: task.patch
-    forEach: "{{steps.overdue.tasks}}"
+    forEach:
+      items:
+        "$expr": 'steps.overdue.output.tasks'
+      as: task
     input:
-      task: "{{item.path}}"
+      task: "{{task.path}}"
       patch:
         priority: high
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
   onError: continue
+  source: tasknotes-workflows
 ---
 
 # Morning overdue review
@@ -258,7 +285,7 @@ Runs while Obsidian is open. Use dry run first, then enable it when the query ma
 		{
 			path: `${folder}/rollover-overdue-scheduled-tasks.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: rollover-overdue-scheduled-tasks
 name: Rollover overdue scheduled tasks
@@ -293,16 +320,22 @@ steps:
           includeArchived: false
   - id: reschedule-to-today
     type: task.reschedule
-    forEach: "{{steps.overdue-scheduled.tasks}}"
+    forEach:
+      items:
+        "$expr": 'steps["overdue-scheduled"].output.tasks'
+      as: task
     input:
-      task: "{{item.path}}"
+      task: "{{task.path}}"
       date: "{{today}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
   onError: continue
+  source: tasknotes-workflows
 ---
 
 # Rollover overdue scheduled tasks
@@ -313,7 +346,7 @@ Runs while Obsidian is open. Use dry run first to confirm the selected tasks bef
 		{
 			path: `${folder}/escalate-upcoming-due-tasks.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: escalate-upcoming-due-tasks
 name: Escalate upcoming due tasks
@@ -334,11 +367,7 @@ steps:
             - field: task.due
               op: lte
               value:
-                fn: dateAdd
-                value:
-                  fn: today
-                amount: 3
-                unit: day
+                "$expr": 'today() + duration("3d")'
             - field: task.status
               op: notIn
               value:
@@ -357,17 +386,23 @@ steps:
           includeArchived: false
   - id: mark-high
     type: task.patch
-    forEach: "{{steps.due-now.tasks}}"
+    forEach:
+      items:
+        "$expr": 'steps["due-now"].output.tasks'
+      as: task
     input:
-      task: "{{item.path}}"
+      task: "{{task.path}}"
       patch:
         priority: high
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
   onError: continue
+  source: tasknotes-workflows
 ---
 
 # Escalate upcoming due tasks
@@ -379,7 +414,7 @@ Adjust the priority value first if your vault uses custom priority names.
 		{
 			path: `${folder}/blocked-task-review.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: blocked-task-review
 name: Blocked task review
@@ -413,13 +448,16 @@ steps:
   - id: show-count
     type: notice.show
     input:
-      message: "You have {{steps.blocked-tasks.count}} blocked task(s) to review."
+      message: "You have {{steps.blocked-tasks.output.count}} blocked task(s) to review."
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 25
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 25
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Blocked task review
@@ -430,7 +468,7 @@ Enable this workflow if you want a weekday reminder when incomplete tasks are st
 		{
 			path: `${folder}/move-done-to-review-folder.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: move-done-to-review-folder
 name: Move completed tasks to review
@@ -441,20 +479,23 @@ triggers:
     type: tasknotes.event
     event: task.completed
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
 steps:
   - id: move
     type: task.move
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
       targetFolder: "TaskNotes/Review"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 1
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 1
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Move completed tasks to review
@@ -465,7 +506,7 @@ This is intentionally disabled by default. Change \`targetFolder\`, dry-run it, 
 		{
 			path: `${folder}/stop-time-tracking-on-complete.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: stop-time-tracking-on-complete
 name: Stop time tracking on complete
@@ -476,19 +517,22 @@ triggers:
     type: tasknotes.event
     event: task.completed
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
 steps:
   - id: stop-time
     type: time.stop
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 1
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 1
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Stop time tracking on complete
@@ -499,7 +543,7 @@ Enable this workflow if completed tasks should automatically stop any active tim
 		{
 			path: `${folder}/inherit-subtask-contexts-and-tags.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: inherit-subtask-contexts-and-tags
 name: Inherit subtask contexts and tags
@@ -513,31 +557,34 @@ triggers:
     type: tasknotes.event
     event: task.created
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.projects
+  - field: event.after.projects
     operator: exists
 steps:
   - id: parents
     type: task.parents
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: inherit-contexts-tags
     type: task.patch
     if:
-      - field: steps.parents.tasks[0].path
+      - field: steps.parents.output.tasks[0].path
         operator: exists
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
       patch:
-        contexts: "{{steps.parents.tasks[0].contexts}}"
-        tags: "{{steps.parents.tasks[0].tags}}"
+        contexts: "{{steps.parents.output.tasks[0].contexts}}"
+        tags: "{{steps.parents.output.tasks[0].tags}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 5
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 5
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Inherit subtask contexts and tags
@@ -548,7 +595,7 @@ Enable this workflow if new subtasks should start with the same contexts and tag
 		{
 			path: `${folder}/inherit-subtask-priority.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: inherit-subtask-priority
 name: Inherit subtask priority
@@ -562,30 +609,33 @@ triggers:
     type: tasknotes.event
     event: task.created
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.projects
+  - field: event.after.projects
     operator: exists
 steps:
   - id: parents
     type: task.parents
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: inherit-priority
     type: task.patch
     if:
-      - field: steps.parents.tasks[0].priority
+      - field: steps.parents.output.tasks[0].priority
         operator: exists
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
       patch:
-        priority: "{{steps.parents.tasks[0].priority}}"
+        priority: "{{steps.parents.output.tasks[0].priority}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 5
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 5
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Inherit subtask priority
@@ -596,7 +646,7 @@ Enable this workflow if subtasks should take their initial priority from their f
 		{
 			path: `${folder}/inherit-subtask-planning-dates.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: inherit-subtask-planning-dates
 name: Inherit subtask planning dates
@@ -610,31 +660,34 @@ triggers:
     type: tasknotes.event
     event: task.created
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.projects
+  - field: event.after.projects
     operator: exists
 steps:
   - id: parents
     type: task.parents
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: inherit-dates
     type: task.patch
     if:
-      - field: steps.parents.tasks[0].path
+      - field: steps.parents.output.tasks[0].path
         operator: exists
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
       patch:
-        scheduled: "{{steps.parents.tasks[0].scheduled}}"
-        due: "{{steps.parents.tasks[0].due}}"
+        scheduled: "{{steps.parents.output.tasks[0].scheduled}}"
+        due: "{{steps.parents.output.tasks[0].due}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 5
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 5
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Inherit subtask planning dates
@@ -645,7 +698,7 @@ Enable this workflow if subtasks should inherit their first parent task's schedu
 		{
 			path: `${folder}/inherit-subtask-dependencies.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: inherit-subtask-dependencies
 name: Inherit subtask dependencies
@@ -659,37 +712,43 @@ triggers:
     type: tasknotes.event
     event: task.created
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.projects
+  - field: event.after.projects
     operator: exists
 steps:
   - id: parents
     type: task.parents
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: parent-dependencies
     type: task.dependencies
     if:
-      - field: steps.parents.tasks[0].path
+      - field: steps.parents.output.tasks[0].path
         operator: exists
     input:
-      task: "{{steps.parents.tasks[0].path}}"
+      task: "{{steps.parents.output.tasks[0].path}}"
   - id: add-dependency
     type: task.addDependency
     if:
-      - field: steps.parent-dependencies.dependencies
+      - field: steps.parent-dependencies.output.dependencies
         operator: exists
-    forEach: "{{steps.parent-dependencies.dependencies}}"
+    forEach:
+      items:
+        "$expr": 'steps["parent-dependencies"].output.dependencies'
+      as: task
     input:
-      task: "{{trigger.after.path}}"
-      dependency: "{{item.dependency}}"
+      task: "{{event.after.path}}"
+      dependency: "{{task.dependency}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 25
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 25
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Inherit subtask dependencies
@@ -700,7 +759,7 @@ Enable this workflow if new subtasks should also be blocked by anything that blo
 		{
 			path: `${folder}/mirror-parent-priority-to-subtasks.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: mirror-parent-priority-to-subtasks
 name: Mirror parent priority to subtasks
@@ -711,26 +770,32 @@ triggers:
     type: tasknotes.event
     event: task.priority.changed
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
 steps:
   - id: subtasks
     type: task.subtasks
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: mirror-priority
     type: task.patch
-    forEach: "{{steps.subtasks.tasks}}"
+    forEach:
+      items:
+        "$expr": 'steps.subtasks.output.tasks'
+      as: task
     input:
-      task: "{{item.path}}"
+      task: "{{task.path}}"
       patch:
-        priority: "{{trigger.after.priority}}"
+        priority: "{{event.after.priority}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
   onError: continue
+  source: tasknotes-workflows
 ---
 
 # Mirror parent priority to subtasks
@@ -741,7 +806,7 @@ Enable this workflow if existing subtasks should keep the same priority as their
 		{
 			path: `${folder}/mirror-parent-planning-dates-to-subtasks.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: mirror-parent-planning-dates-to-subtasks
 name: Mirror parent planning dates to subtasks
@@ -755,27 +820,33 @@ triggers:
     type: tasknotes.event
     event: task.due.changed
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
 steps:
   - id: subtasks
     type: task.subtasks
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: mirror-dates
     type: task.patch
-    forEach: "{{steps.subtasks.tasks}}"
+    forEach:
+      items:
+        "$expr": 'steps.subtasks.output.tasks'
+      as: task
     input:
-      task: "{{item.path}}"
+      task: "{{task.path}}"
       patch:
-        scheduled: "{{trigger.after.scheduled}}"
-        due: "{{trigger.after.due}}"
+        scheduled: "{{event.after.scheduled}}"
+        due: "{{event.after.due}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
   onError: continue
+  source: tasknotes-workflows
 ---
 
 # Mirror parent planning dates to subtasks
@@ -784,9 +855,59 @@ Enable this workflow if subtasks should move with their parent task's scheduled 
 `,
 		},
 		{
+			path: `${folder}/schedule-subtasks-before-parent-due.md`,
+			content: `---
+type: workflow
+schemaVersion: 1
+id: schedule-subtasks-before-parent-due
+name: Schedule subtasks before parent due date
+enabled: false
+description: Schedule existing subtasks one week before their parent task is due.
+triggers:
+  - id: due-changed
+    type: tasknotes.event
+    event: task.due.changed
+conditions:
+  - field: event.after.path
+    operator: exists
+  - field: event.after.due
+    operator: exists
+steps:
+  - id: subtasks
+    type: task.subtasks
+    input:
+      task: "{{event.after.path}}"
+  - id: schedule-subtasks
+    type: task.setScheduled
+    forEach:
+      items:
+        "$expr": 'steps.subtasks.output.tasks'
+      as: task
+    input:
+      task: "{{task.path}}"
+      date:
+        "$expr": 'date(event.after.due) - duration("1w")'
+run:
+  mode: sequential
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
+  onError: continue
+  source: tasknotes-workflows
+---
+
+# Schedule subtasks before parent due date
+
+Enable this workflow if subtasks should be scheduled one week before their parent task is due.
+Adjust the amount and unit in the relative date expression if your planning cadence is different.
+`,
+		},
+		{
 			path: `${folder}/mirror-parent-dependencies-to-subtasks.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: mirror-parent-dependencies-to-subtasks
 name: Mirror parent dependencies to subtasks
@@ -797,26 +918,32 @@ triggers:
     type: tasknotes.event
     event: task.dependencies.changed
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
 steps:
   - id: subtasks
     type: task.subtasks
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: mirror-dependencies
     type: task.patch
-    forEach: "{{steps.subtasks.tasks}}"
+    forEach:
+      items:
+        "$expr": 'steps.subtasks.output.tasks'
+      as: task
     input:
-      task: "{{item.path}}"
+      task: "{{task.path}}"
       patch:
-        blockedBy: "{{trigger.after.blockedBy}}"
+        blockedBy: "{{event.after.blockedBy}}"
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 50
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 50
   onError: continue
+  source: tasknotes-workflows
 ---
 
 # Mirror parent dependencies to subtasks
@@ -827,7 +954,7 @@ Enable this workflow if subtasks should always have the same blocking dependenci
 		{
 			path: `${folder}/warn-when-starting-blocked-task.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: warn-when-starting-blocked-task
 name: Warn when starting a blocked task
@@ -839,26 +966,29 @@ triggers:
     event: task.status.changed
     to: active
 conditions:
-  - field: trigger.after.path
+  - field: event.after.path
     operator: exists
-  - field: trigger.after.isBlocked
+  - field: event.after.isBlocked
     operator: is
     value: true
 steps:
   - id: dependencies
     type: task.dependencies
     input:
-      task: "{{trigger.after.path}}"
+      task: "{{event.after.path}}"
   - id: warn
     type: notice.show
     input:
-      message: "{{trigger.after.title}} is still blocked by {{steps.dependencies.count}} task(s)."
+      message: "{{event.after.title}} is still blocked by {{steps.dependencies.output.count}} task(s)."
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 10
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 10
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Warn when starting a blocked task
@@ -869,7 +999,7 @@ Enable this workflow if you want an Obsidian notice before working on a task tha
 		{
 			path: `${folder}/daily-active-task-review.md`,
 			content: `---
-type: tasknotes-workflow
+type: workflow
 schemaVersion: 1
 id: daily-active-task-review
 name: Daily active task review
@@ -894,13 +1024,16 @@ steps:
   - id: show-count
     type: notice.show
     input:
-      message: "You have {{steps.active-tasks.count}} active task(s) to review."
+      message: "You have {{steps.active-tasks.output.count}} active task(s) to review."
 run:
   mode: sequential
-  noOverlap: true
-  source: tasknotes-workflows
-  maxTasks: 25
+  concurrency:
+    group: workflow
+    policy: skip
+  limits:
+    maxItems: 25
   onError: stop
+  source: tasknotes-workflows
 ---
 
 # Daily active task review

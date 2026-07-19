@@ -46,14 +46,15 @@ export class WorkflowRepository {
 		const parseDiagnostics: WorkflowDiagnostic[] = parsed.error
 			? [{ severity: "error", path: "$frontmatter", message: parsed.error }]
 			: [];
-		const { workflow, diagnostics } = parsed.error
-			? { workflow: null, diagnostics: [] }
+		const { workflow, diagnostics, sourceFormat } = parsed.error
+			? { workflow: null, diagnostics: [], sourceFormat: "unknown" as const }
 			: parseWorkflowDefinition(parsed.data, source);
 
 		return {
 			file,
 			body: parsed.body,
 			source,
+			sourceFormat,
 			workflow,
 			diagnostics: [...parseDiagnostics, ...diagnostics],
 		};
