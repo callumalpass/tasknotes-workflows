@@ -124,7 +124,7 @@ function summarizeTriggers(plugin: TaskNotesWorkflowsPlugin, triggers: WorkflowT
 						: "",
 				});
 			}
-			if (trigger.type === "runtime.event") return trigger.event;
+			if (trigger.type === "contract.event") return trigger.contract;
 			if (trigger.type === "cron") return plugin.t("workflowCard.summary.cron", { schedule: trigger.schedule });
 			if (trigger.type === "interval") return plugin.t("workflowCard.summary.interval", { every: trigger.every });
 			if (trigger.type === "obsidian.vault") return plugin.t("workflowCard.summary.vault", { event: trigger.event });

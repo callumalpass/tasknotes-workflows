@@ -1,6 +1,6 @@
 import { TFile } from "obsidian";
 import { describe, expect, it } from "vitest";
-import { validateCanonicalSchema } from "@callumalpass/mdbase-runtime";
+import { validateRuntimeRecord } from "@callumalpass/mdbase-runtime";
 import { parseMarkdownFrontmatter } from "../src/frontmatter";
 import { WorkflowMigrationService } from "../src/workflowMigration";
 import { WorkflowRepository } from "../src/workflowRepository";
@@ -96,14 +96,14 @@ describe("workflow migration", () => {
 		expect(report.candidates).toHaveLength(1);
 		expect(report.invalid).toEqual([]);
 		expect(vault.files.get("TaskNotes/Workflows/legacy.md")?.content).toBe(LEGACY);
-		expect(report.candidates[0]?.diff).toContain("+version: 1");
+		expect(report.candidates[0]?.diff).toContain("+version: 1.0.0");
 
 		const applied = await service.apply(report);
 		const migrated = vault.files.get("TaskNotes/Workflows/legacy.md")?.content ?? "";
 		const parsed = parseMarkdownFrontmatter(migrated);
-		expect(validateCanonicalSchema("workflow", parsed.data).valid).toBe(true);
+		expect(validateRuntimeRecord(parsed.data).valid).toBe(true);
 		expect(migrated).toContain("# User documentation\n\nKeep this body exactly.");
-		expect(migrated).toContain("action: notice.show");
+		expect(migrated).toContain("id: notice.show");
 		expect(migrated).toContain("customSetting: keep-me");
 		expect(migrated).toContain("customTriggerSetting: keep-trigger");
 		expect(migrated).toContain("customStepSetting: keep-step");

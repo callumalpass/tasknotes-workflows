@@ -54,23 +54,6 @@
 				"capabilities": {
 					"type": "array",
 					"items": { "type": "string" }
-				},
-				"providers": {
-					"type": "array",
-					"items": {
-						"oneOf": [
-							{ "type": "string", "minLength": 1 },
-							{
-								"type": "object",
-								"required": ["id"],
-								"additionalProperties": false,
-								"properties": {
-									"id": { "type": "string", "minLength": 1 },
-									"version": { "type": "string", "minLength": 1 }
-								}
-							}
-						]
-					}
 				}
 			}
 		},
@@ -84,7 +67,6 @@
 					"enum": [
 						"tasknotes.event",
 						"task.event",
-						"runtime.event",
 						"contract.event",
 						"cron",
 						"interval",

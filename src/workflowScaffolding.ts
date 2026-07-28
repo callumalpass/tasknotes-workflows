@@ -11,7 +11,6 @@ export const TRIGGER_TYPES: Array<WorkflowTrigger["type"]> = [
 	"manual",
 	"tasknotes.event",
 	"contract.event",
-	"runtime.event",
 	"cron",
 	"interval",
 	"obsidian.vault",
@@ -59,9 +58,6 @@ export function createDefaultTrigger(
 	const ids = new Set(existing.map((trigger) => trigger.id));
 	if (type === "tasknotes.event") {
 		return { id: uniqueId("status-active", ids), type, event: "task.status.changed", to: "active" };
-	}
-	if (type === "runtime.event") {
-		return { id: uniqueId("canvas-drop", ids), type, event: "canvas.drop", provider: "canvas-bases" };
 	}
 	if (type === "contract.event") {
 		return {
