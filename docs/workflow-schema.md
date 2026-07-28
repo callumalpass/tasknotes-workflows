@@ -74,7 +74,7 @@ triggers:
       id: canvas.drop
       version: ^1.0.0
     if:
-      $expr: 'has(event.payload.record.path)'
+      $expr: 'has(event.data.record.path)'
 ```
 
 TaskNotes Workflows stores executor-specific scheduling and filters under
