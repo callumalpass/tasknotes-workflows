@@ -1,6 +1,7 @@
 # Workflow Schema
 
-TaskNotes Workflows persists canonical mdbase runtime `workflow/0.1` records.
+TaskNotes Workflows persists canonical mdbase Runtime profile 0.2
+`runtime_workflow` records.
 The normative JSON Schema is shipped by `@callumalpass/mdbase-runtime`; the
 plugin validates every newly created, edited, or migrated record before writing
 it.
@@ -12,39 +13,36 @@ migrated.
 ## Core Record
 
 ```yaml
-type: workflow
+type: runtime_workflow
 id: auto-start-time
-version: 1
+version: 1.0.0
 name: Auto-start time tracking
 description: Start a timer when a task becomes active.
 enabled: false
 
 requires:
-  providers:
-    - id: tasknotes
-      version: ">=4.0.0 <5.0.0"
   capabilities:
     - time.write
 
 triggers:
   - id: status-active
-    event: task.status.changed
-    if:
-      $expr: 'event.after.status == "active" && has(event.after.path)'
+    event:
+      id: task.status.changed
+      version: 1.0.0
     x-tasknotes:
       type: tasknotes.event
       to: active
 
 steps:
   - id: start-time
-    action: time.start
+    action:
+      id: time.start
+      version: 1.0.0
     input:
       path:
         $expr: event.after.path
 
 run:
-  execution:
-    mode: single_executor
   concurrency:
     group:
       $expr: event.after.path
@@ -66,12 +64,15 @@ starts with `x-`.
 ## Triggers
 
 Every trigger has a unique `id` and references a runtime `event` contract.
-Generic provider events need no TaskNotes extension:
+Portable events use a contract requirement object. The TaskNotes extension is
+only needed for executor-specific behavior:
 
 ```yaml
 triggers:
   - id: canvas-drop
-    event: canvas.drop
+    event:
+      id: canvas.drop
+      version: ^1.0.0
     if:
       $expr: 'has(event.payload.record.path)'
 ```
@@ -82,25 +83,33 @@ TaskNotes Workflows stores executor-specific scheduling and filters under
 ```yaml
 triggers:
   - id: every-morning
-    event: tasknotes-workflows.schedule.cron
+    event:
+      id: tasknotes-workflows.schedule.cron
+      version: 1.0.0
     x-tasknotes:
       type: cron
       schedule: "0 9 * * *"
       timezone: local
 
   - id: every-half-hour
-    event: tasknotes-workflows.schedule.interval
+    event:
+      id: tasknotes-workflows.schedule.interval
+      version: 1.0.0
     x-tasknotes:
       type: interval
       every: 30m
 
   - id: manual
-    event: tasknotes-workflows.manual
+    event:
+      id: tasknotes-workflows.manual
+      version: 1.0.0
     x-tasknotes:
       type: manual
 
   - id: note-modified
-    event: obsidian.vault.modify
+    event:
+      id: obsidian.vault.modify
+      version: 1.0.0
     x-tasknotes:
       type: obsidian.vault
       event: modify
@@ -109,7 +118,7 @@ triggers:
 ```
 
 Supported TaskNotes executor trigger types are `tasknotes.event`,
-`contract.event`, `runtime.event`, `cron`, `interval`, `manual`, `obsidian.vault`,
+`contract.event`, `cron`, `interval`, `manual`, `obsidian.vault`,
 `obsidian.metadata`, and `obsidian.workspace`.
 
 Contract event triggers select a portable event contract by ID and semantic
@@ -118,10 +127,11 @@ version range. `source` optionally narrows the publishing application:
 ```yaml
 triggers:
   - id: completed
-    event: tasknotes.task.completed
+    event:
+      id: tasknotes.task.completed
+      version: ^1.0.0
     x-tasknotes:
       type: contract.event
-      version: ^1.0.0
       source: tasknotes
 ```
 
@@ -133,7 +143,9 @@ are literals unless represented by an expression object.
 ```yaml
 steps:
   - id: schedule-task
-    action: task.setScheduled
+    action:
+      id: task.setScheduled
+      version: 1.0.0
     input:
       task:
         $expr: event.after.path
@@ -141,30 +153,27 @@ steps:
         $expr: 'date(event.after.due) - duration("7d")'
 ```
 
-TaskNotes Workflows provides its typed local action catalog and dispatches a
-registered action through the shared mdbase host when that action is available.
-A host policy denial is terminal and is never bypassed through the local
-compatibility adapter.
+TaskNotes Workflows owns and executes its typed local action catalog. An action
+that is not local is invoked through the mdbase interoperability bridge using
+its contract requirement. These are deliberately separate execution paths.
 
-Portable action steps put contract and provider selection in the TaskNotes
-extension while retaining the action contract ID in the canonical `action`
-field:
+Portable action steps put the contract requirement and provider selection in
+the canonical step fields:
 
 ```yaml
 steps:
   - id: add-card
-    action: canvas.card.create
+    action:
+      id: canvas.card.create
+      version: ^1.0.0
+    provider:
+      application: canvas-bases
     input:
       canvas_path: TaskNotes/Canvases/Completed tasks.canvas
       card:
         kind: file
         file:
           $expr: event.data.task_path
-    x-tasknotes:
-      contract:
-        version: ^1.0.0
-      provider:
-        application: canvas-bases
 ```
 
 The bridge admits the request only when exactly one compatible provider is
@@ -223,7 +232,9 @@ Use canonical `for_each` for bounded batch work:
 ```yaml
 steps:
   - id: patch-each
-    action: task.patch
+    action:
+      id: task.patch
+      version: 1.0.0
     for_each:
       items:
         $expr: steps.query.output.tasks
@@ -242,8 +253,6 @@ when the item count exceeds `run.limits.max_items`.
 
 ```yaml
 run:
-  execution:
-    mode: single_executor
   idempotency:
     key:
       $expr: 'workflow.id + ":" + event.id + ":" + trigger.id'
@@ -256,8 +265,8 @@ run:
   on_error: stop
 ```
 
-Side-effecting workflows should use `single_executor`. Executor selection is
-deployment policy and does not belong in the workflow record.
+Executor selection is deployment policy and does not belong in the workflow
+record.
 
 ## Compatibility And Migration
 

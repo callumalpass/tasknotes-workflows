@@ -1,36 +1,15 @@
 # Workflow mdbase Type
 
-TaskNotes Workflows uses the canonical mdbase runtime workflow record. It does
-not define a second schema with the same `type: workflow` discriminator.
+TaskNotes Workflows uses the canonical Runtime profile 0.2
+`mdbase.runtime.workflow` type and does not define an application-specific
+replacement. Collections that need to index these records should install the
+`mdbase-runtime` standard pack. The pack owns the type, its JSON Schema, and its
+contract identity.
 
-An mdbase v0.3 collection can match workflow notes with this type wrapper:
-
-```markdown
----
-kind: mdbase.type
-name: workflow
-version: 1
-description: Runtime workflow record.
-match:
-  fields_present:
-    - type
-    - id
-    - version
-  where:
-    $expr: 'record.type == "workflow"'
-schema:
-  dialect: json-schema-2020-12
-  ref: ../schemas/v0.3/runtime/workflow.schema.json
----
-
-# Workflow
-
-A workflow maps registered events to registered actions.
-```
-
-The relative `schema.ref` depends on the collection layout. Consumers may use
-an equivalent inline copy of the canonical schema, but the schema content and
-runtime profile version must remain exact.
+The record discriminator is `type: runtime_workflow`. Event and action fields
+are contract requirements with an ID and SemVer range. Runtime admission
+resolves each requirement to an exact contract digest and declared source or
+provider.
 
 ## TaskNotes Extensions
 
@@ -38,21 +17,25 @@ TaskNotes-only scheduling, editor, and compatibility state belongs beneath
 schema-permitted `x-tasknotes` keys:
 
 ```yaml
-type: workflow
+type: runtime_workflow
 id: morning-review
-version: 1
+version: 1.0.0
 name: Morning review
 enabled: false
 triggers:
   - id: morning
-    event: tasknotes-workflows.schedule.cron
+    event:
+      id: tasknotes-workflows.schedule.cron
+      version: 1.0.0
     x-tasknotes:
       type: cron
       schedule: "0 9 * * *"
       timezone: local
 steps:
   - id: show
-    action: notice.show
+    action:
+      id: notice.show
+      version: 1.0.0
     input:
       message: Review active tasks.
 x-tasknotes:
@@ -68,7 +51,7 @@ TaskNotes Workflows interprets the extension when it is the selected executor.
 `type: tasknotes-workflow` and `type: workflow` records using
 `schemaVersion: 1` are compatibility inputs, not mdbase runtime workflows. They
 remain readable by TaskNotes Workflows but must not be published or
-materialized as `workflow/0.1` contracts until explicitly migrated.
+materialized as Runtime profile 0.2 workflows until explicitly migrated.
 
 The plugin migration command converts recognized legacy syntax into the
 canonical core shape, preserves TaskNotes-only semantics under extensions,

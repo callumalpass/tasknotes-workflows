@@ -6,7 +6,7 @@ import type { WorkflowSourceFormat } from "./types";
 
 export interface WorkflowMigrationCandidate {
 	path: string;
-	sourceFormat: Exclude<WorkflowSourceFormat, "runtime-v0.1" | "unknown">;
+	sourceFormat: Exclude<WorkflowSourceFormat, "runtime-v0.2" | "unknown">;
 	sourceSha256: string;
 	targetSha256: string;
 	source: string;
@@ -46,7 +46,7 @@ export class WorkflowMigrationService {
 		const invalid: WorkflowMigrationIssue[] = [];
 
 		for (const loaded of loadedWorkflows) {
-			if (loaded.sourceFormat === "runtime-v0.1" && loaded.workflow) {
+			if (loaded.sourceFormat === "runtime-v0.2" && loaded.workflow) {
 				alreadyCanonical.push(loaded.file.path);
 				continue;
 			}
@@ -67,7 +67,7 @@ export class WorkflowMigrationService {
 			const verified = parsedTarget.error
 				? null
 				: parseWorkflowDefinition(parsedTarget.data, target);
-			if (!verified?.workflow || verified.sourceFormat !== "runtime-v0.1") {
+			if (!verified?.workflow || verified.sourceFormat !== "runtime-v0.2") {
 				invalid.push({
 					path: loaded.file.path,
 					messages: parsedTarget.error

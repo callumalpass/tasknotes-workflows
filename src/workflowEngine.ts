@@ -3,7 +3,6 @@ import { todayString } from "./duration";
 import { createStepExecutionContext, shouldRunStep, StepRegistry } from "./stepRegistry";
 import { resolveTemplateValue } from "./template";
 import type { App } from "obsidian";
-import type { MdbaseRuntimeHostApi } from "@callumalpass/mdbase-runtime";
 import type { ActionOutcome } from "@callumalpass/mdbase-interop";
 import type { TaskNotesBridge } from "./tasknotesBridge";
 import type { TranslateFn } from "./i18n";
@@ -26,7 +25,7 @@ const ENGINE_FALLBACK_MESSAGES: Record<string, string> = {
 	"engine.conditionsDidNotMatch": "Workflow conditions did not match.",
 	"engine.stepFailed": "Step failed.",
 	"engine.unknownStepType": "Unknown step type: {type}",
-	"engine.preflightFailed": "Workflow runtime preflight failed: {details}",
+	"engine.preflightFailed": "Workflow requirements are not met: {details}",
 	"engine.forEachNonArray": "forEach resolved to a non-array value.",
 	"engine.forEachTooManyItems": "forEach selected {count} items, above run.limits.maxItems {max}.",
 };
@@ -39,7 +38,6 @@ export class WorkflowEngine {
 		private readonly tasknotes: () => TaskNotesRuntimeApi | null,
 		private readonly obsidian: () => App | null = () => null,
 		private readonly translate: TranslateFn = (key) => key,
-		private readonly runtimeHost: () => MdbaseRuntimeHostApi | null = () => null,
 		private readonly interopBridge: () => TaskNotesBridge | null = () => null,
 	) {}
 
@@ -134,29 +132,12 @@ export class WorkflowEngine {
 		maxItems: number
 	): Promise<StepRunDetail> {
 		const definition = this.stepRegistry.get(step.type);
-		const runtimeAction = this.resolveRuntimeAction(step);
-		const interopAction = this.resolveInteropAction(step);
-		if (runtimeAction.error) {
-			const failed = createStepDetail(step, "failed", this.t("engine.preflightFailed", { details: runtimeAction.error }));
-			run.steps.push(failed);
-			return failed;
-		}
-		if (!definition && !runtimeAction.runtime && !interopAction) {
+		const interopAction = step.provider || !definition ? this.interopBridge() : null;
+		if (!definition && !interopAction) {
 			const failed = createStepDetail(step, "failed", this.t("engine.unknownStepType", { type: step.type }));
 			run.steps.push(failed);
 			return failed;
 		}
-		const preflightError = this.preflightError(step.requires);
-		if (preflightError) {
-			const failed = createStepDetail(
-				step,
-				"failed",
-				this.t("engine.preflightFailed", { details: preflightError })
-			);
-			run.steps.push(failed);
-			return failed;
-		}
-
 		if (!shouldRunStep(step, context)) {
 			const skipped = createStepDetail(step, "skipped");
 			run.steps.push(skipped);
@@ -199,7 +180,6 @@ export class WorkflowEngine {
 				const detail = await this.runSingleStep(
 					step,
 					definition,
-					runtimeAction.runtime,
 					interopAction,
 					source,
 					itemContext,
@@ -221,7 +201,6 @@ export class WorkflowEngine {
 		const detail = await this.runSingleStep(
 			step,
 			definition,
-			runtimeAction.runtime,
 			interopAction,
 			source,
 			context,
@@ -236,7 +215,6 @@ export class WorkflowEngine {
 	private async runSingleStep(
 		step: WorkflowStep,
 		definition: ReturnType<StepRegistry["get"]>,
-		runtime: MdbaseRuntimeHostApi | null,
 		interop: TaskNotesBridge | null,
 		source: string,
 		context: WorkflowRunContext,
@@ -258,11 +236,7 @@ export class WorkflowEngine {
 			const input = resolveTemplateValue(sourceInput, context);
 			detail.sourceInput = sourceInput;
 			detail.input = input;
-			if (runtime) {
-				detail.output = dryRun
-					? { dryRun: true, wouldRun: step.type, input }
-					: await runtime.dispatch(step.type, input, runtimeDispatchContext(runId, context));
-			} else if (interop) {
+			if (interop) {
 				if (dryRun) {
 					detail.output = { dryRun: true, wouldInvoke: step.type, input };
 				} else {
@@ -313,51 +287,12 @@ export class WorkflowEngine {
 	}
 
 	private preflightError(requirements: WorkflowStep["requires"]): string | null {
-		if (!requirements || (!requirements.capabilities?.length && !requirements.providers?.length)) return null;
-		const runtime = this.runtimeHost();
-		if (!runtime) return "The mdbase runtime provider host is unavailable.";
-		const result = runtime.preflight(requirements);
-		if (result.valid) return null;
-		return result.diagnostics.map((diagnostic) => `${diagnostic.message} [${diagnostic.code}]`).join("; ");
-	}
-
-	private resolveRuntimeAction(step: WorkflowStep): { runtime: MdbaseRuntimeHostApi | null; error?: string } {
-		const runtime = this.runtimeHost();
-		if (!runtime) return { runtime: null };
-		let available: boolean;
-		try {
-			available = runtime.contracts().some((contract) => contract.type === "action" && contract.id === step.type);
-		} catch (error) {
-			return { runtime: null, error: `Runtime contract discovery failed: ${errorMessage(error)}` };
-		}
-		if (!available) return { runtime: null };
-		try {
-			const result = runtime.preflight({
-				actions: [step.type],
-				capabilities: step.requires?.capabilities,
-				providers: step.requires?.providers,
-			});
-			if (!result.valid) {
-				return {
-					runtime: null,
-					error: result.diagnostics.map((diagnostic) => `${diagnostic.message} [${diagnostic.code}]`).join("; "),
-				};
-			}
-			return { runtime };
-		} catch (error) {
-			return { runtime: null, error: `Runtime action preflight failed: ${errorMessage(error)}` };
-		}
-	}
-
-	private resolveInteropAction(step: WorkflowStep): TaskNotesBridge | null {
-		const bridge = this.interopBridge();
-		if (!bridge) return null;
-		const description = bridge.interopDescription();
-		if (!description) return null;
-		const available = description.action_providers.some((provider) =>
-			provider.handlers.some((handler) => handler.resolved.id === step.type)
-		);
-		return available ? bridge : null;
+		if (!requirements?.capabilities?.length) return null;
+		const api = this.tasknotes();
+		if (!api) return "TaskNotes is unavailable.";
+		const available = new Set(api.capabilities ?? []);
+		const missing = requirements.capabilities.filter((capability) => !available.has(capability));
+		return missing.length > 0 ? `Missing TaskNotes capabilities: ${missing.join(", ")}.` : null;
 	}
 
 	private concurrencyGroup(workflowId: string, group: string): string {
@@ -393,25 +328,6 @@ function asErrorDetails(value: unknown): Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value)
 		? value as Record<string, unknown>
 		: {};
-}
-
-function runtimeDispatchContext(
-	runId: string,
-	context: WorkflowRunContext
-): Parameters<MdbaseRuntimeHostApi["dispatch"]>[2] {
-	const resourcePath = typeof context.event.path === "string"
-		? context.event.path
-		: typeof context.event.after?.path === "string"
-			? context.event.after.path
-			: undefined;
-	return {
-		actor: { id: "local-user", kind: "user" },
-		origin: { workflow: context.workflow.id, path: context.workflow.filePath },
-		run_id: runId,
-		correlation_id: context.event.correlationId ?? runId,
-		executor: "tasknotes-workflows",
-		resource: resourcePath ? { path: resourcePath } : undefined,
-	};
 }
 
 function interpolate(template: string, params?: Record<string, string | number>): string {

@@ -198,6 +198,7 @@ export const en: TranslationTree = {
 		conditionsDidNotMatch: "Workflow conditions did not match.",
 		stepFailed: "Step failed.",
 		unknownStepType: "Unknown step type: {type}",
+		preflightFailed: "Workflow requirements are not met: {details}",
 		forEachNonArray: "forEach resolved to a non-array value.",
 		forEachTooManyItems: "forEach selected {count} items, above run.limits.maxItems {max}.",
 	},

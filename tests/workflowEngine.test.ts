@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import type { MdbaseRuntimeHostApi } from "@callumalpass/mdbase-runtime";
 import { StepRegistry } from "../src/stepRegistry";
 import { WorkflowEngine } from "../src/workflowEngine";
 import type { LoadedWorkflow, TaskNotesRuntimeApi } from "../src/types";
@@ -10,7 +9,7 @@ function workflow(): LoadedWorkflow {
 		file: { path: "TaskNotes/Workflows/test.md", basename: "test" } as LoadedWorkflow["file"],
 		body: "",
 		source: "",
-		sourceFormat: "runtime-v0.1",
+		sourceFormat: "runtime-v0.2",
 		diagnostics: [],
 		workflow: {
 			type: "workflow",
@@ -97,7 +96,6 @@ describe("workflow engine", () => {
 			() => null,
 			() => null,
 			(key) => key,
-			() => null,
 			() => bridge,
 		);
 
@@ -133,116 +131,18 @@ describe("workflow engine", () => {
 		});
 	});
 
-	it("dispatches registered actions through the mdbase runtime host", async () => {
-		const loaded = workflow();
-		const localPatch = vi.fn();
-		const dispatch = vi.fn(async () => ({ path: "Tasks/a.md", status: "active" }));
-		const runtime = {
-			contracts: () => [{ type: "action", id: "task.patch" }],
-			preflight: () => ({ valid: true, diagnostics: [] }),
-			dispatch,
-		} as unknown as MdbaseRuntimeHostApi;
-		const engine = new WorkflowEngine(
-			new StepRegistry(),
-			() => ({ tasks: { patch: localPatch } }) as unknown as TaskNotesRuntimeApi,
-			() => null,
-			(key) => key,
-			() => runtime
-		);
-
-		const run = await engine.runWorkflow(loaded, {
-			trigger: { type: "manual", event: "manual", correlationId: "corr-1" },
-		});
-
-		expect(run.status).toBe("success");
-		expect(dispatch).toHaveBeenCalledWith(
-			"task.patch",
-			{ task: "Tasks/a.md", patch: { status: "active" } },
-			expect.objectContaining({
-				origin: { workflow: "test", path: "TaskNotes/Workflows/test.md" },
-				correlation_id: "corr-1",
-				executor: "tasknotes-workflows",
-			})
-		);
-		expect(localPatch).not.toHaveBeenCalled();
-	});
-
-	it("does not bypass a runtime policy denial through the local step adapter", async () => {
-		const localPatch = vi.fn();
-		const dispatch = vi.fn();
-		const runtime = {
-			contracts: () => [{ type: "action", id: "task.patch" }],
-			preflight: () => ({
-				valid: false,
-				diagnostics: [{ code: "capability_denied", message: "Denied by policy", severity: "error" as const }],
-			}),
-			dispatch,
-		} as unknown as MdbaseRuntimeHostApi;
-		const engine = new WorkflowEngine(
-			new StepRegistry(),
-			() => ({ tasks: { patch: localPatch } }) as unknown as TaskNotesRuntimeApi,
-			() => null,
-			(key) => key,
-			() => runtime
-		);
-
-		const run = await engine.runWorkflow(workflow(), {
-			trigger: { type: "manual", event: "manual" },
-		});
-
-		expect(run.status).toBe("failed");
-		expect(run.error).toContain("capability_denied");
-		expect(localPatch).not.toHaveBeenCalled();
-		expect(dispatch).not.toHaveBeenCalled();
-	});
-
-	it("does not bypass the runtime host when action preflight throws", async () => {
-		const localPatch = vi.fn();
-		const dispatch = vi.fn();
-		const runtime = {
-			contracts: () => [{ type: "action", id: "task.patch" }],
-			preflight: () => { throw new Error("Host policy unavailable"); },
-			dispatch,
-		} as unknown as MdbaseRuntimeHostApi;
-		const engine = new WorkflowEngine(
-			new StepRegistry(),
-			() => ({ tasks: { patch: localPatch } }) as unknown as TaskNotesRuntimeApi,
-			() => null,
-			(key) => key,
-			() => runtime
-		);
-
-		const run = await engine.runWorkflow(workflow(), {
-			trigger: { type: "manual", event: "manual" },
-		});
-
-		expect(run.status).toBe("failed");
-		expect(run.error).toContain("Host policy unavailable");
-		expect(localPatch).not.toHaveBeenCalled();
-		expect(dispatch).not.toHaveBeenCalled();
-	});
-
-	it("fails workflow preflight before any step runs", async () => {
+	it("checks local TaskNotes capability requirements before any step runs", async () => {
 		const loaded = workflow();
 		loaded.workflow!.requires = {
-			providers: [{ id: "canvas-bases", version: ">=1.0.0" }],
 			capabilities: ["task.patch"],
 		};
 		const patch = vi.fn();
-		const preflight = vi.fn(() => ({
-			valid: false,
-			diagnostics: [
-				{ code: "provider_unavailable", message: "Required provider canvas-bases is not registered.", severity: "error" as const },
-			],
-		}));
-		const api = { tasks: { patch } } as unknown as TaskNotesRuntimeApi;
-		const runtime = { preflight } as unknown as MdbaseRuntimeHostApi;
+		const api = { capabilities: [], tasks: { patch } } as unknown as TaskNotesRuntimeApi;
 		const engine = new WorkflowEngine(
 			new StepRegistry(),
 			() => api,
 			() => null,
-			(key) => key,
-			() => runtime
+			(key) => key
 		);
 
 		const run = await engine.runWorkflow(loaded, {
@@ -250,7 +150,7 @@ describe("workflow engine", () => {
 		});
 
 		expect(run.status).toBe("failed");
-		expect(run.error).toContain("provider_unavailable");
+		expect(run.error).toContain("task.patch");
 		expect(run.steps).toEqual([]);
 		expect(patch).not.toHaveBeenCalled();
 	});

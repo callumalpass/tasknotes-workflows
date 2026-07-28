@@ -11,27 +11,27 @@ safe testing steps.
 ## Rules
 
 1. Write files in `TaskNotes/Workflows/` unless the user chooses another folder.
-2. Use `type: workflow`, `version: 1`, `trigger.event`, and `step.action`.
+2. Use `type: runtime_workflow`, exact SemVer for the workflow `version`, and
+   `{ id, version }` contract requirements for trigger events and step actions.
 3. Never write `schemaVersion`, trigger `type`, step `type`, `forEach`,
    `maxItems`, or `onError` in a new file.
 4. Put TaskNotes-only trigger configuration under `x-tasknotes`.
 5. Prefer `enabled: false` for workflows that mutate tasks or vault files.
 6. Use `$expr` objects for computed values. Plain strings are literals.
 7. Give every trigger and step a stable runtime identifier.
-8. Use `run.execution.mode: single_executor` for side-effecting workflows.
-9. Keep `run.limits.max_items` bounded.
-10. Do not use arbitrary JavaScript, shell commands, or unrestricted HTTP.
-11. Use the TaskNotes action catalog rather than editing task frontmatter.
-12. Explain dry-run checks and mutations in the Markdown body.
+8. Keep `run.limits.max_items` bounded.
+9. Do not use arbitrary JavaScript, shell commands, or unrestricted HTTP.
+10. Use the TaskNotes action catalog rather than editing task frontmatter.
+11. Explain dry-run checks and mutations in the Markdown body.
 
 TaskNotes-specific trigger metadata is a runtime extension:
 
 ```yaml
 triggers:
   - id: status-active
-    event: task.status.changed
-    if:
-      $expr: 'event.after.status == "active"'
+    event:
+      id: task.status.changed
+      version: 1.0.0
     x-tasknotes:
       type: tasknotes.event
       to: active
@@ -42,7 +42,9 @@ Scheduled triggers use a canonical event ID plus executor metadata:
 ```yaml
 triggers:
   - id: weekday-morning
-    event: tasknotes-workflows.schedule.cron
+    event:
+      id: tasknotes-workflows.schedule.cron
+      version: 1.0.0
     x-tasknotes:
       type: cron
       schedule: "0 9 * * 1-5"
@@ -63,25 +65,27 @@ workflows?.listStepDefinitions();
 
 ```markdown
 ---
-type: workflow
+type: runtime_workflow
 id: short-lowercase-id
-version: 1
+version: 1.0.0
 name: Human readable name
 enabled: false
 description: One sentence.
 triggers:
   - id: manual
-    event: tasknotes-workflows.manual
+    event:
+      id: tasknotes-workflows.manual
+      version: 1.0.0
     x-tasknotes:
       type: manual
 steps:
   - id: first-step
-    action: notice.show
+    action:
+      id: notice.show
+      version: 1.0.0
     input:
       message: Workflow is wired.
 run:
-  execution:
-    mode: single_executor
   concurrency:
     group: workflow
     policy: skip

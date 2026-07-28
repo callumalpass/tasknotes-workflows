@@ -9,18 +9,18 @@
 
 ### Added
 
-- Added mdbase runtime provider integration, including versioned provider requirements, preflight checks, provider-authorized workflow dispatch, and `runtime.event` triggers such as `canvas.drop`.
+- Added contract-event subscriptions and contract-action invocation over the mdbase interoperability bridge.
 - Added explicit workflow migration analysis with per-file diffs, stale-input checks, configuration-owned backups, rollback on write failure, and no startup-time rewrites.
-- Added canonical workflow contract registration with the shared mdbase host.
+- Added the versioned `tasknotes.workflow.run` action contract for other granted applications.
 - Added Obsidian Bases formula expressions for workflow inputs, guards, and loop item selection.
 - Added expression-aware date controls, OBE formula builder integration, and source input details in run history for dry-run review.
 - Added a disabled default workflow that schedules subtasks one week before their parent task is due.
 
 ### Changed
 
-- New, edited, default, and explicitly migrated workflow files now validate and write the canonical mdbase runtime `workflow/0.1` shape. TaskNotes-only scheduler and editor state is stored under `x-tasknotes` extensions.
+- New, edited, default, and explicitly migrated workflow files now validate and write the canonical Runtime profile 0.2 `runtime_workflow` shape. TaskNotes-only scheduler and editor state is stored under `x-tasknotes` extensions.
 - Legacy `tasknotes-workflow` and `schemaVersion: 1` files remain readable without mutation. Saving one through the editor is an explicit canonical conversion.
-- Registered runtime actions are dispatched through the shared host and policy denials no longer fall back to the local TaskNotes adapter.
+- Local TaskNotes steps now execute only in TaskNotes Workflows, while portable actions execute only through the interoperability bridge. The obsolete private runtime-host fallback and uncontracted `runtime.event` trigger were removed.
 
 ## [0.1.1] - 2026-06-01
 

@@ -512,6 +512,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "e7703157c9aa1c3cca1e43223d59c63c3d126550"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "500919ad6ca510a26907e727f51a63b30d521e13"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "ef71dfc00093ca1fe79397f3663238d904847925"
@@ -684,6 +688,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "b44b8ce4b7c764fa1f15834ec1b41087462b1012"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "27a4d7047b9c9ee969acdaa3f526bb025e8df98f"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "5c1830c4855363466205cae13667a2fbe0c58cda"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "2c5d38eb437281495fef782d7d137e2f067a87ab"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "c40d0ff862772bcaf1f39c05b847f14be7fbb4d8"
@@ -779,6 +795,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "564cc2783dfec99bb2dbef730301401dfd48fb00"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "1169cb07d4cf2143cb1cf180942aa1e8d830d48e"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "de08a2761794ff66acb2b73a5eb5c986f0d9c975"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -1196,6 +1220,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "66801a28941a922dfef150715b45ef9f896e4205"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "307107ecb26db9e6b59ec03133a628a42d61416d"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "8ec55d13a709a3255900993bd540e6bd80a150e1"
@@ -1439,6 +1471,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "0a6c70c7f7d3cc3470de28916d697d33e151111a"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "403ded2aa3e145bbae62ceee7c7e4b347485aeec"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "cd71901fdc6dec94946fb8b9cea8ce9771538aef"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -2914,6 +2954,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "18899576b216c0e82421dbcb7bfa0e609483cf2c"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "9223acb9a225c7edb428d4523305c9a4371be6f2"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "4e32f1281d56fa9e02b04a02bca1402369cbfb91"
@@ -3086,6 +3130,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "e9cc76827dc9d64cd2d155f3cf0c65da45f3b1de"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "615bb2b9959aa780a67e9d2fc5d5e9c4cb80dafc"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "0f384894ebb94e25be8e2b591d0a4db10eb02d25"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "5795201a39901cad314ca5f07a99d9d62fdbd789"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "eae49a7919157d7639b622c649308705e0816171"
@@ -3181,6 +3237,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "71749f66688167023c4882893d4be9f20c1a6775"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "feaa7e0387cfdf104c25f4f57409cd5594ac878d"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "da663ca758376b66469b10258e25ef0369b7e21c"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -3598,6 +3662,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "da4937a4c947e15c4b0c216051d9e3da47a27d4e"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "4263b197b755533d2b2b27ba87f1e3d6a989e775"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "60a8df1699abe686f3469961aaa86e693382e38e"
@@ -3841,6 +3913,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "f1aa159a4eb08c9fd21c557e0c767a1f1eda3aa5"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "3f5a8b400b6beb1edb983470eab88619a79165e7"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "344a13cc660754892ddac3c3573954bf927b4cd4"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -5316,6 +5396,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "af873a722e7169f65df89e1f71097222b8fcfaf4"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "e316678bb4b432691236268f3083fe1499b17592"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "5a93010b0a30ac31628fd9a0471f49195aa4f089"
@@ -5488,6 +5572,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "d26d9e5f513f721325192eafaca59b75abf70c74"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "07384dccd8f7c45027a2f134573a2008d9becfe3"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "ff8eeed911c9dd0f94b84640a940424e48f37438"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "ce5e9bd93afbc568465c1ba726774596e8ff2107"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "a9cf6d0c51c595ae3c981611423af11c23c41a54"
@@ -5583,6 +5679,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "67977583198f0fdb750f7bc76934470a7dff8d8a"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "1cee3ca4aa47b48fb141f59985c2b546a18937a2"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "91db5499857127316f03de5c71c4a9ca0f61b8c7"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -6000,6 +6104,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "3a098bfed43322e559b1619c6e82fac75d0217e6"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "346b0c1cb7a3ad48a89f5c5edb7c1f0e82386db9"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "1f2df1fc804e7569b50523279989b3a1793875bf"
@@ -6243,6 +6355,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "b2925f224cc89307d9b5b1de7f32c4ff8c0228ef"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "79f341d13454b80efe173616b4d461a365f18cf3"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "fd19a1fd7fc826129b39bbd4eb01921e44aeedce"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -7718,6 +7838,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "a020fe452212af6765d8c1f464a934c3455a39c2"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "f6ac308082e9e35e75f2e32a85eb2c02335e673b"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "16a1f777a7dcf88d0ed6d06aa37d2ef73a08b8f2"
@@ -7890,6 +8014,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "aac279c36c25f45b9685f9a88794fe2ed2bb0c91"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "d0152316e49c697ddfbcacc4612dbe4f01b2f4e3"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "d20e23c6725b97ad4d5527ae413afe3ae9c934b7"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "be8cadfcadfdea57953f0624d296596daefdc079"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "9ec5ba05a3e87c07cd70bb719e651405569cffc0"
@@ -7985,6 +8121,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "9a67bd7158547579b7587e7ffb18eca33604fcfa"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "b18f11b9a116ae4fcd271f9f74f92d11bcd6e026"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "9cfb33465bdd5041a5c35231b7a783227a5b1104"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -8402,6 +8546,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "8e5eb90bfb9375df8c6e77ab55b35988d8f469fc"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "366c46eeb4e0c8a5dec0c9bd46559e712152ae5c"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "884d3881b5d3ce8a0208719b8861824f56c43dfc"
@@ -8645,6 +8797,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "2c9ec2fedf0a5b3035e98e7a97afe0dc86c60fcc"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "a903d92f9d061c92b7d15df27a08152c73f9deed"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "4f5cb7bf819e24ba6db56563c7478c8fe0ec75f8"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -10120,6 +10280,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "800d172b7da496e97c376254cec06726072616b1"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "fd445d1353d219f8432a15d3e7732f8d7c0071b6"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "44f02e2a72ac54ccef28e63b09d69e1ca190ceb1"
@@ -10292,6 +10456,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "899387f05c8aaed31960caa5e8c03cb568f75db1"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "19dd5b190007ab533e447b019d62c29906d1d489"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "cd94b6f01349f45619c11453f43aa3b08a0d1ec6"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "c2914f6a954239f2d1f351096190552c2d5b59de"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "0e36ca9007e9825343512804d15a9caf34cd084e"
@@ -10387,6 +10563,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "86131ca016ef93d4bcd1b70eac2a808679c1ce22"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "e1edd38ad5a42c217809fd0d1eace111a6cf6aa3"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "f95e67729f2ae5014c817b2fd4e6c96ae0583549"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -10804,6 +10988,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "47d7157c5c4e3b928c13dc23e47b39e602302bbe"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "5f6db73622a341226389de2b9fc8d5089e716f13"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "443c705ee015f35e13dd426b262aba60cf863295"
@@ -11047,6 +11239,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "6ab6c8d0596ffa9c1be2e3764a28f94abd3281f9"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "c13ac7340fbb2f9b9d8c173d57404bb1c0261b94"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "a3aabadf48cbc796f8f8af060ee58e40dcdf45b1"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -12522,6 +12722,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "f2f9bc76ec32bf73ef3d8f4ac6268f6fb02e0579"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "a9cd804084f559bbbc6c8a001c367bac091af6e7"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "4644a7113773ff7724c17be0dbe558b261843327"
@@ -12694,6 +12898,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "e9cc76827dc9d64cd2d155f3cf0c65da45f3b1de"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "615bb2b9959aa780a67e9d2fc5d5e9c4cb80dafc"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "24ce41b0244235e5f6891793eb6193196bec0cc5"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "ffb820c36dea2a5d41ea4b9489a1dca1bde2c094"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "d8df31760ec2cdc50fe2a8d6ce6e7bbb1e7cbd8e"
@@ -12789,6 +13005,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "01f9249cffddfefa42ac9983315a75a457fd1933"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "feaa7e0387cfdf104c25f4f57409cd5594ac878d"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "0432607c435d2f1cdbf322b8ea94b8eabde77c4f"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -13206,6 +13430,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "9db33a05144708cab6bde35a3bd18ed1f1f70af2"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "3c3260380c4c77f20b3accafc9f6b83cadbd27a3"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "d7818ebf4195b1d701fc7533d6dc09fec8db5198"
@@ -13449,6 +13681,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "305cdd96b8097dfd6a90834d4b2aa7b293972593"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "ae8533ec266b19ae891108912859c85b81f2a551"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "0d4397a72eff37b33d14729be0964c9fdc31f53a"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -14924,6 +15164,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "bf4dc6b5ddda2bdb6397acac3ab26e9bdd9b26fb"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "bb8fc430aaae65db369822cd3b19266eb022e6ba"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "4b343542c519da4bcb4f23462b195e6dad40cffe"
@@ -15096,6 +15340,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "e42d060933b2b4e6dd8a52bf2dd1f82cd02384f1"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "2affa162c6dd92ad69b93fb1f75eca903199eb41"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "a22f6b35e9117f35b4512419a973a8ef0be5cf7e"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "0cec55a1c6b852d8b4170e26f578293a4dd9d80b"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "2974c0e723a9a5891e341b23220e644cef75c2f2"
@@ -15191,6 +15447,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "40abc282711bdbf7a5102f0a2603a4928efe1265"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "80e9955bc77bccce66648d5e0bdc17a5c43baa2c"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "db3a5450655dc6c642e98a38318ba577a9974c6e"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -15608,6 +15872,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "f016c30c28a2e0b9e3d7de95e4caa0c28a03b272"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "d6cae108523a3f9aac2cc03697f06bd221c8f607"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "710aea2e954bfea080d18ea8c1cde24bcb31ab03"
@@ -15851,6 +16123,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "b6e0e5f3c878c03e8f6a9a7ac540b74c9edda32e"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "75bf0dd8a2ffe4a7035b76d8ea7371200f67ea83"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "72fe7490a4e82b79e4eae5dd1796b7a222814697"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",
@@ -17326,6 +17606,10 @@
       "source": "cf1518131812c0ee5d5fac6b03cd9a610c7beae7",
       "translation": "8652474abfc4c6e0376828b59dfb6086340dc548"
     },
+    "engine.preflightFailed": {
+      "source": "ff4963464426c299c44ca38f493592f704c0dfd3",
+      "translation": "8a17619f3f0d43e29b11a7cd21efa5a7100cba48"
+    },
     "engine.forEachNonArray": {
       "source": "00a5ddfe2fe87234a085a25fc4e4fc96dfe47f85",
       "translation": "f0b9bf60f7a9eb3ed75b0c14c004e3ddf9b10b64"
@@ -17498,6 +17782,18 @@
       "source": "abb6ee1539e768e07668a0700f6b5db665885a57",
       "translation": "738378b536af1e4298b280e0f91459b319c858e1"
     },
+    "editor.triggers.contract": {
+      "source": "0cf43b6d080b9d216a82bab52e2e0754c6ff847c",
+      "translation": "0574d69d31900dbe1fac67b449ed1ba2f00e7ae7"
+    },
+    "editor.triggers.contractVersion": {
+      "source": "b25a730779fcf7a3533d634877a71ce92d16a1db",
+      "translation": "854962815fd91c56c8ba638b43dbd327d2be0393"
+    },
+    "editor.triggers.sourceApplication": {
+      "source": "f2f7f058fcba2c804e3fe9753905919fdf61ab19",
+      "translation": "faf404178b16ce5b55322b9a45eb58dbd2c1e436"
+    },
     "editor.triggers.runtimeProvider": {
       "source": "4a10bbc1ea7a09db7f6aca4e1417e4ab7daa9749",
       "translation": "0baf8fe6ed5d97807b070297360fb66d6f06d288"
@@ -17593,6 +17889,14 @@
     "editor.triggers.types.runtimeEvent.description": {
       "source": "c74d43b7177f4f64baf1cd37e5e7fc794587551f",
       "translation": "141b640023c07b47e6dfac4f8719804ef30e49fb"
+    },
+    "editor.triggers.types.contractEvent.label": {
+      "source": "b9815bf36081642a38ad4ae40e89605b16b65e98",
+      "translation": "383893020bc70a24a09da89a3f946781bf329d0f"
+    },
+    "editor.triggers.types.contractEvent.description": {
+      "source": "c6123b8ef51d7db77a30137b7f718c3d40333551",
+      "translation": "69b76e981e9c492bef6d62ebf53be1ce760a541b"
     },
     "editor.triggers.types.cron.label": {
       "source": "08e1aa6f6e291a5569b4ddd28a3c603bc75a855a",
@@ -18010,6 +18314,14 @@
       "source": "89f89c02cf47e091e726a4e07b88af0966806897",
       "translation": "89f89c02cf47e091e726a4e07b88af0966806897"
     },
+    "editor.steps.contractVersion": {
+      "source": "776b16388bb52e18a76b244223fdd6ba1a7cd52c",
+      "translation": "b7214930b007c3944fb46122fe167ee64210e766"
+    },
+    "editor.steps.providerApplication": {
+      "source": "2347cf7e48084c31246bfe935b9f7385d219bf4d",
+      "translation": "74600568089abf7dfb5e4af56544252a01f2d2e1"
+    },
     "editor.steps.advancedTitle": {
       "source": "f2ceb3c37b0978a429e54a8cc9f2a7cd754b4c63",
       "translation": "006a6f522fa58ab83b560411029ded998870e963"
@@ -18253,6 +18565,14 @@
     "editor.validation.runtimeEventRequired": {
       "source": "4b20bb52388a28ed3f41931a255d8cc9fb0a0bcd",
       "translation": "f7f677cee54ecf65baf36ed8ad79fa742a75a280"
+    },
+    "editor.validation.contractRequired": {
+      "source": "17c7fa7ff290e142729216e1c17a4e647d038f29",
+      "translation": "ba1ab159df7c4dbfa92de078b1691f6db129b2ff"
+    },
+    "editor.validation.contractVersionRequired": {
+      "source": "82aaa344303005a623affbf08aedacd3a53ca101",
+      "translation": "962309b6e3d28445a209d11b212f1f0c80317258"
     },
     "editor.validation.cronScheduleRequired": {
       "source": "d0245411c61f32748ced0a4737a8e7d0142b44fa",

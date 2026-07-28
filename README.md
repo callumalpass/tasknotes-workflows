@@ -16,8 +16,7 @@ Use it for things like:
 - Obsidian 1.8.0 or newer
 - TaskNotes installed and enabled
 - `mdbase-obsidian` is optional for local TaskNotes-only workflows and required
-  for shared runtime provider discovery, policy enforcement, contract events,
-  and contract actions
+  for cross-application contract events and contract actions
 
 ## Install
 
@@ -48,31 +47,31 @@ Enable only the workflows that match your vault. Most templates are meant to be 
 
 ```yaml
 ---
-type: workflow
+type: runtime_workflow
 id: auto-start-time-tracking
-version: 1
+version: 1.0.0
 name: Auto-start time tracking
 enabled: true
 
 triggers:
   - id: status-active
-    event: task.status.changed
-    if:
-      $expr: 'event.after.status == "active"'
+    event:
+      id: task.status.changed
+      version: 1.0.0
     x-tasknotes:
       type: tasknotes.event
       to: active
 
 steps:
   - id: start-time
-    action: time.start
+    action:
+      id: time.start
+      version: 1.0.0
     input:
       task:
         $expr: event.after.path
 
 run:
-  execution:
-    mode: single_executor
   concurrency:
     group: workflow
     policy: skip
@@ -85,22 +84,22 @@ x-tasknotes:
 ---
 ```
 
-Workflows can also subscribe to events from registered mdbase runtime providers
-and require a compatible provider version before they run:
+Cross-application triggers always name an event contract and a compatible
+version. The optional `source` narrows which application may publish it:
 
 ```yaml
-requires:
-  providers:
-    - id: canvas-bases
-      version: ">=0.1.0 <1.0.0"
-
 triggers:
   - id: canvas-drop
-    event: canvas.drop
+    event:
+      id: canvas.drop
+      version: ^1.0.0
+    x-tasknotes:
+      type: contract.event
+      source: canvas-bases
 ```
 
 New files and editor saves validate against the canonical mdbase runtime
-`workflow/0.1` schema. Files created by TaskNotes Workflows 0.1.x continue to
+`runtime_workflow` schema from Runtime profile 0.2. Files created by TaskNotes Workflows 0.1.x continue to
 run through the compatibility reader. The migration command shows a per-file
 diff, checks for changes after analysis, and creates a backup before rewriting
 legacy frontmatter; it never runs automatically during plugin startup.
@@ -115,14 +114,16 @@ may pin a provider application:
 ```yaml
 triggers:
   - id: task-completed
-    type: contract.event
-    contract: tasknotes.task.completed
-    version: ^1.0.0
+    event:
+      id: tasknotes.task.completed
+      version: ^1.0.0
+    x-tasknotes:
+      type: contract.event
 
 steps:
   - id: add-card
-    type: canvas.card.create
-    contract:
+    action:
+      id: canvas.card.create
       version: ^1.0.0
     provider:
       application: canvas-bases

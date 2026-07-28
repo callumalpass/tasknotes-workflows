@@ -1,5 +1,5 @@
-import { validateCanonicalSchema, type WorkflowContract } from "@callumalpass/mdbase-runtime";
-import { DEFAULT_SOURCE, LEGACY_WORKFLOW_TYPE, WORKFLOW_TYPE } from "./constants";
+import { validateRuntimeRecord, type RuntimeWorkflow } from "@callumalpass/mdbase-runtime";
+import { DEFAULT_SOURCE, LEGACY_WORKFLOW_TYPE, RUNTIME_WORKFLOW_TYPE, WORKFLOW_TYPE } from "./constants";
 import type {
 	WorkflowCondition,
 	WorkflowDefinition,
@@ -18,18 +18,20 @@ type Dict = Record<string, unknown>;
 export function detectWorkflowSourceFormat(data: unknown): WorkflowSourceFormat {
 	if (!isRecord(data)) return "unknown";
 	if (data.type === LEGACY_WORKFLOW_TYPE) return "tasknotes-v0.1";
+	if (data.type === RUNTIME_WORKFLOW_TYPE && data.version !== undefined && data.schemaVersion === undefined) {
+		return "runtime-v0.2";
+	}
 	if (data.type !== WORKFLOW_TYPE) return "unknown";
-	if (data.version !== undefined && data.schemaVersion === undefined) return "runtime-v0.1";
 	if (data.schemaVersion !== undefined && data.version === undefined) return "tasknotes-v1";
 	return "unknown";
 }
 
 export function validateRuntimeWorkflowRecord(record: unknown): WorkflowDiagnostic[] {
-	const validation = validateCanonicalSchema("workflow", record);
-	return validation.errors.map((error) => ({
-		severity: "error",
-		path: error.instancePath || "$",
-		message: error.message ?? `Workflow schema validation failed: ${error.keyword}.`,
+	const validation = validateRuntimeRecord(record);
+	return validation.diagnostics.map((diagnostic) => ({
+		severity: diagnostic.severity === "info" ? "warning" : diagnostic.severity,
+		path: diagnostic.path ?? "$",
+		message: diagnostic.message,
 	}));
 }
 
@@ -79,7 +81,7 @@ export function runtimeRecordToTaskNotesInput(record: Dict): Dict {
 	};
 }
 
-export function workflowToRuntimeRecord(workflow: WorkflowDefinition): WorkflowContract & Dict {
+export function workflowToRuntimeRecord(workflow: WorkflowDefinition): RuntimeWorkflow & Dict {
 	assertRuntimeIdentifier(workflow.id, "workflow id");
 	const tasknotes = compact({
 		format_version: 1,
@@ -88,22 +90,19 @@ export function workflowToRuntimeRecord(workflow: WorkflowDefinition): WorkflowC
 		query: workflow.query,
 		debug: workflow.debug,
 	});
-	const condition = conditionsToExpression(workflow.conditions);
 	const record: Dict = {
 		...workflow.extensions,
-		type: WORKFLOW_TYPE,
+		type: RUNTIME_WORKFLOW_TYPE,
 		id: workflow.id,
-		version: 1,
+		version: "1.0.0",
 		name: workflow.name,
 		description: workflow.description,
 		enabled: workflow.enabled,
 		requires: normalizeRequires(workflow.requires),
 		vars: Object.keys(workflow.vars).length > 0 ? normalizeExpressionValues(workflow.vars) : undefined,
 		triggers: workflow.triggers.map(workflowTriggerToRuntimeRecord),
-		if: condition,
 		steps: workflow.steps.map(workflowStepToRuntimeRecord),
 		run: {
-			execution: { mode: "single_executor" },
 			concurrency: {
 				group: workflow.run.concurrency.group,
 				policy: workflow.run.concurrency.policy,
@@ -121,20 +120,21 @@ export function workflowToRuntimeRecord(workflow: WorkflowDefinition): WorkflowC
 	if (diagnostics.length > 0) {
 		throw new Error(diagnostics.map((diagnostic) => `${diagnostic.path}: ${diagnostic.message}`).join("; "));
 	}
-	return cleaned as WorkflowContract & Dict;
+	return cleaned as RuntimeWorkflow & Dict;
 }
 
 function runtimeTriggerToTaskNotesInput(raw: unknown): unknown {
 	if (!isRecord(raw)) return raw;
 	const tasknotes = extension(raw);
-	const type = typeof tasknotes.type === "string" ? tasknotes.type : "runtime.event";
+	const event = isRecord(raw.event) ? raw.event : {};
+	const type = typeof tasknotes.type === "string" ? tasknotes.type : "contract.event";
 	return {
 		...tasknotes,
 		id: raw.id,
 		type,
 		...(type === "contract.event"
-			? { contract: raw.event, version: tasknotes.version }
-			: { event: runtimeEventForTaskNotesTrigger(type, raw.event, tasknotes) }),
+			? { contract: event.id, version: event.version }
+			: { event: runtimeEventForTaskNotesTrigger(type, event.id, tasknotes) }),
 		debounce: raw.debounce,
 		minimumInterval: raw.minimum_interval,
 		extensions: otherExtensions(raw),
@@ -144,29 +144,36 @@ function runtimeTriggerToTaskNotesInput(raw: unknown): unknown {
 function runtimeStepToTaskNotesInput(raw: unknown): unknown {
 	if (!isRecord(raw)) return raw;
 	const tasknotes = extension(raw);
+	const action = isRecord(raw.action) ? raw.action : {};
 	return {
 		id: raw.id,
-		type: raw.action,
+		type: action.id,
 		name: raw.name,
 		input: raw.input,
 		if: Array.isArray(tasknotes.conditions) ? tasknotes.conditions : raw.if,
 		forEach: runtimeForEachToTaskNotes(raw.for_each),
 		requires: raw.requires,
-		contract: tasknotes.contract,
-		provider: tasknotes.provider,
+		contract: compact({
+			version: action.version,
+			digest: action.digest,
+		}),
+		provider: raw.provider,
 		extensions: otherExtensions(raw),
 	};
 }
 
 function workflowTriggerToRuntimeRecord(trigger: WorkflowTrigger): Dict {
 	assertRuntimeIdentifier(trigger.id, `trigger id ${trigger.id}`);
-	const event = runtimeEventForWorkflowTrigger(trigger);
-	assertRuntimeIdentifier(event, `trigger event ${event}`);
+	const eventId = runtimeEventForWorkflowTrigger(trigger);
+	assertRuntimeIdentifier(eventId, `trigger event ${eventId}`);
 	const tasknotes = triggerTaskNotesExtension(trigger);
 	return removeUndefined({
 		...trigger.extensions,
 		id: trigger.id,
-		event,
+		event: compact({
+			id: eventId,
+			version: trigger.type === "contract.event" ? trigger.version : "1.0.0",
+		}),
 		debounce: trigger.debounce,
 		minimum_interval: trigger.minimumInterval,
 		[TASKNOTES_EXTENSION]: tasknotes,
@@ -177,20 +184,24 @@ function workflowStepToRuntimeRecord(step: WorkflowStep): Dict {
 	assertRuntimeIdentifier(step.id, `step id ${step.id}`);
 	assertRuntimeIdentifier(step.type, `step action ${step.type}`);
 	const conditions = step.if === undefined ? [] : Array.isArray(step.if) ? step.if : [step.if];
+	const tasknotes = compact({
+		conditions: conditions.length > 0 ? conditions : undefined,
+	});
 	return removeUndefined({
 		...step.extensions,
 		id: step.id,
-		action: step.type,
+		action: compact({
+			id: step.type,
+			version: step.contract?.version ?? "1.0.0",
+			digest: step.contract?.digest,
+		}),
 		name: step.name,
 		if: conditionsToExpression(conditions),
 		input: step.input ? normalizeExpressionValues(step.input) : undefined,
 		for_each: workflowForEachToRuntime(step.forEach),
 		requires: normalizeRequires(step.requires),
-		[TASKNOTES_EXTENSION]: compact({
-			conditions: conditions.length > 0 ? conditions : undefined,
-			contract: step.contract,
-			provider: step.provider,
-		}),
+		provider: step.provider,
+		[TASKNOTES_EXTENSION]: Object.keys(tasknotes).length > 0 ? tasknotes : undefined,
 	});
 }
 
@@ -198,10 +209,8 @@ function triggerTaskNotesExtension(trigger: WorkflowTrigger): Dict {
 	const extension: Dict = { type: trigger.type };
 	if (trigger.type === "tasknotes.event") {
 		Object.assign(extension, select(trigger, ["from", "to", "path", "allowSelfTrigger"]));
-	} else if (trigger.type === "runtime.event") {
-		Object.assign(extension, select(trigger, ["provider", "path"]));
 	} else if (trigger.type === "contract.event") {
-		Object.assign(extension, select(trigger, ["version", "source", "path"]));
+		Object.assign(extension, select(trigger, ["source", "path"]));
 	} else if (trigger.type === "cron") {
 		Object.assign(extension, select(trigger, ["schedule", "timezone", "catchUp"]));
 	} else if (trigger.type === "interval") {
@@ -213,7 +222,7 @@ function triggerTaskNotesExtension(trigger: WorkflowTrigger): Dict {
 }
 
 function runtimeEventForWorkflowTrigger(trigger: WorkflowTrigger): string {
-	if (trigger.type === "tasknotes.event" || trigger.type === "runtime.event") return trigger.event;
+	if (trigger.type === "tasknotes.event") return trigger.event;
 	if (trigger.type === "contract.event") return trigger.contract;
 	if (trigger.type === "cron") return "tasknotes-workflows.schedule.cron";
 	if (trigger.type === "interval") return "tasknotes-workflows.schedule.interval";
@@ -292,10 +301,6 @@ function normalizeRequires(raw: WorkflowDefinition["requires"]): unknown {
 	if (!raw) return undefined;
 	return removeUndefined({
 		capabilities: raw.capabilities,
-		providers: raw.providers?.map((provider) => {
-			if (typeof provider === "string") return provider;
-			return provider.version ? provider : provider.id;
-		}),
 	});
 }
 

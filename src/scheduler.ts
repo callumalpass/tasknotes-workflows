@@ -7,7 +7,6 @@ import type { TaskNotesBridge } from "./tasknotesBridge";
 import type {
 	LoadedWorkflow,
 	ContractEventTrigger,
-	MdbaseRuntimeEventTrigger,
 	ObsidianMetadataTrigger,
 	ObsidianWorkspaceTrigger,
 	TaskNotesEventTrigger,
@@ -15,7 +14,6 @@ import type {
 	WorkflowRunDetail,
 	WorkflowRunOptions,
 	WorkflowTriggerPayload,
-	TaskNotesMdbaseRuntimeEventEnvelope,
 } from "./types";
 
 type RunWorkflow = (
@@ -43,7 +41,6 @@ export class WorkflowScheduler {
 		this.stop();
 		const epoch = this.registrationEpoch;
 		this.registerTaskEvents();
-		this.registerRuntimeEvents();
 		this.registerContractEvents(epoch);
 		this.registerSchedules();
 		this.registerObsidianEvents();
@@ -132,22 +129,6 @@ export class WorkflowScheduler {
 		void this.handleScheduleTick().catch(showError);
 	}
 
-	private registerRuntimeEvents(): void {
-		if (!this.getSettings().enableTaskEventTriggers) return;
-		const events = new Set<string>();
-		for (const loaded of this.getWorkflows()) {
-			for (const trigger of loaded.workflow?.triggers ?? []) {
-				if (trigger.type === "runtime.event") events.add(trigger.event);
-			}
-		}
-		for (const event of events) {
-			const disposable = this.bridge.onRuntimeEvent(event, async (envelope) => {
-				await this.handleRuntimeEvent(envelope);
-			});
-			if (disposable) this.cleanupCallbacks.push(() => void disposable.dispose());
-		}
-	}
-
 	private registerObsidianEvents(): void {
 		if (!this.getSettings().enableObsidianTriggers) return;
 
@@ -218,17 +199,6 @@ export class WorkflowScheduler {
 			for (const trigger of workflow.workflow?.triggers ?? []) {
 				if (!isTaskNotesEventTrigger(trigger)) continue;
 				if (!this.taskNotesTriggerMatches(trigger, payload)) continue;
-				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
-			}
-		}
-	}
-
-	private async handleRuntimeEvent(envelope: TaskNotesMdbaseRuntimeEventEnvelope): Promise<void> {
-		const payload = normalizeRuntimeEventPayload(envelope);
-		for (const workflow of this.getWorkflows()) {
-			for (const trigger of workflow.workflow?.triggers ?? []) {
-				if (trigger.type !== "runtime.event") continue;
-				if (!this.runtimeTriggerMatches(trigger, envelope, payload)) continue;
 				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
 			}
 		}
@@ -372,17 +342,6 @@ export class WorkflowScheduler {
 		return true;
 	}
 
-	private runtimeTriggerMatches(
-		trigger: MdbaseRuntimeEventTrigger,
-		envelope: TaskNotesMdbaseRuntimeEventEnvelope,
-		payload: WorkflowTriggerPayload
-	): boolean {
-		if (trigger.event !== envelope.type) return false;
-		if (trigger.provider && trigger.provider !== envelope.source.provider) return false;
-		if (trigger.path && (!payload.path || !pathMatchesFilter(payload.path, trigger.path))) return false;
-		return true;
-	}
-
 	private shouldRunCron(
 		workflowId: string,
 		triggerId: string,
@@ -428,31 +387,6 @@ function normalizeTaskNotesEventPayload(event: string, rawPayload: unknown): Wor
 		path: typeof payload.taskPath === "string" ? payload.taskPath : undefined,
 		data: payload,
 		actualAt: new Date().toISOString(),
-	};
-}
-
-function normalizeRuntimeEventPayload(
-	envelope: TaskNotesMdbaseRuntimeEventEnvelope
-): WorkflowTriggerPayload {
-	const record = isRecord(envelope.payload.record) ? envelope.payload.record : undefined;
-	const file = isRecord(envelope.payload.file) ? envelope.payload.file : undefined;
-	const path = [envelope.payload.path, record?.path, file?.path].find(
-		(value): value is string => typeof value === "string" && value.length > 0
-	);
-	return {
-		type: envelope.type,
-		triggerType: "runtime.event",
-		event: envelope.type,
-		path,
-		source: envelope.source.provider,
-		correlationId: envelope.trace?.correlation_id,
-		data: {
-			payload: envelope.payload,
-			eventId: envelope.id,
-			contractVersion: envelope.contract_version,
-			causationId: envelope.trace?.causation_id,
-		},
-		actualAt: envelope.occurred_at,
 	};
 }
 

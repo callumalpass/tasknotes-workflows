@@ -1,8 +1,4 @@
 import type { App, EventRef, TFile } from "obsidian";
-import type {
-	MdbaseProviderRequirement,
-	MdbaseRuntimeEventEnvelope,
-} from "@callumalpass/mdbase-runtime";
 import type { ProviderSelector } from "@callumalpass/mdbase-interop";
 
 export interface TaskNotesWorkflowsSettings {
@@ -40,7 +36,7 @@ export interface LoadedWorkflow {
 	lastRun?: RunSummary;
 }
 
-export type WorkflowSourceFormat = "runtime-v0.1" | "tasknotes-v1" | "tasknotes-v0.1" | "unknown";
+export type WorkflowSourceFormat = "runtime-v0.2" | "tasknotes-v1" | "tasknotes-v0.1" | "unknown";
 
 export interface WorkflowDiagnostic {
 	severity: "error" | "warning";
@@ -68,13 +64,11 @@ export interface WorkflowDefinition {
 
 export interface WorkflowRequires {
 	capabilities?: string[];
-	providers?: MdbaseProviderRequirement[];
 }
 
 export type WorkflowTrigger =
 	| TaskNotesEventTrigger
 	| ContractEventTrigger
-	| MdbaseRuntimeEventTrigger
 	| CronTrigger
 	| IntervalTrigger
 	| ManualTrigger
@@ -97,13 +91,6 @@ export interface TaskNotesEventTrigger extends WorkflowTriggerBase {
 	to?: unknown;
 	path?: PathFilter;
 	allowSelfTrigger?: boolean;
-}
-
-export interface MdbaseRuntimeEventTrigger extends WorkflowTriggerBase {
-	type: "runtime.event";
-	event: string;
-	provider?: string;
-	path?: PathFilter;
 }
 
 export interface ContractEventTrigger extends WorkflowTriggerBase {
@@ -505,7 +492,6 @@ export interface TaskNotesRuntimeApi {
 	};
 }
 
-export type TaskNotesMdbaseRuntimeEventEnvelope = MdbaseRuntimeEventEnvelope;
 
 export interface TaskNotesRuntimeCatalogOption {
 	id?: string;

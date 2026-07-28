@@ -69,16 +69,16 @@ export function parseWorkflowDefinition(
 		};
 	}
 
-	if (sourceFormat === "runtime-v0.1") {
+	if (sourceFormat === "runtime-v0.2") {
 		diagnostics.push(...validateRuntimeWorkflowRecord(data));
 		if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
 			return { workflow: null, diagnostics, sourceFormat };
 		}
 	}
-	const normalizedData = sourceFormat === "runtime-v0.1"
+	const normalizedData = sourceFormat === "runtime-v0.2"
 		? runtimeRecordToTaskNotesInput(data)
 		: normalizeLegacyWorkflowObject(data);
-	if (sourceFormat !== "runtime-v0.1") {
+	if (sourceFormat !== "runtime-v0.2") {
 		for (const key of Object.keys(data)) {
 			if (TOP_LEVEL_FIELDS.has(key) || key.startsWith("x-")) continue;
 			diagnostics.push({
@@ -185,17 +185,6 @@ function parseRequires(raw: unknown, diagnostics: WorkflowDiagnostic[], path = "
 			diagnostics.push({ severity: "error", path: `${path}.capabilities`, message: "capabilities must be a string list." });
 		}
 	}
-	if (typeof raw.providers !== "undefined") {
-		if (Array.isArray(raw.providers) && raw.providers.every(isProviderRequirement)) {
-			requires.providers = raw.providers.map((provider) =>
-				typeof provider === "string"
-					? provider
-					: { id: provider.id, ...(provider.version ? { version: provider.version } : {}) }
-			);
-		} else {
-			diagnostics.push({ severity: "error", path: `${path}.providers`, message: "providers must contain provider ids or id/version objects." });
-		}
-	}
 	return Object.keys(requires).length > 0 ? requires : undefined;
 }
 
@@ -243,22 +232,6 @@ function parseTrigger(
 		const event = stringField(trigger, "event", diagnostics, path);
 		if (!event) return null;
 		return { ...trigger, id, type, event, extensions };
-	}
-	if (type === "runtime.event") {
-		const event = stringField(trigger, "event", diagnostics, path);
-		if (!event) return null;
-		if (trigger.provider !== undefined && typeof trigger.provider !== "string") {
-			diagnostics.push({ severity: "error", path: `${path}.provider`, message: "provider must be a string." });
-			return null;
-		}
-		return {
-			...trigger,
-			id,
-			type,
-			event,
-			provider: optionalString(trigger.provider),
-			extensions,
-		};
 	}
 	if (type === "contract.event") {
 		const contract = stringField(trigger, "contract", diagnostics, path);
@@ -640,7 +613,7 @@ function collectExtensions(
 	for (const [key, value] of Object.entries(original)) {
 		if (key.startsWith("x-") && key !== "x-tasknotes") extensions[key as `x-${string}`] = value;
 	}
-	if (sourceFormat !== "runtime-v0.1") {
+	if (sourceFormat !== "runtime-v0.2") {
 		const unknown = Object.fromEntries(
 			Object.entries(original).filter(([key]) => !TOP_LEVEL_FIELDS.has(key) && !key.startsWith("x-"))
 		);
@@ -673,7 +646,6 @@ function nestedExtensions(
 function triggerFields(type: string): Set<string> {
 	const fields = new Set(["id", "type", "debounce", "minimumInterval", "extensions"]);
 	if (type === "tasknotes.event") ["event", "from", "to", "path", "allowSelfTrigger"].forEach((field) => fields.add(field));
-	if (type === "runtime.event") ["event", "provider", "path"].forEach((field) => fields.add(field));
 	if (type === "contract.event") ["contract", "version", "source", "path"].forEach((field) => fields.add(field));
 	if (type === "cron") ["schedule", "timezone", "catchUp"].forEach((field) => fields.add(field));
 	if (type === "interval") fields.add("every");
@@ -751,12 +723,6 @@ function pushExpressionDiagnostics(value: unknown, path: string, diagnostics: Wo
 
 function optionalString(value: unknown): string | undefined {
 	return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function isProviderRequirement(value: unknown): value is string | { id: string; version?: string } {
-	if (typeof value === "string") return value.trim().length > 0;
-	if (!isRecord(value) || typeof value.id !== "string" || value.id.trim().length === 0) return false;
-	return value.version === undefined || (typeof value.version === "string" && value.version.trim().length > 0);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
