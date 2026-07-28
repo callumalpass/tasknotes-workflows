@@ -10,6 +10,7 @@ import type {
 export const TRIGGER_TYPES: Array<WorkflowTrigger["type"]> = [
 	"manual",
 	"tasknotes.event",
+	"contract.event",
 	"runtime.event",
 	"cron",
 	"interval",
@@ -61,6 +62,14 @@ export function createDefaultTrigger(
 	}
 	if (type === "runtime.event") {
 		return { id: uniqueId("canvas-drop", ids), type, event: "canvas.drop", provider: "canvas-bases" };
+	}
+	if (type === "contract.event") {
+		return {
+			id: uniqueId("contract-event", ids),
+			type,
+			contract: "tasknotes.task.completed",
+			version: "^1.0.0",
+		};
 	}
 	if (type === "cron") {
 		return { id: uniqueId("daily", ids), type, schedule: "0 9 * * *", timezone: "local" };

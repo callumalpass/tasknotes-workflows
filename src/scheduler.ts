@@ -1,10 +1,12 @@
 import { Notice, TFile, type EventRef, type Plugin } from "obsidian";
+import type { CloudEvent } from "@callumalpass/mdbase-interop";
 import { cronMatches } from "./cron";
 import { parseDurationMs } from "./duration";
 import { pathMatchesFilter } from "./path";
 import type { TaskNotesBridge } from "./tasknotesBridge";
 import type {
 	LoadedWorkflow,
+	ContractEventTrigger,
 	MdbaseRuntimeEventTrigger,
 	ObsidianMetadataTrigger,
 	ObsidianWorkspaceTrigger,
@@ -27,6 +29,7 @@ export class WorkflowScheduler {
 	private cleanupCallbacks: Array<() => void> = [];
 	private cronLastRun = new Map<string, string>();
 	private intervalLastRun = new Map<string, number>();
+	private registrationEpoch = 0;
 
 	constructor(
 		private readonly plugin: Plugin,
@@ -38,13 +41,16 @@ export class WorkflowScheduler {
 
 	start(): void {
 		this.stop();
+		const epoch = this.registrationEpoch;
 		this.registerTaskEvents();
 		this.registerRuntimeEvents();
+		this.registerContractEvents(epoch);
 		this.registerSchedules();
 		this.registerObsidianEvents();
 	}
 
 	stop(): void {
+		this.registrationEpoch += 1;
 		for (const ref of this.taskEventRefs) {
 			this.bridge.api?.events.off(ref);
 		}
@@ -55,6 +61,35 @@ export class WorkflowScheduler {
 		this.intervalIds = [];
 		for (const cleanup of this.cleanupCallbacks) cleanup();
 		this.cleanupCallbacks = [];
+	}
+
+	private registerContractEvents(epoch: number): void {
+		if (!this.getSettings().enableTaskEventTriggers) return;
+		const subscriptions = new Map<string, { contract: string; version: string }>();
+		for (const loaded of this.getWorkflows()) {
+			for (const trigger of loaded.workflow?.triggers ?? []) {
+				if (trigger.type !== "contract.event") continue;
+				subscriptions.set(contractTriggerKey(trigger), {
+					contract: trigger.contract,
+					version: trigger.version,
+				});
+			}
+		}
+		for (const [key, contract] of subscriptions) {
+			void this.bridge.onContractEvent(
+				{ id: contract.contract, version: contract.version },
+				async (event) => {
+					await this.handleContractEvent(key, event);
+				},
+			).then((disposable) => {
+				if (!disposable) return;
+				if (epoch !== this.registrationEpoch) {
+					void disposable.dispose();
+					return;
+				}
+				this.cleanupCallbacks.push(() => void disposable.dispose());
+			}).catch(showError);
+		}
 	}
 
 	runManual(workflow: LoadedWorkflow, dryRun = false): Promise<WorkflowRunDetail> {
@@ -194,6 +229,19 @@ export class WorkflowScheduler {
 			for (const trigger of workflow.workflow?.triggers ?? []) {
 				if (trigger.type !== "runtime.event") continue;
 				if (!this.runtimeTriggerMatches(trigger, envelope, payload)) continue;
+				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
+			}
+		}
+	}
+
+	private async handleContractEvent(key: string, event: CloudEvent): Promise<void> {
+		const payload = normalizeContractEventPayload(event);
+		for (const workflow of this.getWorkflows()) {
+			for (const trigger of workflow.workflow?.triggers ?? []) {
+				if (trigger.type !== "contract.event") continue;
+				if (contractTriggerKey(trigger) !== key) continue;
+				if (trigger.source && trigger.source !== event.mdbaseapplication) continue;
+				if (trigger.path && (!payload.path || !pathMatchesFilter(payload.path, trigger.path))) continue;
 				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
 			}
 		}
@@ -406,6 +454,35 @@ function normalizeRuntimeEventPayload(
 		},
 		actualAt: envelope.occurred_at,
 	};
+}
+
+function normalizeContractEventPayload(event: CloudEvent): WorkflowTriggerPayload {
+	const data = isRecord(event.data) ? event.data : {};
+	const path = typeof data.task_path === "string"
+		? data.task_path
+		: typeof event.subject === "string"
+			? event.subject
+			: undefined;
+	return {
+		type: event.type,
+		triggerType: "contract.event",
+		event: event.type,
+		path,
+		source: event.mdbaseapplication,
+		correlationId: typeof event.correlationid === "string" ? event.correlationid : undefined,
+		data: {
+			...data,
+			eventId: event.id,
+			contractVersion: event.mdbasecontractversion,
+			contractDigest: event.mdbasecontractdigest,
+			causationId: event.causationid,
+		},
+		actualAt: event.time,
+	};
+}
+
+function contractTriggerKey(trigger: ContractEventTrigger): string {
+	return `${trigger.contract}\u0000${trigger.version}`;
 }
 
 function isTaskNotesEventTrigger(trigger: { type: string }): trigger is TaskNotesEventTrigger {

@@ -1,4 +1,13 @@
-import type { App, EventRef } from "obsidian";
+import type { App, EventRef, Plugin } from "obsidian";
+import type {
+	ActionOutcome,
+	BridgeDescription,
+	CloudEvent,
+	ContractRequirement,
+	Disposable,
+	InteropClient,
+	InvokeActionInput,
+} from "@callumalpass/mdbase-interop";
 import type {
 	MdbaseRuntimeDispatchContext,
 	MdbaseRuntimeEventEnvelope,
@@ -31,6 +40,11 @@ interface MdbasePluginWithApi {
 	api?: {
 		apiVersion: number;
 		runtime?: MdbaseRuntimeHostApi;
+		interop?: {
+			connect(plugin: Plugin): InteropClient;
+			describe(): BridgeDescription;
+		};
+		getInteropStatus?(): { enabled: boolean };
 	};
 }
 
@@ -38,8 +52,12 @@ export class TaskNotesBridge {
 	private extensionHandle: { unregister(): void } | null = null;
 	private providerHandle: MdbaseRuntimeProviderRegistration | null = null;
 	private providerRegistration: Promise<void> | null = null;
+	private interopClient: InteropClient | null = null;
 
-	constructor(private readonly app: App) {}
+	constructor(
+		private readonly app: App,
+		private readonly plugin?: Plugin,
+	) {}
 
 	get api(): TaskNotesRuntimeApi | null {
 		const app = this.app as App & {
@@ -55,6 +73,15 @@ export class TaskNotesBridge {
 		return this.api !== null;
 	}
 
+	get interopAvailable(): boolean {
+		const mdbase = this.mdbasePlugin();
+		return Boolean(
+			this.plugin
+			&& mdbase?.api?.interop
+			&& mdbase.api.getInteropStatus?.().enabled !== false
+		);
+	}
+
 	get runtimeHost(): MdbaseRuntimeHostApi | null {
 		const app = this.app as App & {
 			plugins?: { getPlugin(id: string): unknown };
@@ -62,6 +89,39 @@ export class TaskNotesBridge {
 		const mdbase = app.plugins?.getPlugin("mdbase-obsidian") as MdbasePluginWithApi | null;
 		if (mdbase?.api?.apiVersion === 1 && mdbase.api.runtime) return mdbase.api.runtime;
 		return null;
+	}
+
+	connectInterop(): InteropClient | null {
+		if (this.interopClient) return this.interopClient;
+		if (!this.interopAvailable || !this.plugin) return null;
+		const mdbase = this.mdbasePlugin();
+		if (!mdbase?.api?.interop) return null;
+		this.interopClient = mdbase.api.interop.connect(this.plugin);
+		return this.interopClient;
+	}
+
+	interopDescription(): BridgeDescription | null {
+		return this.mdbasePlugin()?.api?.interop?.describe() ?? null;
+	}
+
+	async onContractEvent(
+		contract: ContractRequirement,
+		handler: (event: CloudEvent) => void | Promise<void>,
+	): Promise<Disposable | null> {
+		return await this.connectInterop()?.subscribeEvents({ contract }, handler) ?? null;
+	}
+
+	async invokeContractAction(
+		input: InvokeActionInput,
+	): Promise<ActionOutcome> {
+		const client = this.connectInterop();
+		if (!client) throw new Error("The mdbase interoperability bridge is unavailable or not granted.");
+		return await client.invokeAction(input);
+	}
+
+	async disposeInterop(): Promise<void> {
+		await this.interopClient?.dispose();
+		this.interopClient = null;
 	}
 
 	get missingReason(): string | null {
@@ -200,6 +260,13 @@ export class TaskNotesBridge {
 	async explainTaskQuery(query: unknown): Promise<TaskNotesRuntimeQueryExplainResult | null> {
 		if (!this.api?.query?.explain) return null;
 		return await this.api.query.explain(query);
+	}
+
+	private mdbasePlugin(): MdbasePluginWithApi | null {
+		const app = this.app as App & {
+			plugins?: { getPlugin(id: string): unknown };
+		};
+		return app.plugins?.getPlugin("mdbase-obsidian") as MdbasePluginWithApi | null;
 	}
 }
 

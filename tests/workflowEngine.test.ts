@@ -3,6 +3,7 @@ import type { MdbaseRuntimeHostApi } from "@callumalpass/mdbase-runtime";
 import { StepRegistry } from "../src/stepRegistry";
 import { WorkflowEngine } from "../src/workflowEngine";
 import type { LoadedWorkflow, TaskNotesRuntimeApi } from "../src/types";
+import type { TaskNotesBridge } from "../src/tasknotesBridge";
 
 function workflow(): LoadedWorkflow {
 	return {
@@ -47,6 +48,91 @@ function workflow(): LoadedWorkflow {
 }
 
 describe("workflow engine", () => {
+	it("invokes a selected event/action contract provider and retains exact outcome evidence", async () => {
+		const loaded = workflow();
+		loaded.workflow!.steps = [{
+			id: "card",
+			type: "canvas.card.create",
+			contract: { version: "^1.0.0" },
+			provider: { application: "canvas-bases" },
+			input: {
+				canvas_path: "Completed.canvas",
+				card: { kind: "file", file: "{{event.data.task_path}}" },
+			},
+		}];
+		const invokeContractAction = vi.fn(async () => ({
+			kind: "mdbase.action.outcome",
+			profile_version: "0.1",
+			outcome_id: "out-1",
+			request_id: "req-1",
+			invocation_id: "inv-1",
+			attempt_id: "attempt-1",
+			contract: { id: "canvas.card.create", version: "1.0.0", digest: `sha256:${"a".repeat(64)}` },
+			provider: {
+				application: "canvas-bases",
+				implementation: "canvas-bases.obsidian",
+				version: "0.1.2",
+			},
+			provider_declaration_digest: `sha256:${"b".repeat(64)}`,
+			status: "succeeded",
+			completed_at: "2026-07-28T10:15:01.000Z",
+			output: { canvas_path: "Completed.canvas", card_id: "card-1", created: true },
+		}));
+		const bridge = {
+			interopDescription: () => ({
+				action_providers: [{
+					handlers: [{
+						resolved: {
+							id: "canvas.card.create",
+							version: "1.0.0",
+							digest: `sha256:${"a".repeat(64)}`,
+						},
+					}],
+				}],
+			}),
+			invokeContractAction,
+		} as unknown as TaskNotesBridge;
+		const engine = new WorkflowEngine(
+			new StepRegistry(),
+			() => null,
+			() => null,
+			(key) => key,
+			() => null,
+			() => bridge,
+		);
+
+		const run = await engine.runWorkflow(loaded, {
+			trigger: {
+				type: "tasknotes.task.completed",
+				triggerType: "contract.event",
+				path: "Tasks/A.md",
+				correlationId: "corr-1",
+				data: { task_path: "Tasks/A.md", eventId: "evt-1" },
+			},
+		});
+
+		expect(run.status).toBe("success");
+		expect(invokeContractAction).toHaveBeenCalledWith(expect.objectContaining({
+			contract: { id: "canvas.card.create", version: "^1.0.0" },
+			requested_provider: { application: "canvas-bases" },
+			correlation_id: "corr-1",
+			causation_id: "evt-1",
+			subject: "Tasks/A.md",
+			input: {
+				canvas_path: "Completed.canvas",
+				card: { kind: "file", file: "Tasks/A.md" },
+			},
+		}));
+		expect(run.steps[0]).toMatchObject({
+			output: { card_id: "card-1", created: true },
+			evidence: {
+				status: "succeeded",
+				contract: { id: "canvas.card.create", version: "1.0.0" },
+				provider: { application: "canvas-bases" },
+			},
+		});
+	});
+
 	it("dispatches registered actions through the mdbase runtime host", async () => {
 		const loaded = workflow();
 		const localPatch = vi.fn();

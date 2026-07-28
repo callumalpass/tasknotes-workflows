@@ -1,6 +1,6 @@
 {
 	"name": "tasknotes-workflows",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Markdown-defined workflow automation for TaskNotes.",
 	"type": "module",
 	"main": "main.js",
@@ -32,6 +32,7 @@
 	"author": "Callum Alpass",
 	"license": "MIT",
 	"dependencies": {
+		"@callumalpass/mdbase-interop": "file:vendor/callumalpass-mdbase-interop-0.1.0-rc.2.tgz",
 		"@callumalpass/mdbase-runtime": "0.1.0-rc.1",
 		"obsidian-bases-expression": "^0.2.0",
 		"obsidian-bases-expression-builder": "^0.1.0",

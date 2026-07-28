@@ -46,6 +46,56 @@ run:
 		expect(result.sourceFormat).toBe("tasknotes-v1");
 	});
 
+	it("round-trips contract events and action provider selection", () => {
+		const result = parseWorkflowDefinition({
+			type: "workflow",
+			schemaVersion: 1,
+			id: "completed-to-canvas",
+			name: "Completed to canvas",
+			enabled: true,
+			triggers: [{
+				id: "completed",
+				type: "contract.event",
+				contract: "tasknotes.task.completed",
+				version: "^1.0.0",
+				source: "tasknotes",
+			}],
+			steps: [{
+				id: "card",
+				type: "canvas.card.create",
+				contract: { version: "^1.0.0" },
+				provider: { application: "canvas-bases" },
+				input: {
+					canvas_path: "Completed.canvas",
+					card: { kind: "file", file: "{{event.data.task_path}}" },
+				},
+			}],
+			run: {
+				mode: "sequential",
+				concurrency: { group: "workflow", policy: "queue" },
+				limits: { maxItems: 1 },
+				source: "tasknotes-workflows",
+				onError: "stop",
+			},
+		}, "");
+
+		expect(result.diagnostics).toEqual([]);
+		expect(result.workflow?.triggers[0]).toMatchObject({
+			type: "contract.event",
+			contract: "tasknotes.task.completed",
+			version: "^1.0.0",
+			source: "tasknotes",
+		});
+		const frontmatter = workflowToFrontmatter(result.workflow!);
+		const canonical = parseWorkflowDefinition(parse(frontmatter), frontmatter);
+		expect(canonical.diagnostics).toEqual([]);
+		expect(canonical.workflow?.steps[0]).toMatchObject({
+			type: "canvas.card.create",
+			contract: { version: "^1.0.0" },
+			provider: { application: "canvas-bases" },
+		});
+	});
+
 	it("writes canonical mdbase runtime workflow records and reads TaskNotes extensions", () => {
 		const legacy = parseWorkflowDefinition({
 			type: "tasknotes-workflow",

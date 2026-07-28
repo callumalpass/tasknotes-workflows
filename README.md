@@ -16,7 +16,8 @@ Use it for things like:
 - Obsidian 1.8.0 or newer
 - TaskNotes installed and enabled
 - `mdbase-obsidian` is optional for local TaskNotes-only workflows and required
-  for shared runtime provider discovery, policy enforcement, and external events
+  for shared runtime provider discovery, policy enforcement, contract events,
+  and contract actions
 
 ## Install
 
@@ -103,6 +104,43 @@ New files and editor saves validate against the canonical mdbase runtime
 run through the compatibility reader. The migration command shows a per-file
 diff, checks for changes after analysis, and creates a backup before rewriting
 legacy frontmatter; it never runs automatically during plugin startup.
+
+## Contract Events And Actions
+
+The mdbase interoperability profile lets workflows connect applications without
+giving one application ownership of another's types. A trigger selects an event
+contract and compatible version range; a step selects an action contract and
+may pin a provider application:
+
+```yaml
+triggers:
+  - id: task-completed
+    type: contract.event
+    contract: tasknotes.task.completed
+    version: ^1.0.0
+
+steps:
+  - id: add-card
+    type: canvas.card.create
+    contract:
+      version: ^1.0.0
+    provider:
+      application: canvas-bases
+    input:
+      canvas_path: TaskNotes/Canvases/Completed tasks.canvas
+      card:
+        kind: file
+        file: "{{event.data.task_path}}"
+```
+
+The included **Add completed tasks to a canvas** workflow demonstrates this
+flow and is disabled by default. Enable **Allow local application
+interoperability** in mdbase settings before enabling it.
+
+Contract events use CloudEvents and are multicast. Action execution requires
+exactly one compatible provider. Run details preserve the exact contract,
+source, provider, request, attempt, and outcome evidence. Compatibility never
+acts as authorization; the mdbase host grant remains default-deny.
 
 ## Editing Workflows
 

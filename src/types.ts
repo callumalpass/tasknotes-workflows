@@ -3,6 +3,7 @@ import type {
 	MdbaseProviderRequirement,
 	MdbaseRuntimeEventEnvelope,
 } from "@callumalpass/mdbase-runtime";
+import type { ProviderSelector } from "@callumalpass/mdbase-interop";
 
 export interface TaskNotesWorkflowsSettings {
 	workflowFolder: string;
@@ -72,6 +73,7 @@ export interface WorkflowRequires {
 
 export type WorkflowTrigger =
 	| TaskNotesEventTrigger
+	| ContractEventTrigger
 	| MdbaseRuntimeEventTrigger
 	| CronTrigger
 	| IntervalTrigger
@@ -101,6 +103,14 @@ export interface MdbaseRuntimeEventTrigger extends WorkflowTriggerBase {
 	type: "runtime.event";
 	event: string;
 	provider?: string;
+	path?: PathFilter;
+}
+
+export interface ContractEventTrigger extends WorkflowTriggerBase {
+	type: "contract.event";
+	contract: string;
+	version: string;
+	source?: string;
 	path?: PathFilter;
 }
 
@@ -183,6 +193,11 @@ export interface WorkflowStep {
 	if?: WorkflowCondition | WorkflowCondition[];
 	forEach?: WorkflowForEach;
 	requires?: WorkflowRequires;
+	contract?: {
+		version?: string;
+		digest?: string;
+	};
+	provider?: ProviderSelector;
 	extensions?: Record<`x-${string}`, unknown>;
 }
 
@@ -290,6 +305,7 @@ export interface StepRunDetail {
 	sourceInput?: unknown;
 	input?: unknown;
 	output?: unknown;
+	evidence?: unknown;
 	error?: string;
 	errorCode?: string;
 	errorStatus?: number;

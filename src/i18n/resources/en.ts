@@ -264,6 +264,9 @@ export const en: TranslationTree = {
 			id: "ID",
 			typeLabel: "Type",
 			tasknotesEvent: "TaskNotes event",
+			contract: "Event contract",
+			contractVersion: "Compatible version",
+			sourceApplication: "Source application",
 			runtimeProvider: "Runtime provider",
 			fromStatus: "From status",
 			toStatus: "To status",
@@ -296,6 +299,10 @@ export const en: TranslationTree = {
 				runtimeEvent: {
 					label: "Runtime event",
 					description: "Runs when a registered mdbase runtime provider emits the selected event.",
+				},
+				contractEvent: {
+					label: "Contract event",
+					description: "Runs when an authorized application publishes a compatible mdbase event contract.",
 				},
 				cron: {
 					label: "Cron schedule",
@@ -502,6 +509,8 @@ export const en: TranslationTree = {
 			addButton: "Add step",
 			type: "Step type",
 			id: "ID",
+			contractVersion: "Compatible contract version",
+			providerApplication: "Provider application",
 			advancedTitle: "Advanced step options",
 			advancedDescription: "Stable ids create references for later steps. Batch runs use the optional for each value.",
 			forEach: "For each",
@@ -583,6 +592,8 @@ export const en: TranslationTree = {
 			duplicateTriggerId: "Trigger ids must be unique.",
 			tasknotesEventRequired: "Choose a TaskNotes event.",
 			runtimeEventRequired: "Enter a runtime event id.",
+			contractRequired: "Enter an event contract id.",
+			contractVersionRequired: "Enter a compatible semantic version.",
 			cronScheduleRequired: "Add a cron schedule.",
 			intervalRequired: "Add an interval.",
 			stepRequired: "Add at least one step.",

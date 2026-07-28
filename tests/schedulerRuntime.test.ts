@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MdbaseRuntimeEventEnvelope } from "@callumalpass/mdbase-runtime";
+import type { CloudEvent } from "@callumalpass/mdbase-interop";
 import { WorkflowScheduler } from "../src/scheduler";
 import type { TaskNotesBridge } from "../src/tasknotesBridge";
 import type {
@@ -10,6 +11,84 @@ import type {
 } from "../src/types";
 
 describe("workflow runtime event scheduling", () => {
+	it("subscribes by event contract range and preserves CloudEvents evidence", async () => {
+		let handler: ((event: CloudEvent) => Promise<void>) | undefined;
+		const onContractEvent = vi.fn(async (
+			_contract: { id: string; version: string },
+			candidate: (event: CloudEvent) => Promise<void>,
+		) => {
+			handler = candidate;
+			return { dispose: vi.fn() };
+		});
+		const bridge = {
+			onTaskEvent: () => null,
+			onRuntimeEvent: () => null,
+			onContractEvent,
+			api: null,
+		} as unknown as TaskNotesBridge;
+		const workflow = runtimeWorkflow();
+		workflow.workflow!.triggers = [{
+			id: "completed",
+			type: "contract.event",
+			contract: "tasknotes.task.completed",
+			version: "^1.0.0",
+			source: "tasknotes",
+		}];
+		const runWorkflow = vi.fn(async (
+			_workflow: LoadedWorkflow,
+			_options: WorkflowRunOptions,
+		) => ({ status: "success" }) as WorkflowRunDetail);
+		const scheduler = new WorkflowScheduler(
+			{ app: {} } as never,
+			bridge,
+			() => settings(),
+			() => [workflow],
+			runWorkflow,
+		);
+		scheduler.start();
+		await vi.waitFor(() => expect(handler).toBeTypeOf("function"));
+
+		await handler?.({
+			specversion: "1.0",
+			id: "evt-1",
+			source: "urn:mdbase:application:tasknotes:tasknotes.obsidian",
+			type: "tasknotes.task.completed",
+			time: "2026-07-28T10:15:00.000Z",
+			subject: "Tasks/Alpha.md",
+			datacontenttype: "application/json",
+			dataschema: "urn:mdbase:contract:tasknotes.task.completed:1.0.0",
+			data: { task_path: "Tasks/Alpha.md", title: "Alpha" },
+			mdbaseprofile: "0.1",
+			mdbasecontractversion: "1.0.0",
+			mdbasecontractdigest: `sha256:${"a".repeat(64)}`,
+			mdbaseapplication: "tasknotes",
+			mdbaseimplementation: "tasknotes.obsidian",
+			mdbaseimplementationversion: "5.0.0",
+			correlationid: "corr-1",
+		});
+
+		expect(onContractEvent).toHaveBeenCalledWith(
+			{ id: "tasknotes.task.completed", version: "^1.0.0" },
+			expect.any(Function),
+		);
+		expect(runWorkflow).toHaveBeenCalledTimes(1);
+		const runCall = runWorkflow.mock.calls[0];
+		expect(runCall?.[0]).toBe(workflow);
+		expect(runCall?.[1].trigger).toMatchObject({
+			id: "completed",
+			event: "tasknotes.task.completed",
+			triggerType: "contract.event",
+			path: "Tasks/Alpha.md",
+			source: "tasknotes",
+			correlationId: "corr-1",
+			data: {
+				eventId: "evt-1",
+				contractVersion: "1.0.0",
+			},
+		});
+		scheduler.stop();
+	});
+
 	it("subscribes to canvas.drop and runs only matching provider events", async () => {
 		let handler: ((event: MdbaseRuntimeEventEnvelope) => Promise<void>) | undefined;
 		const bridge = {
