@@ -4,6 +4,8 @@ import { createStepExecutionContext, shouldRunStep, StepRegistry } from "./stepR
 import { resolveTemplateValue } from "./template";
 import type { App } from "obsidian";
 import type { MdbaseRuntimeHostApi } from "@callumalpass/mdbase-runtime";
+import type { ActionOutcome } from "@callumalpass/mdbase-interop";
+import type { TaskNotesBridge } from "./tasknotesBridge";
 import type { TranslateFn } from "./i18n";
 import type {
 	LoadedWorkflow,
@@ -37,7 +39,8 @@ export class WorkflowEngine {
 		private readonly tasknotes: () => TaskNotesRuntimeApi | null,
 		private readonly obsidian: () => App | null = () => null,
 		private readonly translate: TranslateFn = (key) => key,
-		private readonly runtimeHost: () => MdbaseRuntimeHostApi | null = () => null
+		private readonly runtimeHost: () => MdbaseRuntimeHostApi | null = () => null,
+		private readonly interopBridge: () => TaskNotesBridge | null = () => null,
 	) {}
 
 	async runWorkflow(
@@ -132,12 +135,13 @@ export class WorkflowEngine {
 	): Promise<StepRunDetail> {
 		const definition = this.stepRegistry.get(step.type);
 		const runtimeAction = this.resolveRuntimeAction(step);
+		const interopAction = this.resolveInteropAction(step);
 		if (runtimeAction.error) {
 			const failed = createStepDetail(step, "failed", this.t("engine.preflightFailed", { details: runtimeAction.error }));
 			run.steps.push(failed);
 			return failed;
 		}
-		if (!definition && !runtimeAction.runtime) {
+		if (!definition && !runtimeAction.runtime && !interopAction) {
 			const failed = createStepDetail(step, "failed", this.t("engine.unknownStepType", { type: step.type }));
 			run.steps.push(failed);
 			return failed;
@@ -196,6 +200,7 @@ export class WorkflowEngine {
 					step,
 					definition,
 					runtimeAction.runtime,
+					interopAction,
 					source,
 					itemContext,
 					run.runId,
@@ -217,6 +222,7 @@ export class WorkflowEngine {
 			step,
 			definition,
 			runtimeAction.runtime,
+			interopAction,
 			source,
 			context,
 			run.runId,
@@ -231,6 +237,7 @@ export class WorkflowEngine {
 		step: WorkflowStep,
 		definition: ReturnType<StepRegistry["get"]>,
 		runtime: MdbaseRuntimeHostApi | null,
+		interop: TaskNotesBridge | null,
 		source: string,
 		context: WorkflowRunContext,
 		runId: string,
@@ -255,6 +262,27 @@ export class WorkflowEngine {
 				detail.output = dryRun
 					? { dryRun: true, wouldRun: step.type, input }
 					: await runtime.dispatch(step.type, input, runtimeDispatchContext(runId, context));
+			} else if (interop) {
+				if (dryRun) {
+					detail.output = { dryRun: true, wouldInvoke: step.type, input };
+				} else {
+					const outcome = await interop.invokeContractAction({
+						request_id: interopRequestId(runId, step.id, itemIndex),
+						contract: {
+							id: step.type,
+							version: step.contract?.version ?? "*",
+							...(step.contract?.digest ? { digest: step.contract.digest } : {}),
+						},
+						correlation_id: context.event.correlationId ?? runId,
+						...(eventCausationId(context) ? { causation_id: eventCausationId(context) } : {}),
+						...(context.event.path ? { subject: context.event.path } : {}),
+						idempotency_key: interopRequestId(runId, step.id, itemIndex),
+						...(step.provider ? { requested_provider: step.provider } : {}),
+						input,
+					});
+					detail.evidence = outcome;
+					detail.output = successfulInteropOutput(outcome);
+				}
 			} else if (definition) {
 				detail.output = await definition.run(
 					input,
@@ -321,9 +349,50 @@ export class WorkflowEngine {
 		}
 	}
 
+	private resolveInteropAction(step: WorkflowStep): TaskNotesBridge | null {
+		const bridge = this.interopBridge();
+		if (!bridge) return null;
+		const description = bridge.interopDescription();
+		if (!description) return null;
+		const available = description.action_providers.some((provider) =>
+			provider.handlers.some((handler) => handler.resolved.id === step.type)
+		);
+		return available ? bridge : null;
+	}
+
 	private concurrencyGroup(workflowId: string, group: string): string {
 		return group === "global" ? "global" : `${group || "workflow"}:${workflowId}`;
 	}
+}
+
+function interopRequestId(runId: string, stepId: string, itemIndex?: number): string {
+	return `workflow:${runId}:${stepId}${itemIndex === undefined ? "" : `:${itemIndex}`}`;
+}
+
+function eventCausationId(context: WorkflowRunContext): string | undefined {
+	const data = context.event.data;
+	if (!data || typeof data !== "object" || Array.isArray(data)) return undefined;
+	const eventId = (data as Record<string, unknown>).eventId;
+	return typeof eventId === "string" ? eventId : undefined;
+}
+
+function successfulInteropOutput(outcome: ActionOutcome): unknown {
+	if (outcome.status === "succeeded") return outcome.output;
+	const error = new Error(`${outcome.error.message} [${outcome.error.code}]`);
+	Object.assign(error, {
+		code: outcome.error.code,
+		details: {
+			...asErrorDetails(outcome.error.details),
+			outcome,
+		},
+	});
+	throw error;
+}
+
+function asErrorDetails(value: unknown): Record<string, unknown> {
+	return value !== null && typeof value === "object" && !Array.isArray(value)
+		? value as Record<string, unknown>
+		: {};
 }
 
 function runtimeDispatchContext(

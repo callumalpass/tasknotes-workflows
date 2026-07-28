@@ -72,4 +72,41 @@ describe("TaskNotesBridge runtime ownership", () => {
 		expect(bridge.runtimeHost).toBeNull();
 		expect(tasknotesHost.registerProvider).not.toHaveBeenCalled();
 	});
+
+	it("tracks the host interoperability grant without caching disabled state", () => {
+		let enabled = false;
+		const connect = vi.fn(() => ({}) as never);
+		const app = {
+			plugins: {
+				getPlugin: (id: string) => id === "mdbase-obsidian"
+					? {
+							api: {
+								apiVersion: 1,
+								interop: {
+									connect,
+									describe: () => ({
+										profile_version: "0.1",
+										transport: {},
+										contracts: [],
+										event_sources: [],
+										event_subscriptions: [],
+										action_providers: [],
+										active_actions: [],
+									}),
+								},
+								getInteropStatus: () => ({ enabled }),
+							},
+						}
+					: null,
+			},
+		};
+		const bridge = new TaskNotesBridge(app as never, {} as never);
+
+		expect(bridge.interopAvailable).toBe(false);
+		expect(bridge.connectInterop()).toBeNull();
+		enabled = true;
+		expect(bridge.interopAvailable).toBe(true);
+		expect(bridge.connectInterop()).not.toBeNull();
+		expect(connect).toHaveBeenCalledOnce();
+	});
 });

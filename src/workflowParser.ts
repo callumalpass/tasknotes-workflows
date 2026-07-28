@@ -260,6 +260,32 @@ function parseTrigger(
 			extensions,
 		};
 	}
+	if (type === "contract.event") {
+		const contract = stringField(trigger, "contract", diagnostics, path);
+		const version = stringField(trigger, "version", diagnostics, path);
+		if (!contract || !version) return null;
+		if (!isRuntimeIdentifier(contract)) {
+			diagnostics.push({
+				severity: "error",
+				path: `${path}.contract`,
+				message: "contract must be an mdbase contract identifier.",
+			});
+			return null;
+		}
+		if (trigger.source !== undefined && typeof trigger.source !== "string") {
+			diagnostics.push({ severity: "error", path: `${path}.source`, message: "source must be a string." });
+			return null;
+		}
+		return {
+			...trigger,
+			id,
+			type,
+			contract,
+			version,
+			source: optionalString(trigger.source),
+			extensions,
+		};
+	}
 	if (type === "cron") {
 		const schedule = stringField(trigger, "schedule", diagnostics, path);
 		if (!schedule) return null;
@@ -413,7 +439,65 @@ function parseStep(
 		if: stepConditions,
 		forEach,
 		requires: parseRequires(step.requires, diagnostics, `${path}.requires`),
-		extensions: nestedExtensions(step, new Set(["id", "type", "name", "input", "if", "forEach", "requires", "extensions"])),
+		contract: parseActionContractRequirement(step.contract, `${path}.contract`, diagnostics),
+		provider: parseProviderSelector(step.provider, `${path}.provider`, diagnostics),
+		extensions: nestedExtensions(step, new Set([
+			"id",
+			"type",
+			"name",
+			"input",
+			"if",
+			"forEach",
+			"requires",
+			"contract",
+			"provider",
+			"extensions",
+		])),
+	};
+}
+
+function parseActionContractRequirement(
+	value: unknown,
+	path: string,
+	diagnostics: WorkflowDiagnostic[],
+): WorkflowStep["contract"] {
+	if (value === undefined) return undefined;
+	if (!isRecord(value)) {
+		diagnostics.push({ severity: "error", path, message: "contract must be an object." });
+		return undefined;
+	}
+	const version = optionalString(value.version);
+	const digest = optionalString(value.digest);
+	if (value.version !== undefined && !version) {
+		diagnostics.push({ severity: "error", path: `${path}.version`, message: "version must be a non-empty string." });
+	}
+	if (value.digest !== undefined && !digest) {
+		diagnostics.push({ severity: "error", path: `${path}.digest`, message: "digest must be a non-empty string." });
+	}
+	return { ...(version ? { version } : {}), ...(digest ? { digest } : {}) };
+}
+
+function parseProviderSelector(
+	value: unknown,
+	path: string,
+	diagnostics: WorkflowDiagnostic[],
+): WorkflowStep["provider"] {
+	if (value === undefined) return undefined;
+	if (!isRecord(value)) {
+		diagnostics.push({ severity: "error", path, message: "provider must be an object." });
+		return undefined;
+	}
+	const application = optionalString(value.application);
+	const implementation = optionalString(value.implementation);
+	const instance_id = optionalString(value.instance_id);
+	if (!application && !implementation && !instance_id) {
+		diagnostics.push({ severity: "error", path, message: "provider must select at least one identity field." });
+		return undefined;
+	}
+	return {
+		...(application ? { application } : {}),
+		...(implementation ? { implementation } : {}),
+		...(instance_id ? { instance_id } : {}),
 	};
 }
 
@@ -590,6 +674,7 @@ function triggerFields(type: string): Set<string> {
 	const fields = new Set(["id", "type", "debounce", "minimumInterval", "extensions"]);
 	if (type === "tasknotes.event") ["event", "from", "to", "path", "allowSelfTrigger"].forEach((field) => fields.add(field));
 	if (type === "runtime.event") ["event", "provider", "path"].forEach((field) => fields.add(field));
+	if (type === "contract.event") ["contract", "version", "source", "path"].forEach((field) => fields.add(field));
 	if (type === "cron") ["schedule", "timezone", "catchUp"].forEach((field) => fields.add(field));
 	if (type === "interval") fields.add("every");
 	if (type === "obsidian.vault" || type === "obsidian.metadata" || type === "obsidian.workspace") {

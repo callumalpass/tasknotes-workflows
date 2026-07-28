@@ -132,7 +132,9 @@ function runtimeTriggerToTaskNotesInput(raw: unknown): unknown {
 		...tasknotes,
 		id: raw.id,
 		type,
-		event: runtimeEventForTaskNotesTrigger(type, raw.event, tasknotes),
+		...(type === "contract.event"
+			? { contract: raw.event, version: tasknotes.version }
+			: { event: runtimeEventForTaskNotesTrigger(type, raw.event, tasknotes) }),
 		debounce: raw.debounce,
 		minimumInterval: raw.minimum_interval,
 		extensions: otherExtensions(raw),
@@ -150,6 +152,8 @@ function runtimeStepToTaskNotesInput(raw: unknown): unknown {
 		if: Array.isArray(tasknotes.conditions) ? tasknotes.conditions : raw.if,
 		forEach: runtimeForEachToTaskNotes(raw.for_each),
 		requires: raw.requires,
+		contract: tasknotes.contract,
+		provider: tasknotes.provider,
 		extensions: otherExtensions(raw),
 	};
 }
@@ -182,7 +186,11 @@ function workflowStepToRuntimeRecord(step: WorkflowStep): Dict {
 		input: step.input ? normalizeExpressionValues(step.input) : undefined,
 		for_each: workflowForEachToRuntime(step.forEach),
 		requires: normalizeRequires(step.requires),
-		[TASKNOTES_EXTENSION]: conditions.length > 0 ? { conditions } : undefined,
+		[TASKNOTES_EXTENSION]: compact({
+			conditions: conditions.length > 0 ? conditions : undefined,
+			contract: step.contract,
+			provider: step.provider,
+		}),
 	});
 }
 
@@ -192,6 +200,8 @@ function triggerTaskNotesExtension(trigger: WorkflowTrigger): Dict {
 		Object.assign(extension, select(trigger, ["from", "to", "path", "allowSelfTrigger"]));
 	} else if (trigger.type === "runtime.event") {
 		Object.assign(extension, select(trigger, ["provider", "path"]));
+	} else if (trigger.type === "contract.event") {
+		Object.assign(extension, select(trigger, ["version", "source", "path"]));
 	} else if (trigger.type === "cron") {
 		Object.assign(extension, select(trigger, ["schedule", "timezone", "catchUp"]));
 	} else if (trigger.type === "interval") {
@@ -204,6 +214,7 @@ function triggerTaskNotesExtension(trigger: WorkflowTrigger): Dict {
 
 function runtimeEventForWorkflowTrigger(trigger: WorkflowTrigger): string {
 	if (trigger.type === "tasknotes.event" || trigger.type === "runtime.event") return trigger.event;
+	if (trigger.type === "contract.event") return trigger.contract;
 	if (trigger.type === "cron") return "tasknotes-workflows.schedule.cron";
 	if (trigger.type === "interval") return "tasknotes-workflows.schedule.interval";
 	if (trigger.type === "manual") return "tasknotes-workflows.manual";

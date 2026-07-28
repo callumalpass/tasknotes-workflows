@@ -109,8 +109,21 @@ triggers:
 ```
 
 Supported TaskNotes executor trigger types are `tasknotes.event`,
-`runtime.event`, `cron`, `interval`, `manual`, `obsidian.vault`,
+`contract.event`, `runtime.event`, `cron`, `interval`, `manual`, `obsidian.vault`,
 `obsidian.metadata`, and `obsidian.workspace`.
+
+Contract event triggers select a portable event contract by ID and semantic
+version range. `source` optionally narrows the publishing application:
+
+```yaml
+triggers:
+  - id: completed
+    event: tasknotes.task.completed
+    x-tasknotes:
+      type: contract.event
+      version: ^1.0.0
+      source: tasknotes
+```
 
 ## Steps
 
@@ -132,6 +145,31 @@ TaskNotes Workflows provides its typed local action catalog and dispatches a
 registered action through the shared mdbase host when that action is available.
 A host policy denial is terminal and is never bypassed through the local
 compatibility adapter.
+
+Portable action steps put contract and provider selection in the TaskNotes
+extension while retaining the action contract ID in the canonical `action`
+field:
+
+```yaml
+steps:
+  - id: add-card
+    action: canvas.card.create
+    input:
+      canvas_path: TaskNotes/Canvases/Completed tasks.canvas
+      card:
+        kind: file
+        file:
+          $expr: event.data.task_path
+    x-tasknotes:
+      contract:
+        version: ^1.0.0
+      provider:
+        application: canvas-bases
+```
+
+The bridge admits the request only when exactly one compatible provider is
+selected. Run logs preserve the exact resolved contract digest and provider
+identity.
 
 The current TaskNotes action catalog includes task reads and mutations, task
 relationships, time tracking, notices, selected Obsidian file operations, and

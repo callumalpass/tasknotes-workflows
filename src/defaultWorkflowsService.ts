@@ -89,6 +89,51 @@ function escapeBasesString(value: string): string {
 function defaultWorkflows(folder: string): DefaultWorkflow[] {
 	return [
 		{
+			path: `${folder}/completed-task-to-canvas.md`,
+			content: `---
+type: workflow
+schemaVersion: 1
+id: completed-task-to-canvas
+name: Add completed tasks to a canvas
+enabled: false
+description: Demonstrates portable TaskNotes, Workflows, and Canvas Bases interoperability.
+triggers:
+  - id: task-completed
+    type: contract.event
+    contract: tasknotes.task.completed
+    version: ^1.0.0
+steps:
+  - id: add-card
+    type: canvas.card.create
+    contract:
+      version: ^1.0.0
+    provider:
+      application: canvas-bases
+    input:
+      canvas_path: TaskNotes/Canvases/Completed tasks.canvas
+      card:
+        kind: file
+        file: "{{event.data.task_path}}"
+run:
+  mode: sequential
+  concurrency:
+    group: workflow
+    policy: queue
+  limits:
+    maxItems: 1
+  onError: stop
+  source: tasknotes-workflows
+---
+
+# Add completed tasks to a canvas
+
+This disabled example is the smallest end-to-end interoperability flow:
+TaskNotes publishes a contract event, this workflow consumes it, and Canvas
+Bases provides the selected card-creation action. Enable local application
+interoperability in mdbase settings before enabling the workflow.
+`,
+		},
+		{
 			path: `${folder}/auto-start-time-tracking.md`,
 			content: `---
 type: workflow

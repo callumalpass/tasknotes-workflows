@@ -32,7 +32,7 @@ describe("default workflows service", () => {
 		const first = await service.ensureDefaultFiles();
 		const second = await service.ensureDefaultFiles();
 
-		expect(first.workflows).toHaveLength(19);
+		expect(first.workflows).toHaveLength(20);
 		expect(first.view).toBe("TaskNotes/Views/workflows.base");
 		expect(second.workflows).toHaveLength(0);
 		expect(second.view).toBeNull();
