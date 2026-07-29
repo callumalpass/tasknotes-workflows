@@ -5,6 +5,7 @@ coverage/
 .copy-files.local
 .env
 dist/
+.testbed/
 .DS_Store
 *.log
 *.tsbuildinfo
