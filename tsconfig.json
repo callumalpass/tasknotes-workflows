@@ -13,7 +13,6 @@
 		"noImplicitOverride": true,
 		"types": ["node", "obsidian", "obsidian-typings"]
 	},
-	"include": ["main.ts", "src/**/*.ts", "tests/**/*.ts"],
+	"include": ["main.ts", "src/**/*.ts", "tests/**/*.ts", "scripts/testbed-adapter.ts"],
 	"exclude": ["node_modules", "main.js"]
 }
-

@@ -158,7 +158,11 @@ See [Workflow Schema](docs/workflow-schema.md) and [AI Agent Authoring Script](d
 ```bash
 npm install
 npm run build:test
+npm run test:testbed
 obsidian vault=test plugin:reload id=tasknotes-workflows
 ```
 
 `npm run build:test` copies `main.js`, `manifest.json`, and `styles.css` to the local test vault by default.
+`npm run test:testbed` runs the real workflow action provider through the
+spec-owned black-box provider lifecycle scenario, including valid invocation,
+invalid-input rejection, and unload.

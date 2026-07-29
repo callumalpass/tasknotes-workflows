@@ -5,7 +5,7 @@ import obsidianmd from "eslint-plugin-obsidianmd";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
 
-const sourceFilePatterns = ["main.ts", "src/**/*.ts"];
+const sourceFilePatterns = ["main.ts", "src/**/*.ts", "scripts/testbed-adapter.ts"];
 
 const obsidianRecommendedConfig = obsidianmd.configs.recommended.map((config) => {
 	const hasUnscopedObsidianRules =
@@ -24,7 +24,14 @@ const obsidianRecommendedConfig = obsidianmd.configs.recommended.map((config) =>
 
 export default [
 	{
-		ignores: ["node_modules/**", "main.js", "coverage/**", "*.config.mjs", "*.config.ts"],
+		ignores: [
+			"node_modules/**",
+			".testbed/**",
+			"main.js",
+			"coverage/**",
+			"*.config.mjs",
+			"*.config.ts",
+		],
 	},
 	js.configs.recommended,
 	...obsidianRecommendedConfig,
