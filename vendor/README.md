@@ -1,5 +1,4 @@
 # Vendored development packages
 
-`@callumalpass/mdbase-interop` is vendored while its first release candidate is
-developed across repositories. The tarball is produced by `npm pack` from
-`mdbase-spec/packages/interop`.
+`@callumalpass/mdbase-runtime` remains vendored until its current release
+candidate is published. The interop package is installed from npm.

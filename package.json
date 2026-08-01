@@ -34,7 +34,7 @@
 	"author": "Callum Alpass",
 	"license": "MIT",
 	"dependencies": {
-		"@callumalpass/mdbase-interop": "file:vendor/callumalpass-mdbase-interop-0.1.0-rc.2.tgz",
+		"@callumalpass/mdbase-interop": "0.1.0-rc.2",
 		"@callumalpass/mdbase-runtime": "file:vendor/callumalpass-mdbase-runtime-0.2.0-rc.1.tgz",
 		"obsidian-bases-expression": "^0.2.0",
 		"obsidian-bases-expression-builder": "^0.1.0",
