@@ -15,7 +15,7 @@ function workflow(id: string, enabled: boolean): LoadedWorkflow {
 		file: { path: `TaskNotes/Workflows/${id}.md`, basename: id } as LoadedWorkflow["file"],
 		body: "",
 		source: "",
-		sourceFormat: "runtime-v0.1",
+		sourceFormat: "runtime-v0.2",
 		diagnostics: [],
 		workflow: {
 			type: "workflow",

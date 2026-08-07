@@ -212,6 +212,42 @@ steps.query.output.tasks
 steps.query.error
 ```
 
+TaskNotes exposes its configured core fields through stable semantic names.
+For example, `event.after.projects` and `event.after.scheduled` continue to work
+when those properties are stored in frontmatter as `parent` and `do`. Task paths
+may point into any vault folder, including nested year and month folders.
+
+Custom frontmatter values are available under `customProperties`. To copy a
+custom `area` field from a parent task, then write it to the triggering task:
+
+```yaml
+steps:
+  - id: read-parent
+    action:
+      id: task.parents
+      version: 1.0.0
+    input:
+      task:
+        $expr: event.after.path
+
+  - id: inherit-area
+    action:
+      id: task.patch
+      version: 1.0.0
+    input:
+      task:
+        $expr: event.after.path
+      patch:
+        customFrontmatter:
+          area:
+            $expr: steps.read-parent.output.tasks[0].customProperties.area
+```
+
+Use semantic names such as `projects` and `scheduled` inside `patch`; TaskNotes
+writes them through the configured property mappings. Put arbitrary properties
+inside `customFrontmatter`. Setting a custom frontmatter value to `null` removes
+that property from the task note.
+
 ## Conditions
 
 Workflow, trigger, and step guards use the canonical `if` expression:

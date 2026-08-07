@@ -85,6 +85,27 @@ export function createDefaultTrigger(
 	return { id: uniqueId("manual", ids), type: "manual" };
 }
 
+export function createTaskNotesEventTrigger(input: {
+	id: string;
+	event: string;
+	from?: string;
+	to?: string;
+	path?: { glob: string };
+	allowSelfTrigger?: boolean;
+}): WorkflowTrigger {
+	const event = input.event.trim() || "task.status.changed";
+	const isStatusChange = event === "task.status.changed";
+	return {
+		id: input.id,
+		type: "tasknotes.event",
+		event,
+		from: isStatusChange ? input.from?.trim() || undefined : undefined,
+		to: isStatusChange ? input.to?.trim() || undefined : undefined,
+		path: input.path,
+		allowSelfTrigger: input.allowSelfTrigger || undefined,
+	};
+}
+
 export function createDefaultStep(type: string, ids: Set<string>): WorkflowStep {
 	return {
 		id: uniqueId(type.replace(/^.*\./u, ""), ids),
@@ -156,11 +177,17 @@ export function uniqueId(base: string, existing: Set<string>): string {
 }
 
 export function slugifyWorkflowId(value: string): string {
+	return normalizeWorkflowIdInput(value.trim())
+		.replace(/-+$/gu, "")
+		.slice(0, 80);
+}
+
+export function normalizeWorkflowIdInput(value: string): string {
 	return value
-		.trim()
+		.trimStart()
 		.toLowerCase()
 		.replace(/[^a-z0-9._-]+/gu, "-")
-		.replace(/^-+|-+$/gu, "")
+		.replace(/^-+/gu, "")
 		.slice(0, 80);
 }
 

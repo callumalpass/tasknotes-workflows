@@ -16,8 +16,10 @@ import {
 	cloneWorkflow,
 	createDefaultStep,
 	createDefaultTrigger,
+	createTaskNotesEventTrigger,
 	createWorkflowDefinition,
 	defaultInputForStep,
+	normalizeWorkflowIdInput,
 	slugifyWorkflowId,
 	uniqueWorkflowId,
 } from "./workflowScaffolding";
@@ -313,7 +315,7 @@ export class WorkflowEditModal extends Modal {
 		);
 		const idInput = renderTextInput(advanced, this.t("editor.definition.id"), this.draft.id);
 		idInput.addEventListener("input", () => {
-			this.draft.id = slugifyWorkflowId(idInput.value);
+			this.draft.id = normalizeWorkflowIdInput(idInput.value);
 			idInput.value = this.draft.id;
 		});
 		this.renderValidation(idInput, "definition.id");
@@ -410,7 +412,7 @@ export class WorkflowEditModal extends Modal {
 		const idInput = renderTextInput(advancedGrid, this.t("editor.triggers.id"), trigger.id);
 		let currentTriggerId = trigger.id;
 		idInput.addEventListener("input", () => {
-			const id = slugifyWorkflowId(idInput.value);
+			const id = normalizeWorkflowIdInput(idInput.value);
 			idInput.value = id;
 			this.draft.triggers[index] = { ...this.draft.triggers[index], id };
 			this.openTriggerIds.delete(currentTriggerId);
@@ -705,7 +707,7 @@ export class WorkflowEditModal extends Modal {
 		const idInput = renderTextInput(advancedGrid, this.t("editor.steps.id"), step.id);
 		let currentStepId = step.id;
 		idInput.addEventListener("input", () => {
-			const id = slugifyWorkflowId(idInput.value);
+			const id = normalizeWorkflowIdInput(idInput.value);
 			idInput.value = id;
 			this.draft.steps[index].id = id;
 			this.openStepIds.delete(currentStepId);
@@ -2442,15 +2444,14 @@ function triggerFromControls(input: {
 	const id = slugifyWorkflowId(input.id) || "trigger";
 	const path = input.pathGlob.trim() ? { glob: input.pathGlob.trim() } : undefined;
 	if (isTaskNotesEventTriggerType(input.type)) {
-		return {
+		return createTaskNotesEventTrigger({
 			id,
-			type: "tasknotes.event",
-			event: input.event.trim() || "task.status.changed",
-			from: input.from.trim() || undefined,
-			to: input.to.trim() || undefined,
+			event: input.event,
+			from: input.from,
+			to: input.to,
 			path,
-			allowSelfTrigger: input.allowSelfTrigger || undefined,
-		};
+			allowSelfTrigger: input.allowSelfTrigger,
+		});
 	}
 	if (input.type === "contract.event") {
 		return {

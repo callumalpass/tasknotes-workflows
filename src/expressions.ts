@@ -239,6 +239,7 @@ function taskProperties(): Array<{ name: string; type: string }> {
 		{ name: "reminders", type: "list" },
 		{ name: "dependencies", type: "list" },
 		{ name: "isBlocked", type: "boolean" },
+		{ name: "customProperties", type: "object" },
 	];
 }
 
