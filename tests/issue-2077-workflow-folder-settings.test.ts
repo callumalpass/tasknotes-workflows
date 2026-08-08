@@ -183,6 +183,23 @@ describe("issue #2077 - workflow folder setting input", () => {
 		expect(plugin.settings.workflowFolder).toBe("Workflows/New");
 		expect(plugin.saveSettingsAndReload).toHaveBeenCalledTimes(1);
 	});
+
+	it("exposes the settings tab to Obsidian settings search", () => {
+		const tab = new WorkflowsSettingsTab({} as never, mockPlugin() as never);
+
+		expect(tab.getSettingDefinitions()).toEqual([
+			expect.objectContaining({
+				name: "common.appName",
+				aliases: [
+					"settings.workflowFiles.heading",
+					"settings.triggers.heading",
+					"settings.runLogs.heading",
+					"settings.language.heading",
+				],
+				render: expect.any(Function),
+			}),
+		]);
+	});
 });
 
 function mockPlugin(): MockPlugin {

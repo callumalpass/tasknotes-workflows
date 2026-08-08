@@ -5,21 +5,28 @@ import obsidianmd from "eslint-plugin-obsidianmd";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
 
-const sourceFilePatterns = ["main.ts", "src/**/*.ts", "scripts/testbed-adapter.ts"];
+const pluginSourceFilePatterns = ["main.ts", "src/**/*.ts"];
+const sourceFilePatterns = [...pluginSourceFilePatterns, "scripts/testbed-adapter.ts"];
+const obsidianRecommendedPlugins = Object.assign(
+	{},
+	...obsidianmd.configs.recommended.map((config) => config.plugins ?? {})
+);
 
-const obsidianRecommendedConfig = obsidianmd.configs.recommended.map((config) => {
-	const hasUnscopedObsidianRules =
-		config.files === undefined &&
-		Object.keys(config.rules ?? {}).some((ruleName) => ruleName.startsWith("obsidianmd/"));
+const obsidianRecommendedConfig = obsidianmd.configs.recommended.flatMap((config) => {
+	const hasObsidianRules = Object.keys(config.rules ?? {}).some((ruleName) => ruleName.startsWith("obsidianmd/"));
+	const filePatterns = JSON.stringify(config.files ?? []);
+	const isTypeScriptOnlyConfig =
+		filePatterns.includes("{ts,cts,mts,tsx}") && !filePatterns.includes("{js,cjs,mjs,jsx}");
 
-	if (!hasUnscopedObsidianRules) {
-		return config;
+	if (isTypeScriptOnlyConfig) {
+		return [{ ...config, files: pluginSourceFilePatterns }];
 	}
 
-	return {
-		...config,
-		files: sourceFilePatterns,
-	};
+	if (filePatterns.includes("{js,cjs,mjs,jsx}") && !filePatterns.includes("{ts,cts,mts,tsx}")) {
+		return hasObsidianRules ? [] : [config];
+	}
+
+	return hasObsidianRules ? [{ ...config, files: pluginSourceFilePatterns }] : [config];
 });
 
 export default [
@@ -34,6 +41,7 @@ export default [
 		],
 	},
 	js.configs.recommended,
+	{ plugins: obsidianRecommendedPlugins },
 	...obsidianRecommendedConfig,
 	{
 		files: sourceFilePatterns,

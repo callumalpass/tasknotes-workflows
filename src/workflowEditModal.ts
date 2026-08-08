@@ -505,9 +505,7 @@ export class WorkflowEditModal extends Modal {
 				this.t("editor.triggers.contract"),
 				trigger.contract
 			);
-			// Contract identifiers are case-sensitive machine names.
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
-			controls.eventInput.placeholder = "tasknotes.task.completed";
+			setCodePlaceholder(controls.eventInput, "tasknotes.task.completed");
 			controls.versionInput = renderTextInput(
 				parent,
 				this.t("editor.triggers.contractVersion"),
@@ -519,9 +517,7 @@ export class WorkflowEditModal extends Modal {
 				this.t("editor.triggers.sourceApplication"),
 				trigger.source ?? ""
 			);
-			// Application identifiers are case-sensitive machine names.
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
-			controls.providerInput.placeholder = "tasknotes";
+			setCodePlaceholder(controls.providerInput, "tasknotes");
 			controls.pathInput = renderTextInput(
 				advancedParent,
 				this.t("editor.triggers.pathGlob"),
@@ -734,9 +730,7 @@ export class WorkflowEditModal extends Modal {
 				this.t("editor.steps.providerApplication"),
 				step.provider?.application ?? ""
 			);
-			// Application identifiers are case-sensitive machine names.
-			// eslint-disable-next-line obsidianmd/ui/sentence-case
-			providerInput.placeholder = "canvas-bases";
+			setCodePlaceholder(providerInput, "canvas-bases");
 			providerInput.addEventListener("input", () => {
 				const application = providerInput.value.trim();
 				step.provider = application
@@ -747,8 +741,7 @@ export class WorkflowEditModal extends Modal {
 
 		if (definition?.supportsForEach !== false) {
 			const forEach = renderTextInput(advancedGrid, this.t("editor.steps.forEach"), forEachInputValue(step));
-			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Formula placeholders are code examples.
-			forEach.placeholder = 'steps.query.output.tasks';
+			setCodePlaceholder(forEach, "steps.query.output.tasks");
 			forEach.addEventListener("change", () => {
 				this.draft.steps[index].forEach = forEach.value.trim()
 					? { ...(this.draft.steps[index].forEach ?? {}), items: { [EXPRESSION_KEY]: forEach.value.trim() } }
@@ -764,8 +757,7 @@ export class WorkflowEditModal extends Modal {
 				text: this.t("editor.steps.forEachHelp"),
 			});
 			const aliasInput = renderTextInput(advancedGrid, this.t("editor.steps.forEachAs"), step.forEach?.as ?? "");
-			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Loop alias placeholders are identifiers.
-			aliasInput.placeholder = "task";
+			setCodePlaceholder(aliasInput, "task");
 			aliasInput.addEventListener("change", () => {
 				const alias = aliasInput.value.trim();
 				if (!this.draft.steps[index].forEach && !alias) return;
@@ -986,7 +978,7 @@ export class WorkflowEditModal extends Modal {
 		validationPath: string
 	): void {
 		if (!parent) return;
-		const details = parent.ownerDocument.createElement("details");
+		const details = parent.ownerDocument.win.createEl("details");
 		details.className = "tnw-expression-advanced";
 		if (parent.matches("label.tnw-field")) {
 			parent.insertAdjacentElement("afterend", details);
@@ -1026,8 +1018,7 @@ export class WorkflowEditModal extends Modal {
 			const wrapper = parent.createDiv({ cls: "tnw-expression-formula" });
 			const row = wrapper.createDiv({ cls: "tnw-expression-formula-row" });
 			const formula = renderTextareaInput(row, this.t("editor.expressions.formulaLabel"), expressionSource(current), true, true);
-			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Formula placeholders are code examples.
-			formula.placeholder = "date(event.after.due) - duration(\"7d\")";
+			setCodePlaceholder(formula, 'date(event.after.due) - duration("7d")');
 		formula.addEventListener("change", () => {
 			const source = formula.value.trim();
 			if (!source) {
@@ -2190,6 +2181,10 @@ function renderCheckboxInput(parent: HTMLElement, label: string, checked: boolea
 	const input = wrapper.createEl("input", { type: "checkbox" });
 	input.checked = checked;
 	return input;
+}
+
+function setCodePlaceholder(input: HTMLInputElement | HTMLTextAreaElement, placeholder: string): void {
+	input.placeholder = placeholder;
 }
 
 function taskQueryFromValue(value: unknown): TaskNotesRuntimeTaskQuery {

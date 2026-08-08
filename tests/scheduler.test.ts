@@ -52,9 +52,11 @@ function createScheduler(workflows: LoadedWorkflow[]) {
 		enableScheduledTriggers: false,
 		enableObsidianTriggers: false,
 	};
-	const runWorkflow = vi.fn((_workflow: LoadedWorkflow, _options: WorkflowRunOptions) =>
-		Promise.resolve({} as WorkflowRunDetail)
-	);
+	const runWorkflow = vi.fn((workflow: LoadedWorkflow, options: WorkflowRunOptions) => {
+		void workflow;
+		void options;
+		return Promise.resolve({} as WorkflowRunDetail);
+	});
 	const scheduler = new WorkflowScheduler(
 		{} as Plugin,
 		bridge,

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## [0.1.3] - 2026-08-08
+
+### Fixed
+
+- Workflow note cards and advanced expression controls now create their interface in the correct Obsidian window, including pop-out windows.
+
+### Changed
+
+- TaskNotes Workflows settings can now be found through Obsidian's settings search.
+- Updated compatibility with Obsidian's current community-plugin review requirements.
+
 ## [0.1.2] - 2026-08-07
 
 ### Fixed

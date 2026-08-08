@@ -97,7 +97,7 @@ class WorkflowNoteCardEditorPlugin implements PluginValue {
 		if (!container) return;
 
 		removeWorkflowNoteCardHosts(container);
-		const host = createWorkflowNoteCardHost(this.plugin, loaded, "editor");
+		const host = createWorkflowNoteCardHost(this.plugin, loaded, "editor", container);
 		this.currentHost = host;
 		insertAfterMetadataOrHeader(container, host);
 	}
@@ -157,7 +157,7 @@ async function injectReadingModeWorkflowCard(
 	const sizer = container.querySelector<HTMLElement>(".markdown-preview-sizer");
 	if (!sizer) return;
 
-	const host = createWorkflowNoteCardHost(plugin, loaded, "reading");
+	const host = createWorkflowNoteCardHost(plugin, loaded, "reading", sizer);
 	insertAfterMetadataOrHeader(sizer, host);
 }
 
@@ -176,9 +176,10 @@ async function loadWorkflow(
 function createWorkflowNoteCardHost(
 	plugin: TaskNotesWorkflowsPlugin,
 	loaded: LoadedWorkflow,
-	context: "editor" | "reading"
+	context: "editor" | "reading",
+	owner: HTMLElement
 ): HTMLElement {
-	const host = activeDocument.createElement("div");
+	const host = owner.win.createDiv();
 	host.className = NOTE_CARD_HOST_CLASS;
 	host.setAttribute("contenteditable", "false");
 	host.setAttribute("spellcheck", "false");

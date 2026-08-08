@@ -1,4 +1,11 @@
-import { Notice, PluginSettingTab, Setting, type App, type TextComponent } from "obsidian";
+import {
+	Notice,
+	PluginSettingTab,
+	Setting,
+	type App,
+	type SettingDefinitionItem,
+	type TextComponent,
+} from "obsidian";
 import { DEFAULT_WORKFLOW_FOLDER, DEFAULT_WORKFLOW_VIEW_PATH } from "./constants";
 import type TaskNotesWorkflowsPlugin from "../main";
 
@@ -12,12 +19,29 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 		);
 	}
 
+	override getSettingDefinitions(): SettingDefinitionItem[] {
+		return [
+			{
+				name: this.workflowsPlugin.t("common.appName"),
+				aliases: [
+					this.workflowsPlugin.t("settings.workflowFiles.heading"),
+					this.workflowsPlugin.t("settings.triggers.heading"),
+					this.workflowsPlugin.t("settings.runLogs.heading"),
+					this.workflowsPlugin.t("settings.language.heading"),
+				],
+				render: (setting) => {
+					setting.settingEl.empty();
+					this.renderSettings(setting.settingEl);
+				},
+			},
+		];
+	}
+
 	override display(): void {
 		this.renderSettings();
 	}
 
-	private renderSettings(): void {
-		const { containerEl } = this;
+	private renderSettings(containerEl: HTMLElement = this.containerEl): void {
 		containerEl.empty();
 		containerEl.addClass("tnw-settings");
 
