@@ -20,7 +20,7 @@ Use it for things like:
 
 ## Install
 
-Download `main.js`, `manifest.json`, and `styles.css` from the latest release, place them in `.obsidian/plugins/tasknotes-workflows/`, then enable **TaskNotes Workflows** in Obsidian's Community plugins settings.
+Download `main.ts`, `manifest.json`, and `styles.css` from the latest release, place them in `.obsidian/plugins/tasknotes-workflows/`, then enable **TaskNotes Workflows** in Obsidian's Community plugins settings.
 
 ## Getting Started
 
