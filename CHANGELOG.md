@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.1.5] - 2026-11-11
+
 ### Fixed
 
 - (#22, TaskNotes #2119) Workflows triggered by moving a task on a Kanban board, or by editing any task shown in a Bases view, no longer fail with "Maximum call stack size exceeded" when an expression reads `steps` or `event`. The run log no longer fails with "Converting circular structure to JSON", so the real error is now recorded. Step outputs and trigger events now contain only plain task data. Thanks to @rougeayrn and @chrabia for reporting this, and to @konstantinopolka for finding the cause.
