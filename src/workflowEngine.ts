@@ -2,6 +2,7 @@ import { conditionsMatch } from "./conditions";
 import { todayString } from "./duration";
 import { createStepExecutionContext, shouldRunStep, StepRegistry } from "./stepRegistry";
 import { resolveTemplateValue } from "./template";
+import { toWorkflowData } from "./workflowData";
 import type { App } from "obsidian";
 import type { ActionOutcome } from "@callumalpass/mdbase-interop";
 import type { TaskNotesBridge } from "./tasknotesBridge";
@@ -52,6 +53,9 @@ export class WorkflowEngine {
 
 		const runId = createRunId();
 		const startedAt = new Date();
+		// Trigger payloads can carry live runtime objects (for example TaskNotes'
+		// Bases `basesData`), which break expressions and the run log.
+		const trigger = toWorkflowData(options.trigger) as WorkflowRunOptions["trigger"];
 		const detail: WorkflowRunDetail = {
 			runId,
 			workflowId: workflow.id,
@@ -60,7 +64,7 @@ export class WorkflowEngine {
 			dryRun: options.dryRun === true,
 			startedAt: startedAt.toISOString(),
 			status: "success",
-			trigger: options.trigger,
+			trigger,
 			steps: [],
 		};
 		const preflightError = this.preflightError(workflow.requires);
@@ -85,11 +89,11 @@ export class WorkflowEngine {
 					name: workflow.name,
 					filePath: loadedWorkflow.file.path,
 				},
-				trigger: workflow.triggers.find((trigger) => trigger.id === options.trigger.id) ?? {
-					id: options.trigger.id,
-					type: options.trigger.triggerType ?? options.trigger.type,
+				trigger: workflow.triggers.find((candidate) => candidate.id === trigger.id) ?? {
+					id: trigger.id,
+					type: trigger.triggerType ?? trigger.type,
 				},
-				event: options.trigger,
+				event: trigger,
 				vars: workflow.vars,
 				steps: {},
 				now: startedAt.toISOString(),
@@ -255,13 +259,14 @@ export class WorkflowEngine {
 						input,
 					});
 					detail.evidence = outcome;
-					detail.output = successfulInteropOutput(outcome);
+					detail.output = toWorkflowData(successfulInteropOutput(outcome));
 				}
 			} else if (definition) {
-				detail.output = await definition.run(
+				// Keep step outputs to plain data before they reach `steps.*`.
+				detail.output = toWorkflowData(await definition.run(
 					input,
 					createStepExecutionContext(runId, dryRun, this.tasknotes(), this.obsidian(), source)
-				);
+				));
 			} else {
 				throw new Error(this.t("engine.unknownStepType", { type: step.type }));
 			}
