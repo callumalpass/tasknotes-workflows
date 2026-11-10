@@ -2,6 +2,7 @@ import type { App } from "obsidian";
 import { PLUGIN_ID } from "./constants";
 import { safePathSegment } from "./path";
 import type { RunSummary, TaskNotesWorkflowsSettings, WorkflowRunDetail } from "./types";
+import { stringifyWorkflowData } from "./workflowData";
 
 export class RunLogService {
 	private writeQueue: Promise<unknown> = Promise.resolve();
@@ -87,7 +88,7 @@ export class RunLogService {
 		const existing = (await this.exists(historyPath))
 			? await this.app.vault.adapter.read(historyPath)
 			: "";
-		const lines = [...existing.split("\n").filter(Boolean), JSON.stringify(summary)].slice(
+		const lines = [...existing.split("\n").filter(Boolean), stringifyWorkflowData(summary)].slice(
 			-settings.maxHistoryEntries
 		);
 		await this.app.vault.adapter.write(historyPath, `${lines.join("\n")}\n`);
@@ -98,7 +99,7 @@ export class RunLogService {
 		await this.ensureFolder(folder);
 		await this.app.vault.adapter.write(
 			this.detailPath(detail.workflowId, detail.runId),
-			JSON.stringify(detail, null, 2)
+			stringifyWorkflowData(detail, 2)
 		);
 	}
 
