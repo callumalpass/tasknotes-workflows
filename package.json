@@ -36,8 +36,8 @@
 	"dependencies": {
 		"@callumalpass/mdbase-interop": "0.1.0-rc.2",
 		"@callumalpass/mdbase-runtime": "file:vendor/callumalpass-mdbase-runtime-0.2.0-rc.1.tgz",
-		"obsidian-bases-expression": "^0.2.0",
-		"obsidian-bases-expression-builder": "^0.1.0",
+		"obsidian-bases-expression": "^0.3.0-rc.5",
+		"obsidian-bases-expression-builder": "^0.2.0-rc.3",
 		"yaml": "^2.8.1"
 	},
 	"devDependencies": {
