@@ -45,4 +45,17 @@ describe("workflow expressions", () => {
 			$expr: "steps.read-parent.output.tasks[0].customProperties.area",
 		}, "$", schema)).toEqual([]);
 	});
+
+	it("evaluates over a context that reaches a circular object graph", () => {
+		// The engine passes plain data, but the expression library must not
+		// overflow if a runtime object slips through (issue #22).
+		const app: Record<string, unknown> = {};
+		app.self = app;
+		const run = context();
+		run.steps.read = { status: "success", output: { task: { title: "Write report", app } } };
+
+		expect(evaluateWorkflowExpression({ $expr: "steps.read.output.task.title" }, run)).toBe(
+			"Write report"
+		);
+	});
 });

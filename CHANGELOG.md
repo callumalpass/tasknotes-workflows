@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Updated the expression engine to `obsidian-bases-expression` 0.3.0-rc.5 and the expression editor to `obsidian-bases-expression-builder` 0.2.0-rc.3. Expressions no longer overflow the stack if they read a value that refers back to itself (obsidian-bases-expression #7).
+
 ## [0.1.5] - 2026-11-11
 
 ### Fixed
