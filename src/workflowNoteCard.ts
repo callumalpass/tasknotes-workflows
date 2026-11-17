@@ -20,7 +20,7 @@ export function registerWorkflowNoteCards(plugin: TaskNotesWorkflowsPlugin): voi
 	}, 100);
 
 	plugin.registerMarkdownPostProcessor((_el, ctx) => {
-		if (!isWorkflowFrontmatter(ctx.frontmatter)) return;
+		if (!isWorkflowFrontmatter(ctx.frontmatter) && !plugin.workflows.some((loaded) => loaded.file.path === ctx.sourcePath)) return;
 		scheduleReadingModeWorkflowCards(plugin, ctx.sourcePath);
 	}, -10);
 
@@ -294,6 +294,6 @@ function isWorkflowFrontmatter(frontmatter: unknown): boolean {
 		frontmatter !== null &&
 		typeof frontmatter === "object" &&
 		"type" in frontmatter &&
-		(frontmatter as { type?: unknown }).type === WORKFLOW_TYPE
+		[WORKFLOW_TYPE, "runtime_workflow", "tasknotes-workflow"].includes(String((frontmatter as { type?: unknown }).type))
 	);
 }

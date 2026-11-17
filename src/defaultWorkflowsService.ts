@@ -1,7 +1,9 @@
+import { runtimeFrontmatter } from "./collection";
+import { workflowToCelRecord } from "./migrateExpressions";
 import { normalizePath, type App } from "obsidian";
 import { DEFAULT_WORKFLOW_FOLDER, DEFAULT_WORKFLOW_VIEW_PATH, WORKFLOW_BASE_VIEW_TYPE } from "./constants";
 import { parseMarkdownFrontmatter, replaceMarkdownFrontmatter } from "./frontmatter";
-import { parseWorkflowDefinition, workflowToFrontmatter } from "./workflowParser";
+import { parseWorkflowDefinition } from "./workflowParser";
 import type { TaskNotesWorkflowsSettings } from "./types";
 
 interface DefaultWorkflow {
@@ -27,7 +29,7 @@ export class DefaultWorkflowsService {
 		const written: string[] = [];
 		for (const workflow of defaultWorkflows(folder)) {
 			if (await this.app.vault.adapter.exists(workflow.path)) continue;
-			await this.app.vault.create(workflow.path, canonicalWorkflowMarkdown(workflow.content));
+			await this.app.vault.create(workflow.path, await canonicalWorkflowMarkdown(this.app, workflow.content));
 			written.push(workflow.path);
 		}
 		return written;
@@ -55,21 +57,21 @@ export class DefaultWorkflowsService {
 	}
 }
 
-function canonicalWorkflowMarkdown(markdown: string): string {
+async function canonicalWorkflowMarkdown(app: App, markdown: string): Promise<string> {
 	const parsed = parseMarkdownFrontmatter(markdown);
 	if (parsed.error) throw new Error(parsed.error);
 	const result = parseWorkflowDefinition(parsed.data, markdown);
 	if (!result.workflow) {
 		throw new Error(result.diagnostics.map((diagnostic) => `${diagnostic.path}: ${diagnostic.message}`).join("; "));
 	}
-	return replaceMarkdownFrontmatter(markdown, workflowToFrontmatter(result.workflow));
+	return replaceMarkdownFrontmatter(markdown, await runtimeFrontmatter(app, workflowToCelRecord(result.workflow)));
 }
 
 function workflowViewFile(workflowFolder: string): string {
 	const folder = normalizePath(workflowFolder || DEFAULT_WORKFLOW_FOLDER);
 	return `filters:
   and:
-    - note["type"] == "workflow" || note["type"] == "tasknotes-workflow"
+    - note["type"] == "runtime_workflow" || note["mdbase_type"] == "runtime_workflow" || note["type"] == "workflow" || note["type"] == "tasknotes-workflow"
     - file.inFolder("${escapeBasesString(folder)}")
 
 views:
@@ -129,8 +131,7 @@ run:
 
 This disabled example is the smallest end-to-end interoperability flow:
 TaskNotes publishes a contract event, this workflow consumes it, and Canvas
-Bases provides the selected card-creation action. Enable local application
-interoperability in mdbase settings before enabling the workflow.
+Bases provides the selected card-creation action. Enable Allow plugin integrations in mdbase settings before enabling the workflow.
 `,
 		},
 		{

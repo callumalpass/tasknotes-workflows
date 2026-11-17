@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Changed
+
+- Execute Runtime 0.2 workflow records directly with CEL expressions, trigger guards, ordered variables/iteration, persistent seven-day idempotency reservations, concurrency policies, debounce/minimum intervals, deadlines and item limits. Missed cron/interval schedules fire once after downtime; cron respects its timezone.
+- Migrate Bases expressions, templates and structured conditions through the reviewed backup/apply/rollback flow. Unsupported conversions disable the workflow with an explanation. Unmigrated v1 files keep the original evaluator; CEL notes open directly for YAML editing.
+- Store runtime run and action-attempt evidence in plugin configuration storage while retaining the history UI and read-only compatibility with old history. Interrupted work is not replayed.
+- Add the device-local “Run workflows on this device” setting, enabled by default on desktop and disabled on mobile. Manual runs remain available. Obsidian 1.8.7 is now required for its local-storage API.
+- Use stable mdbase interop 0.1.0 and runtime 0.2.0 packages; remove the vendored prerelease archive. Connect to the published `mdbase-sync` plugin and validate API/profile versions. Settings and documentation use “Allow plugin integrations”.
+- Preserve TaskNotes v5 task IDs in event data; support stable-ID task reads/mutations and correct the scaffolded time-entry DTO. Metadata-change events use the `mdbase.record.modified` data shape. New/migrated workflows respect collection type keys and suggest the runtime standard pack when its type is missing.
+- Generate disabled CEL starter workflows and recognize runtime notes in the workflow Base/note cards.
+
+### Fixed
+
+- Disabled workflows no longer execute or create skipped-run history on contract events.
+- Interop step idempotency derives from the run idempotency key, step ID and item index.
+
+
 ## [0.1.6] - 2026-11-11
 
 ### Changed

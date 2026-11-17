@@ -28,6 +28,7 @@ export class WorkflowMigrationModal extends Modal {
 		for (const candidate of this.report.candidates) {
 			const details = this.contentEl.createEl("details", { cls: "tnw-workflow-migration-file" });
 			details.createEl("summary", { text: candidate.path });
+			if (candidate.warnings.length) details.createEl("p", { text: candidate.warnings.join("; ") });
 			details.createEl("pre", { text: candidate.diff });
 		}
 		if (this.report.invalid.length > 0) {

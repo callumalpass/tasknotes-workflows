@@ -1,4 +1,6 @@
-import { Notice, Plugin, TFile } from "obsidian";
+import { RuntimeStateStore } from "./src/runtimeState";
+import { collectionSettings, hasRuntimeType } from "./src/collection";
+import { Notice, Platform, Plugin, TFile } from "obsidian";
 import type { BasesViewRegistration } from "obsidian";
 import { DefaultWorkflowsService } from "./src/defaultWorkflowsService";
 import { RunLogService } from "./src/runLogService";
@@ -42,6 +44,9 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	runLogs!: RunLogService;
 	stepRegistry!: StepRegistry;
 
+	runOnThisDevice = true;
+	private migrationNoticeShown = false;
+	private runtimeTypeHintShown = false;
 	private bridge!: TaskNotesBridge;
 	private engine!: WorkflowEngine;
 	private scheduler!: WorkflowScheduler;
@@ -97,6 +102,9 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	override async onload(): Promise<void> {
 		await this.loadSettings();
+		const deviceSetting = this.app.loadLocalStorage("tasknotes-workflows:run-on-this-device") as boolean | null;
+		this.runOnThisDevice = deviceSetting ?? !Platform.isMobile;
+		this.runtimeTypeHintShown = this.app.loadLocalStorage("tasknotes-workflows:runtime-type-hint") === true;
 
 		this.i18n = createI18nService({
 			initialLocale: this.settings.uiLanguage,
@@ -111,20 +119,26 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		this.bridge = new TaskNotesBridge(this.app, this);
 		this.repository = new WorkflowRepository(this.app, () => this.settings);
 		this.runLogs = new RunLogService(this.app, () => this.settings);
+		await this.runLogs.recoverInterrupted();
 		this.stepRegistry = new StepRegistry((key, params) => this.t(key, params));
+		const runtimeState = new RuntimeStateStore(this.app);
 		this.engine = new WorkflowEngine(
 			this.stepRegistry,
 			() => this.bridge.api,
 			() => this.app,
 			(key, params) => this.t(key, params),
 			() => this.bridge,
+			runtimeState,
+			(detail) => this.runLogs.checkpoint(this.redactRunDetail(detail)),
 		);
 		this.scheduler = new WorkflowScheduler(
 			this,
 			this.bridge,
 			() => this.settings,
 			() => this.loadedWorkflows,
-			(workflow, options) => this.executeWorkflow(workflow, options)
+			(workflow, options) => this.executeWorkflow(workflow, options),
+			() => this.runOnThisDevice,
+			runtimeState,
 		);
 		this.defaults = new DefaultWorkflowsService(this.app, () => this.settings);
 		this.workflowMigrations = new WorkflowMigrationService(this.app, this.repository);
@@ -168,6 +182,12 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		this.settings = normalizeSettings(loaded ?? {});
 	}
 
+	async setRunOnThisDevice(value: boolean): Promise<void> {
+		this.runOnThisDevice = value;
+		this.app.saveLocalStorage("tasknotes-workflows:run-on-this-device", value);
+		await this.reloadWorkflows();
+	}
+
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
@@ -191,6 +211,16 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	async reloadWorkflows(): Promise<void> {
 		this.loadedWorkflows = await this.repository.reload();
+		if (!this.migrationNoticeShown && this.loadedWorkflows.some((loaded) => loaded.workflow && (!loaded.runtime || (loaded.runtime["x-tasknotes"] as Record<string, unknown> | undefined)?.format_version === 1))) {
+			this.migrationNoticeShown = true;
+			new Notice(this.t("notices.celMigration"), 12000);
+		}
+		const collection = await collectionSettings(this.app);
+		if (!this.runtimeTypeHintShown && collection && !await hasRuntimeType(this.app, collection)) {
+			this.runtimeTypeHintShown = true;
+			this.app.saveLocalStorage("tasknotes-workflows:runtime-type-hint", true);
+			new Notice(this.t("notices.runtimeTypeHint"), 12000);
+		}
 		this.loadedWorkflows = await this.withLastRunSummaries(this.loadedWorkflows);
 		if (this.bridge?.interopAvailable) await this.refreshActionProvider();
 		this.scheduler.start();
@@ -665,6 +695,11 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		if (this.settings.runLogLevel === "inputs-and-outputs") return detail;
 		return {
 			...detail,
+			attempts: detail.attempts?.map((attempt) => ({
+				...attempt,
+				request: { ...attempt.request, input: this.settings.runLogLevel === "summary" ? undefined : attempt.request.input },
+				outcome: this.settings.runLogLevel === "summary" && attempt.outcome?.status === "succeeded" ? { ...attempt.outcome, output: undefined } : attempt.outcome,
+			})),
 			steps: detail.steps.map((step) => ({
 				...step,
 				output: this.settings.runLogLevel === "summary" ? undefined : step.output,

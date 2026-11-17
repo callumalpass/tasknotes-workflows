@@ -39,12 +39,12 @@ describe("default workflows service", () => {
 		expect(vault.files.get("TaskNotes/Workflows/clear-scheduled-when-started.md")).toContain("id: task.clearScheduled");
 		expect(vault.files.get("TaskNotes/Workflows/stamp-started-at.md")).toContain("startedAt");
 		expect(vault.files.get("TaskNotes/Workflows/rollover-overdue-scheduled-tasks.md")).toContain("id: task.reschedule");
-		expect(vault.files.get("TaskNotes/Workflows/escalate-upcoming-due-tasks.md")).toContain('today() + duration("3d")');
+		expect(vault.files.get("TaskNotes/Workflows/escalate-upcoming-due-tasks.md")).toContain('(today()).addDays(3)');
 		expect(vault.files.get("TaskNotes/Workflows/blocked-task-review.md")).toContain("task.isBlocked");
 		expect(vault.files.get("TaskNotes/Workflows/inherit-subtask-dependencies.md")).toContain("id: task.dependencies");
 		expect(vault.files.get("TaskNotes/Workflows/mirror-parent-dependencies-to-subtasks.md")).toContain("blockedBy");
 		expect(vault.files.get("TaskNotes/Workflows/schedule-subtasks-before-parent-due.md")).toContain(
-			'date(event.after.due) - duration("1w")'
+			'(date(event.data["after"]["due"])).addDays(-7)'
 		);
 		expect(vault.files.get("TaskNotes/Views/workflows.base")).toContain("type: tasknotesWorkflows");
 		expect(vault.files.get("TaskNotes/Views/workflows.base")).toContain('note["type"] == "workflow"');

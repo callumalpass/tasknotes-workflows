@@ -2,7 +2,7 @@
 	"id": "tasknotes-workflows",
 	"name": "TaskNotes Workflows",
 	"version": "0.1.6",
-	"minAppVersion": "1.8.0",
+	"minAppVersion": "1.8.7",
 	"description": "Markdown-defined workflow automation for TaskNotes.",
 	"author": "Callum Alpass",
 	"authorUrl": "https://github.com/callumalpass",

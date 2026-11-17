@@ -1,3 +1,4 @@
+import type { RuntimeWorkflow } from "@callumalpass/mdbase-runtime";
 import type { App, EventRef, TFile } from "obsidian";
 import type { ProviderSelector } from "@callumalpass/mdbase-interop";
 
@@ -27,6 +28,7 @@ export interface WorkflowFile {
 }
 
 export interface LoadedWorkflow {
+	runtime?: RuntimeWorkflow;
 	file: TFile;
 	body: string;
 	source: string;
@@ -45,6 +47,9 @@ export interface WorkflowDiagnostic {
 }
 
 export interface WorkflowDefinition {
+	expressionLanguage?: "cel";
+	/** Original record retained by the editor; execution uses LoadedWorkflow.runtime. */
+	runtime?: RuntimeWorkflow;
 	type: "workflow";
 	schemaVersion: 1;
 	id: string;
@@ -217,6 +222,8 @@ export interface WorkflowDebugSettings {
 }
 
 export interface WorkflowTriggerPayload {
+	cloudEvent?: import("@callumalpass/mdbase-interop").CloudEvent;
+	taskId?: string;
 	type: string;
 	id?: string;
 	triggerType?: string;
@@ -265,6 +272,8 @@ export interface WorkflowStepResult {
 }
 
 export interface WorkflowRunDetail {
+	runtime?: import("./runtimeHistory").RuntimeRunRecord;
+	attempts?: import("./runtimeHistory").RuntimeAttemptRecord[];
 	runId: string;
 	workflowId: string;
 	workflowName: string;
@@ -422,6 +431,8 @@ export interface TaskNotesRuntimeApi {
 	};
 	tasks: {
 		get(path: string): Promise<Record<string, unknown> | null>;
+		getByPath?(path: string): Promise<Record<string, unknown> | null>;
+		getById?(id: string): Promise<Record<string, unknown> | null>;
 		list(query?: TaskNotesRuntimeTaskQuery): Promise<Record<string, unknown>[]>;
 		create(input: Record<string, unknown>, context?: TaskNotesMutationContext): Promise<Record<string, unknown>>;
 		update(path: string, patch: Record<string, unknown>, context?: TaskNotesMutationContext): Promise<Record<string, unknown>>;

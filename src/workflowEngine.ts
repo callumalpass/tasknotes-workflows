@@ -1,3 +1,5 @@
+import { RuntimeWorkflowExecutor } from "./runtimeExecutor";
+import { RuntimeStateStore } from "./runtimeState";
 import { conditionsMatch } from "./conditions";
 import { todayString } from "./duration";
 import { createStepExecutionContext, shouldRunStep, StepRegistry } from "./stepRegistry";
@@ -32,6 +34,7 @@ const ENGINE_FALLBACK_MESSAGES: Record<string, string> = {
 };
 
 export class WorkflowEngine {
+	private readonly runtimeExecutor: RuntimeWorkflowExecutor;
 	private readonly runningGroups = new Set<string>();
 
 	constructor(
@@ -40,12 +43,15 @@ export class WorkflowEngine {
 		private readonly obsidian: () => App | null = () => null,
 		private readonly translate: TranslateFn = (key) => key,
 		private readonly interopBridge: () => TaskNotesBridge | null = () => null,
-	) {}
+		state?: RuntimeStateStore,
+		persist?: (detail: WorkflowRunDetail) => Promise<void>,
+	) { this.runtimeExecutor = new RuntimeWorkflowExecutor(stepRegistry, tasknotes, obsidian, interopBridge, state, persist); }
 
 	async runWorkflow(
 		loadedWorkflow: LoadedWorkflow,
 		options: WorkflowRunOptions
 	): Promise<WorkflowRunDetail> {
+		if (loadedWorkflow.runtime) return this.runtimeExecutor.run(loadedWorkflow, options);
 		const workflow = loadedWorkflow.workflow;
 		if (!workflow) {
 			throw new Error(this.t("engine.workflowInvalid", { path: loadedWorkflow.file.path }));

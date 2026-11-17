@@ -198,7 +198,9 @@ export function shouldRunStep(step: WorkflowStep, context: WorkflowRunContext): 
 function createDefaultSteps(): StepDefinition[] {
 	return [
 		taskReadStep("task.get", "Get task", "Reads one task by path.", async (api, input) => ({
-			task: await api.tasks.get(requiredString(input, "task")),
+			task: typeof asRecord(input).taskId === "string" && api.tasks.getById
+				? await api.tasks.getById(requiredString(input, "taskId"))
+				: await (api.tasks.getByPath ?? api.tasks.get)(requiredString(input, "task")),
 		}), {
 			inputFields: [taskPathField()],
 			examples: [{ label: "Read the triggering task", input: { task: "{{event.after.path}}" } }],
@@ -552,7 +554,7 @@ function createDefaultSteps(): StepDefinition[] {
 					type: "json",
 					required: true,
 					wide: true,
-					defaultValue: { minutes: 25, date: "{{today}}" },
+					defaultValue: { startTime: "{{now}}", description: "Workflow time entry" },
 				},
 			],
 		}),
@@ -841,7 +843,14 @@ function taskMutationStep(
 			if (context.dryRun) {
 				return { dryRun: true, wouldRun: type, input };
 			}
-			return run(requireTaskNotes(context.tasknotes), input, context);
+			const api = requireTaskNotes(context.tasknotes);
+			const record = asRecord(input);
+			if (typeof record.taskId === "string" && api.tasks.getById) {
+				const task = await api.tasks.getById(record.taskId);
+				if (!task || typeof task.path !== "string") throw new Error(`Task not found: ${record.taskId}`);
+				return run(api, { ...record, task: task.path }, context);
+			}
+			return run(api, input, context);
 		},
 	};
 }

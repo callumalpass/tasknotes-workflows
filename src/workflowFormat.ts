@@ -1,3 +1,4 @@
+import { workflowToCelRecord } from "./migrateExpressions";
 import { validateRuntimeRecord, type RuntimeWorkflow } from "@callumalpass/mdbase-runtime";
 import { DEFAULT_SOURCE, LEGACY_WORKFLOW_TYPE, RUNTIME_WORKFLOW_TYPE, WORKFLOW_TYPE } from "./constants";
 import type {
@@ -82,6 +83,7 @@ export function runtimeRecordToTaskNotesInput(record: Dict): Dict {
 }
 
 export function workflowToRuntimeRecord(workflow: WorkflowDefinition): RuntimeWorkflow & Dict {
+	if (workflow.expressionLanguage === "cel" && !workflow.runtime) return workflowToCelRecord({ ...workflow, expressionLanguage: undefined }) as RuntimeWorkflow & Dict;
 	assertRuntimeIdentifier(workflow.id, "workflow id");
 	const tasknotes = compact({
 		format_version: 1,
@@ -115,6 +117,7 @@ export function workflowToRuntimeRecord(workflow: WorkflowDefinition): RuntimeWo
 		},
 		[TASKNOTES_EXTENSION]: tasknotes,
 	};
+	if (workflow.runtime) Object.assign(record, workflow.runtime, { id: workflow.id, name: workflow.name, description: workflow.description, enabled: workflow.enabled });
 	const cleaned = removeUndefined(record);
 	const diagnostics = validateRuntimeWorkflowRecord(cleaned);
 	if (diagnostics.length > 0) {
@@ -135,6 +138,7 @@ function runtimeTriggerToTaskNotesInput(raw: unknown): unknown {
 		...(type === "contract.event"
 			? { contract: event.id, version: event.version }
 			: { event: runtimeEventForTaskNotesTrigger(type, event.id, tasknotes) }),
+		if: raw.if,
 		debounce: raw.debounce,
 		minimumInterval: raw.minimum_interval,
 		extensions: otherExtensions(raw),
@@ -174,6 +178,7 @@ function workflowTriggerToRuntimeRecord(trigger: WorkflowTrigger): Dict {
 			id: eventId,
 			version: trigger.type === "contract.event" ? trigger.version : "1.0.0",
 		}),
+		if: (trigger as unknown as Dict).if,
 		debounce: trigger.debounce,
 		minimum_interval: trigger.minimumInterval,
 		[TASKNOTES_EXTENSION]: tasknotes,
@@ -223,6 +228,7 @@ function triggerTaskNotesExtension(trigger: WorkflowTrigger): Dict {
 
 function runtimeEventForWorkflowTrigger(trigger: WorkflowTrigger): string {
 	if (trigger.type === "tasknotes.event") return trigger.event;
+	if (trigger.type === "obsidian.metadata" && trigger.event === "changed") return "mdbase.record.modified";
 	if (trigger.type === "contract.event") return trigger.contract;
 	if (trigger.type === "cron") return "tasknotes-workflows.schedule.cron";
 	if (trigger.type === "interval") return "tasknotes-workflows.schedule.interval";

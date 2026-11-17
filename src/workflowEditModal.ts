@@ -193,6 +193,11 @@ export class WorkflowEditModal extends Modal {
 	}
 
 	override onOpen(): void {
+		if (this.loaded?.runtime && (this.loaded.runtime["x-tasknotes"] as Record<string, unknown> | undefined)?.format_version !== 1) {
+			void this.plugin.openWorkflowFile(this.loaded.file);
+			super.close();
+			return;
+		}
 		this.modalEl.addClass("tnw-modal");
 		this.render();
 	}

@@ -58,7 +58,7 @@ export function readReference(root: unknown, expression: string): unknown {
 	return current;
 }
 
-function parseReferencePath(path: string): string[] {
+export function parseReferencePath(path: string): string[] {
 	const parts: string[] = [];
 	let index = 0;
 	const readIdentifier = (): string | null => {

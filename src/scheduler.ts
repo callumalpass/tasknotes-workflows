@@ -1,3 +1,7 @@
+import { collectionSettings } from "./collection";
+import { RuntimeStateStore } from "./runtimeState";
+import { localCloudEvent } from "./runtimeExecutor";
+import { digest } from "./runtimeHistory";
 import { Notice, TFile, type EventRef, type Plugin } from "obsidian";
 import type { CloudEvent } from "@callumalpass/mdbase-interop";
 import { cronMatches } from "./cron";
@@ -25,8 +29,8 @@ export class WorkflowScheduler {
 	private taskEventRefs: EventRef[] = [];
 	private intervalIds: number[] = [];
 	private cleanupCallbacks: Array<() => void> = [];
-	private cronLastRun = new Map<string, string>();
-	private intervalLastRun = new Map<string, number>();
+	private debounceTimers = new Map<string, { timer: number; resolve: () => void }>();
+	private metadataSnapshots = new Map<string, Record<string, unknown>>();
 	private registrationEpoch = 0;
 
 	constructor(
@@ -34,11 +38,14 @@ export class WorkflowScheduler {
 		private readonly bridge: TaskNotesBridge,
 		private readonly getSettings: () => TaskNotesWorkflowsSettings,
 		private readonly getWorkflows: () => LoadedWorkflow[],
-		private readonly runWorkflow: RunWorkflow
+		private readonly runWorkflow: RunWorkflow,
+		private readonly automaticEnabled: () => boolean = () => true,
+		private readonly state = new RuntimeStateStore(),
 	) {}
 
 	start(): void {
 		this.stop();
+		if (!this.automaticEnabled()) return;
 		const epoch = this.registrationEpoch;
 		this.registerTaskEvents();
 		this.registerContractEvents(epoch);
@@ -48,6 +55,8 @@ export class WorkflowScheduler {
 
 	stop(): void {
 		this.registrationEpoch += 1;
+		for (const pending of this.debounceTimers.values()) { window.clearTimeout(pending.timer); pending.resolve(); }
+		this.debounceTimers.clear();
 		for (const ref of this.taskEventRefs) {
 			this.bridge.api?.events.off(ref);
 		}
@@ -161,6 +170,9 @@ export class WorkflowScheduler {
 		});
 		this.cleanupCallbacks.push(() => this.plugin.app.workspace.offref(layoutChangeRef));
 
+		for (const file of this.plugin.app.vault.getMarkdownFiles()) {
+			this.metadataSnapshots.set(file.path, structuredClone(this.plugin.app.metadataCache.getFileCache(file)?.frontmatter ?? {}));
+		}
 		const metadataChangedRef = this.plugin.app.metadataCache.on("changed", (file, _data, cache) => {
 			void this.handleMetadataEvent("changed", file, { cache }).catch(showError);
 		});
@@ -195,12 +207,13 @@ export class WorkflowScheduler {
 
 	private async handleTaskEvent(event: string, rawPayload: unknown): Promise<void> {
 		const payload = normalizeTaskNotesEventPayload(event, rawPayload);
+		payload.cloudEvent = await localCloudEvent({ trigger: payload }, event);
 		for (const workflow of this.getWorkflows()) {
 			if (!workflow.workflow?.enabled) continue;
 			for (const trigger of workflow.workflow.triggers) {
 				if (!isTaskNotesEventTrigger(trigger)) continue;
 				if (!this.taskNotesTriggerMatches(trigger, payload)) continue;
-				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
+				await this.runAutomatic(workflow, { trigger: { ...payload, id: trigger.id } });
 			}
 		}
 	}
@@ -208,12 +221,13 @@ export class WorkflowScheduler {
 	private async handleContractEvent(key: string, event: CloudEvent): Promise<void> {
 		const payload = normalizeContractEventPayload(event);
 		for (const workflow of this.getWorkflows()) {
-			for (const trigger of workflow.workflow?.triggers ?? []) {
+			if (!workflow.workflow?.enabled) continue;
+			for (const trigger of workflow.workflow.triggers) {
 				if (trigger.type !== "contract.event") continue;
 				if (contractTriggerKey(trigger) !== key) continue;
 				if (trigger.source && trigger.source !== event.mdbaseapplication) continue;
 				if (trigger.path && (!payload.path || !pathMatchesFilter(payload.path, trigger.path))) continue;
-				await this.runWorkflow(workflow, { trigger: { ...payload, id: trigger.id } });
+				await this.runAutomatic(workflow, { trigger: { ...payload, id: trigger.id } });
 			}
 		}
 	}
@@ -223,8 +237,8 @@ export class WorkflowScheduler {
 		for (const workflow of this.getWorkflows()) {
 			if (!workflow.workflow?.enabled) continue;
 			for (const trigger of workflow.workflow.triggers) {
-				if (trigger.type === "cron" && this.shouldRunCron(workflow.workflow.id, trigger.id, trigger.schedule, now)) {
-					await this.runWorkflow(workflow, {
+				if (trigger.type === "cron" && await this.shouldRunCron(workflow.workflow.id, trigger.id, trigger.schedule, now, trigger.timezone, trigger.catchUp)) {
+					await this.runAutomatic(workflow, {
 						trigger: {
 							type: "cron",
 							triggerType: "cron",
@@ -235,8 +249,8 @@ export class WorkflowScheduler {
 						},
 					});
 				}
-				if (trigger.type === "interval" && this.shouldRunInterval(workflow.workflow.id, trigger.id, trigger.every)) {
-					await this.runWorkflow(workflow, {
+				if (trigger.type === "interval" && await this.shouldRunInterval(workflow.workflow.id, trigger.id, trigger.every)) {
+					await this.runAutomatic(workflow, {
 						trigger: {
 							type: "interval",
 							triggerType: "interval",
@@ -262,7 +276,7 @@ export class WorkflowScheduler {
 			for (const trigger of workflow.workflow.triggers) {
 				if (trigger.type !== "obsidian.vault" || trigger.event !== event) continue;
 				if (!pathMatchesFilter(file.path, trigger.path)) continue;
-				await this.runWorkflow(workflow, {
+				await this.runAutomatic(workflow, {
 					trigger: {
 						type: event,
 						triggerType: "obsidian.vault",
@@ -288,7 +302,7 @@ export class WorkflowScheduler {
 				if (trigger.type !== "obsidian.workspace" || trigger.event !== event) continue;
 				if (file && !pathMatchesFilter(file.path, trigger.path)) continue;
 				if (!file && trigger.path) continue;
-				await this.runWorkflow(workflow, {
+				await this.runAutomatic(workflow, {
 					trigger: {
 						type: event,
 						triggerType: "obsidian.workspace",
@@ -308,16 +322,31 @@ export class WorkflowScheduler {
 		file: TFile | null,
 		data?: unknown
 	): Promise<void> {
+		let cloudEvent: CloudEvent | undefined;
+		if (event === "changed" && file) {
+			const before = this.metadataSnapshots.get(file.path) ?? {};
+			const cache = (data as { cache?: { frontmatter?: Record<string, unknown> } } | undefined)?.cache;
+			const after = structuredClone(cache?.frontmatter ?? {});
+			delete after.position;
+			delete before.position;
+			this.metadataSnapshots.set(file.path, after);
+			const changed_fields = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]));
+			const keys = (await collectionSettings(this.plugin.app))?.typeKeys ?? ["type", "types"];
+			const types = (record: Record<string, unknown>): string[] => [...new Set(keys.flatMap((key) => typeof record[key] === "string" ? [record[key]] : Array.isArray(record[key]) ? record[key] as unknown[] : []).filter((value): value is string => typeof value === "string"))];
+			data = { path: file.path, before, after, changed_fields, previous_revision: await digest(before), revision: await digest(after), previous_types: types(before), types: types(after) };
+			cloudEvent = await localCloudEvent({ trigger: { type: event, data, path: file.path } }, "mdbase.record.modified");
+		}
 		for (const workflow of this.getWorkflows()) {
 			if (!workflow.workflow?.enabled) continue;
 			for (const trigger of workflow.workflow.triggers) {
 				if (trigger.type !== "obsidian.metadata" || trigger.event !== event) continue;
 				if (file && !pathMatchesFilter(file.path, trigger.path)) continue;
 				if (!file && trigger.path) continue;
-				await this.runWorkflow(workflow, {
+				await this.runAutomatic(workflow, {
 					trigger: {
 						type: event,
 						triggerType: "obsidian.metadata",
+						cloudEvent,
 						id: trigger.id,
 						event,
 						path: file?.path,
@@ -346,32 +375,65 @@ export class WorkflowScheduler {
 		return true;
 	}
 
-	private shouldRunCron(
-		workflowId: string,
-		triggerId: string,
-		schedule: string,
-		now: Date
-	): boolean {
-		if (!cronMatches(schedule, now)) return false;
-		const key = `${workflowId}:${triggerId}`;
-		const minuteKey = now.toISOString().slice(0, 16);
-		if (this.cronLastRun.get(key) === minuteKey) return false;
-		this.cronLastRun.set(key, minuteKey);
-		return true;
+	private async runAutomatic(workflow: LoadedWorkflow, options: WorkflowRunOptions): Promise<void> {
+		if (!this.automaticEnabled() || !workflow.workflow?.enabled) return;
+		const trigger = workflow.workflow.triggers.find(({ id }) => id === options.trigger.id);
+		const key = `${workflow.workflow.id}:${trigger?.id ?? "unknown"}`;
+		const execute = async (): Promise<void> => {
+			if (!this.automaticEnabled()) return;
+			if (trigger?.minimumInterval && !workflow.runtime) {
+				const interval = parseDurationMs(trigger.minimumInterval, 0);
+				const admitted = await this.state.update((state) => {
+					const now = Date.now();
+					if (state.lastAdmission[key] !== undefined && now - state.lastAdmission[key] < interval) return false;
+					state.lastAdmission[key] = now;
+					return true;
+				});
+				if (!admitted) return;
+			}
+			await this.runWorkflow(workflow, options);
+		};
+		const delay = parseDurationMs(trigger?.debounce, 0);
+		if (!delay) return execute();
+		const previous = this.debounceTimers.get(key);
+		if (previous) { window.clearTimeout(previous.timer); previous.resolve(); }
+		return new Promise<void>((resolve, reject) => {
+			const timer = window.setTimeout(() => {
+				this.debounceTimers.delete(key);
+				void execute().then(resolve, reject);
+			}, delay);
+			this.debounceTimers.set(key, { timer, resolve });
+		});
 	}
 
-	private shouldRunInterval(workflowId: string, triggerId: string, every: string): boolean {
-		const interval = Math.max(
-			parseDurationMs(every, this.getSettings().minIntervalMs),
-			this.getSettings().minIntervalMs
-		);
-		const key = `${workflowId}:${triggerId}`;
-		const now = Date.now();
-		const lastRun = this.intervalLastRun.get(key) ?? 0;
-		if (now - lastRun < interval) return false;
-		this.intervalLastRun.set(key, now);
-		return true;
+	private async shouldRunCron(workflowId: string, triggerId: string, schedule: string, now: Date, timezone?: string, catchUp = true): Promise<boolean> {
+		return this.state.update((state) => {
+			const key = `cron:${workflowId}:${triggerId}`;
+			const minute = Math.floor(now.getTime() / 60_000) * 60_000;
+			const last = state.lastFire[key];
+			if (last === minute) return false;
+			let due = cronMatches(schedule, now, timezone);
+			if (!due && catchUp && last !== undefined) {
+				for (let instant = last + 60_000; instant < minute; instant += 60_000) {
+					if (cronMatches(schedule, new Date(instant), timezone)) { due = true; break; }
+				}
+			}
+			state.lastFire[key] = minute;
+			return due;
+		});
 	}
+
+	private async shouldRunInterval(workflowId: string, triggerId: string, every: string): Promise<boolean> {
+		const interval = Math.max(parseDurationMs(every, this.getSettings().minIntervalMs), this.getSettings().minIntervalMs);
+		return this.state.update((state) => {
+			const key = `interval:${workflowId}:${triggerId}`;
+			const now = Date.now();
+			if (state.lastFire[key] !== undefined && now - state.lastFire[key] < interval) return false;
+			state.lastFire[key] = now;
+			return true;
+		});
+	}
+
 }
 
 function normalizeTaskNotesEventPayload(event: string, rawPayload: unknown): WorkflowTriggerPayload {
@@ -387,6 +449,7 @@ function normalizeTaskNotesEventPayload(event: string, rawPayload: unknown): Wor
 			? (payload.changes as Record<string, { before: unknown; after: unknown }>)
 			: undefined,
 		source: typeof payload.source === "string" ? payload.source : undefined,
+		taskId: typeof payload.taskId === "string" ? payload.taskId : undefined,
 		correlationId: typeof payload.correlationId === "string" ? payload.correlationId : undefined,
 		path: typeof payload.taskPath === "string" ? payload.taskPath : undefined,
 		data: payload,
@@ -396,13 +459,14 @@ function normalizeTaskNotesEventPayload(event: string, rawPayload: unknown): Wor
 
 function normalizeContractEventPayload(event: CloudEvent): WorkflowTriggerPayload {
 	const data = isRecord(event.data) ? event.data : {};
-	const path = typeof data.task_path === "string"
+	const path = typeof data.path === "string" ? data.path : typeof data.task_path === "string"
 		? data.task_path
 		: typeof event.subject === "string"
 			? event.subject
 			: undefined;
 	return {
 		type: event.type,
+		cloudEvent: event,
 		triggerType: "contract.event",
 		event: event.type,
 		path,

@@ -102,6 +102,13 @@ export class WorkflowsSettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl).setName(this.workflowsPlugin.t("settings.triggers.heading")).setHeading();
+		new Setting(containerEl).setDesc(this.workflowsPlugin.t("settings.interop"));
+		new Setting(containerEl)
+			.setName(this.workflowsPlugin.t("settings.deviceExecutor.name"))
+			.setDesc(this.workflowsPlugin.t("settings.deviceExecutor.description"))
+			.addToggle((toggle) => toggle.setValue(this.workflowsPlugin.runOnThisDevice).onChange((value) => {
+				void this.workflowsPlugin.setRunOnThisDevice(value);
+			}));
 
 			new Setting(containerEl)
 				.setName(this.workflowsPlugin.t("settings.triggers.tasknotesEvents.name"))

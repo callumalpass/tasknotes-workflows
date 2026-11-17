@@ -1,17 +1,20 @@
+import { collectionSettings, normalizeWorkflowType } from "./collection";
 import { normalizePath, TFile, type App } from "obsidian";
 import { parseMarkdownFrontmatter, replaceMarkdownFrontmatter } from "./frontmatter";
 import type { WorkflowRepository } from "./workflowRepository";
-import { parseWorkflowDefinition, workflowToFrontmatter } from "./workflowParser";
+import { migrateExpressions } from "./migrateExpressions";
+import { parseWorkflowDefinition } from "./workflowParser";
 import type { WorkflowSourceFormat } from "./types";
 
 export interface WorkflowMigrationCandidate {
 	path: string;
-	sourceFormat: Exclude<WorkflowSourceFormat, "runtime-v0.2" | "unknown">;
+	sourceFormat: Exclude<WorkflowSourceFormat, "unknown">;
 	sourceSha256: string;
 	targetSha256: string;
 	source: string;
 	target: string;
 	diff: string;
+	warnings: string[];
 }
 
 export interface WorkflowMigrationIssue {
@@ -46,7 +49,7 @@ export class WorkflowMigrationService {
 		const invalid: WorkflowMigrationIssue[] = [];
 
 		for (const loaded of loadedWorkflows) {
-			if (loaded.sourceFormat === "runtime-v0.2" && loaded.workflow) {
+			if (loaded.sourceFormat === "runtime-v0.2" && loaded.workflow && (loaded.runtime?.["x-tasknotes"] as Record<string, unknown> | undefined)?.format_version !== 1) {
 				alreadyCanonical.push(loaded.file.path);
 				continue;
 			}
@@ -57,16 +60,17 @@ export class WorkflowMigrationService {
 				});
 				continue;
 			}
-			if (loaded.sourceFormat !== "tasknotes-v1" && loaded.sourceFormat !== "tasknotes-v0.1") {
+			if (loaded.sourceFormat !== "tasknotes-v1" && loaded.sourceFormat !== "tasknotes-v0.1" && loaded.sourceFormat !== "runtime-v0.2") {
 				invalid.push({ path: loaded.file.path, messages: ["The workflow format could not be migrated safely."] });
 				continue;
 			}
 
-			const target = replaceMarkdownFrontmatter(loaded.source, workflowToFrontmatter(loaded.workflow));
+			const { record, warnings } = migrateExpressions(loaded);
+			const target = replaceMarkdownFrontmatter(loaded.source, await this.repository.runtimeFrontmatter(record));
 			const parsedTarget = parseMarkdownFrontmatter(target);
 			const verified = parsedTarget.error
 				? null
-				: parseWorkflowDefinition(parsedTarget.data, target);
+				: parseWorkflowDefinition(normalizeWorkflowType(parsedTarget.data, await collectionSettings(this.app)), target);
 			if (!verified?.workflow || verified.sourceFormat !== "runtime-v0.2") {
 				invalid.push({
 					path: loaded.file.path,
@@ -84,6 +88,7 @@ export class WorkflowMigrationService {
 				targetSha256: await sha256(target),
 				source: loaded.source,
 				target,
+				warnings,
 				diff: replacementDiff(loaded.file.path, loaded.source, target),
 			});
 		}

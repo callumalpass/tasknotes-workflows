@@ -50,6 +50,7 @@ export function parseWorkflowDefinition(
 	_source: string
 ): {
 	workflow: WorkflowDefinition | null;
+	runtime?: import("@callumalpass/mdbase-runtime").RuntimeWorkflow;
 	diagnostics: WorkflowDiagnostic[];
 	sourceFormat: WorkflowSourceFormat;
 } {
@@ -74,6 +75,29 @@ export function parseWorkflowDefinition(
 		if (diagnostics.some((diagnostic) => diagnostic.severity === "error")) {
 			return { workflow: null, diagnostics, sourceFormat };
 		}
+	}
+	if (sourceFormat === "runtime-v0.2" && (data["x-tasknotes"] as Record<string, unknown> | undefined)?.format_version !== 1) {
+		const runtime = data as unknown as import("@callumalpass/mdbase-runtime").RuntimeWorkflow;
+		const formatVersion = (runtime["x-tasknotes"] as Record<string, unknown> | undefined)?.format_version;
+		if (formatVersion !== undefined && formatVersion !== 2) diagnostics.push({ severity: "error", path: "x-tasknotes.format_version", message: "Unsupported workflow expression format." });
+		for (const [name, entries] of [["triggers", runtime.triggers], ["steps", runtime.steps]] as const) {
+			if (new Set(entries.map(({ id }) => id)).size !== entries.length) diagnostics.push({ severity: "error", path: name, message: `Duplicate ${name} IDs.` });
+		}
+		if (diagnostics.some(({ severity }) => severity === "error")) return { workflow: null, diagnostics, sourceFormat };
+		const projected = runtimeRecordToTaskNotesInput(data);
+		const workflow = {
+			...projected,
+			runtime,
+			vars: runtime.vars ?? {},
+			conditions: [],
+			steps: projected.steps as WorkflowStep[],
+			run: {
+				mode: "sequential", source: "tasknotes-workflows", onError: runtime.run?.on_error ?? "stop",
+				concurrency: { group: "workflow", policy: runtime.run?.concurrency?.policy ?? "skip" },
+				limits: { maxItems: runtime.run?.limits?.max_items ?? 25, timeout: runtime.run?.limits?.timeout },
+			},
+		} as unknown as WorkflowDefinition;
+		return { workflow, runtime, diagnostics, sourceFormat };
 	}
 	const normalizedData = sourceFormat === "runtime-v0.2"
 		? runtimeRecordToTaskNotesInput(data)
@@ -156,7 +180,7 @@ export function parseWorkflowDefinition(
 					extensions: collectExtensions(data, normalizedData, sourceFormat),
 				};
 
-	return { workflow, diagnostics, sourceFormat };
+	return { workflow, runtime: sourceFormat === "runtime-v0.2" ? data as unknown as import("@callumalpass/mdbase-runtime").RuntimeWorkflow : undefined, diagnostics, sourceFormat };
 }
 
 export function workflowToFrontmatter(workflow: WorkflowDefinition): string {
