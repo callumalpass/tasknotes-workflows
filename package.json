@@ -35,7 +35,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@callumalpass/mdbase-interop": "0.1.0",
-		"@callumalpass/mdbase-runtime": "0.2.0",
+		"@callumalpass/mdbase-runtime": "0.2.1",
 		"@marcbachmann/cel-js": "8.0.0",
 		"obsidian-bases-expression": "^0.3.0-rc.5",
 		"obsidian-bases-expression-builder": "^0.2.0-rc.3",

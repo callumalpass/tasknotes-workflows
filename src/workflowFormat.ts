@@ -28,7 +28,7 @@ export function detectWorkflowSourceFormat(data: unknown): WorkflowSourceFormat 
 }
 
 export function validateRuntimeWorkflowRecord(record: unknown): WorkflowDiagnostic[] {
-	const validation = validateRuntimeRecord(record);
+	const validation = validateRuntimeRecord(record, RUNTIME_WORKFLOW_TYPE);
 	return validation.diagnostics.map((diagnostic) => ({
 		severity: diagnostic.severity === "info" ? "warning" : diagnostic.severity,
 		path: diagnostic.path ?? "$",

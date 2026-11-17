@@ -51,7 +51,7 @@ export const en: TranslationTree = {
 	},
 	notices: {
 		celMigration: "Some workflows still use Bases expressions. Use ‘Review workflow migration’ to review and migrate them to CEL.",
-		runtimeTypeHint: "Install the ‘mdbase runtime standard’ pack from mdbase to add the runtime_workflow type.",
+		runtimeTypeHint: "Install or update the ‘mdbase runtime standard’ pack (0.2.1 or later) from mdbase to add the runtime_workflow type.",
 		languageChanged: "Language changed to {language}.",
 		workflowsReloaded: "Workflows reloaded.",
 		defaultFilesCreated: "Created {count} default {fileLabel}.",

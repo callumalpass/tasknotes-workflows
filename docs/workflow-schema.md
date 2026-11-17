@@ -40,7 +40,7 @@ x-tasknotes:
   format_version: 2
 ```
 
-Required fields are `type`, `id`, `version`, `name`, `enabled`, `triggers`, and `steps`. Trigger and step IDs must each be unique. Unknown fields require an `x-` prefix. In an mdbase 0.3 collection, new and migrated files use the first configured `settings.explicit_type_keys` key instead of `type` (for example `mdbase_type` in a new TaskNotes v5 collection). Omitted settings use `type`; an explicitly empty list requires collection configuration before writing workflows. A missing `runtime_workflow` type produces a hint to install the **mdbase runtime standard** pack; the plugin does not install it.
+Required fields are the type declaration (`type: runtime_workflow` by default), `id`, `version`, `name`, `enabled`, `triggers`, and `steps`. Trigger and step IDs must each be unique. Unknown fields require an `x-` prefix. In an mdbase 0.3 collection, new and migrated files use the first configured `settings.explicit_type_keys` key instead of `type` (for example `mdbase_type` in a new TaskNotes v5 collection). Omitted settings use `type`; an explicitly empty list requires collection configuration before writing workflows. A missing `runtime_workflow` type, or the version 1 type from pack 0.2.0 (which pinned `type`), produces a hint to install the **mdbase runtime standard** pack 0.2.1 or later; the plugin does not install it.
 
 ## Expressions
 

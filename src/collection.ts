@@ -34,8 +34,9 @@ export async function hasRuntimeType(app: App, config: CollectionSettings): Prom
 			const text = await app.vault.adapter.read(file);
 			const match = /^---\r?\n([\s\S]*?)\r?\n---/u.exec(text);
 			if (file.endsWith(".md") && !match) continue;
-			const type = parse(match?.[1] ?? text) as { kind?: string; name?: string } | null;
-			if (type?.kind === "mdbase.type" && type.name === "runtime_workflow") return true;
+			const type = parse(match?.[1] ?? text) as { kind?: string; name?: string; version?: unknown } | null;
+			// Version 1 (runtime pack 0.2.0) pins `type` and rejects other type keys.
+			if (type?.kind === "mdbase.type" && type.name === "runtime_workflow" && Number(type.version) >= 2) return true;
 		}
 		for (const child of listing.folders) if (await visit(child)) return true;
 		return false;

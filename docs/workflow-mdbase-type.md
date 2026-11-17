@@ -6,7 +6,11 @@ replacement. Collections that need to index these records should install the
 `mdbase-runtime` standard pack. The pack owns the type, its JSON Schema, and its
 contract identity.
 
-The record discriminator is `type: runtime_workflow`. Event and action fields
+The record declares `runtime_workflow` under the collection's first explicit
+type key: `type: runtime_workflow` by default, `mdbase_type: runtime_workflow`
+in a TaskNotes v5 collection. Use pack 0.2.1 or later (contract 1.1.0, type
+version 2): the 0.2.0 type pinned `type` and rejected records that declare
+their type under another key. Event and action fields
 are contract requirements with an ID and SemVer range. Runtime admission
 resolves each requirement to an exact contract digest and declared source or
 provider.
