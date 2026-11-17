@@ -33,6 +33,7 @@ interface MdbasePluginWithApi {
 	api?: {
 		apiVersion: number;
 		interop?: {
+			profileVersion: string;
 			connect(plugin: Plugin): InteropClient;
 			describe(): BridgeDescription;
 		};
@@ -69,14 +70,15 @@ export class TaskNotesBridge {
 		const mdbase = this.mdbasePlugin();
 		return Boolean(
 			this.plugin
-			&& mdbase?.api?.interop
+			&& mdbase?.api?.apiVersion === 1
+			&& mdbase.api.interop?.profileVersion === "0.1"
 			&& mdbase.api.getInteropStatus?.().enabled !== false
 		);
 	}
 
 	connectInterop(): InteropClient | null {
-		if (this.interopClient) return this.interopClient;
 		if (!this.interopAvailable || !this.plugin) return null;
+		if (this.interopClient) return this.interopClient;
 		const mdbase = this.mdbasePlugin();
 		if (!mdbase?.api?.interop) return null;
 		this.interopClient = mdbase.api.interop.connect(this.plugin);
@@ -84,7 +86,7 @@ export class TaskNotesBridge {
 	}
 
 	interopDescription(): BridgeDescription | null {
-		return this.mdbasePlugin()?.api?.interop?.describe() ?? null;
+		return this.interopAvailable ? this.mdbasePlugin()?.api?.interop?.describe() ?? null : null;
 	}
 
 	async onContractEvent(
@@ -225,7 +227,7 @@ export class TaskNotesBridge {
 		const app = this.app as App & {
 			plugins?: { getPlugin(id: string): unknown };
 		};
-		return app.plugins?.getPlugin("mdbase-obsidian") as MdbasePluginWithApi | null;
+		return app.plugins?.getPlugin("mdbase-sync") as MdbasePluginWithApi | null;
 	}
 }
 
