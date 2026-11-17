@@ -11,11 +11,13 @@
 - Migrate Bases expressions, templates and structured conditions through the reviewed backup/apply/rollback flow. Unsupported conversions disable the workflow with an explanation. Unmigrated v1 files keep the original evaluator; CEL notes open directly for YAML editing.
 - Store runtime run and action-attempt evidence in plugin configuration storage while retaining the history UI and read-only compatibility with old history. Interrupted work is not replayed.
 - Add the device-local “Run workflows on this device” setting, enabled by default on desktop and disabled on mobile. Manual runs remain available. Obsidian 1.8.7 is now required for its local-storage API. Turning it off persists across restarts.
-- Use stable mdbase interop 0.1.0 and runtime 0.2.0 packages; remove the vendored prerelease archive. Connect to the published `mdbase-sync` plugin and validate API/profile versions. Settings and documentation use “Allow plugin integrations”.
+- Use stable mdbase interop 0.1.0 and runtime 0.2.1 packages; remove the vendored prerelease archive. Connect to the published `mdbase-sync` plugin and validate API/profile versions. Settings and documentation use “Allow plugin integrations”.
 - Preserve TaskNotes v5 task IDs in event data; support stable-ID task reads/mutations and correct the scaffolded time-entry DTO. Metadata-change events use the `mdbase.record.modified` data shape. New/migrated workflows respect collection type keys and suggest the runtime standard pack when its type is missing.
 - Generate disabled CEL starter workflows and recognize runtime notes in the workflow Base/note cards.
 
 ### Fixed
+
+- Workflow notes in collections that declare types with `mdbase_type` (TaskNotes v5) are valid mdbase records and show their workflow card. They need the mdbase runtime standard pack 0.2.1, whose `runtime_workflow` type no longer pins `type`; the runtime-type hint now also appears when only the older type is installed.
 
 - Disabled workflows no longer execute or create skipped-run history on contract events.
 - Interop step idempotency derives from the run idempotency key, step ID and item index.

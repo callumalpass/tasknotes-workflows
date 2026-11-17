@@ -41,7 +41,7 @@ Automatic execution is controlled by **Run workflows on this device**, a device-
 
 Run idempotency reservations persist for seven days; cron/interval downtime coalesces into one firing. Concurrency supports skip, queue, replace, and allow. This client does not provide distributed leases, a transactional event journal, or interrupted-run replay; see the [schema and execution limits](docs/workflow-schema.md).
 
-In an mdbase 0.3 collection, new/migrated notes use its configured explicit type key (including TaskNotes v5's `mdbase_type`). If the runtime type is missing, the plugin suggests installing the **mdbase runtime standard** pack.
+In an mdbase 0.3 collection, new/migrated notes use its configured explicit type key (including TaskNotes v5's `mdbase_type`). If the runtime type is missing or older than pack 0.2.1, whose type first accepts keys other than `type`, the plugin suggests installing the **mdbase runtime standard** pack.
 
 ## Included Workflows
 

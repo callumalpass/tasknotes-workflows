@@ -47,6 +47,8 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 	runOnThisDevice = true;
 	private migrationNoticeShown = false;
 	private runtimeTypeHintShown = false;
+	/** The collection's explicit type keys (mdbase.yaml), refreshed on every reload. */
+	collectionTypeKeys: string[] = ["type", "types"];
 	private bridge!: TaskNotesBridge;
 	private engine!: WorkflowEngine;
 	private scheduler!: WorkflowScheduler;
@@ -217,6 +219,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 			new Notice(this.t("notices.celMigration"), 12000);
 		}
 		const collection = await collectionSettings(this.app);
+		this.collectionTypeKeys = collection?.typeKeys ?? ["type", "types"];
 		if (!this.runtimeTypeHintShown && collection && !await hasRuntimeType(this.app, collection)) {
 			this.runtimeTypeHintShown = true;
 			this.app.saveLocalStorage("tasknotes-workflows:runtime-type-hint", true);

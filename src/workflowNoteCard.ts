@@ -20,7 +20,7 @@ export function registerWorkflowNoteCards(plugin: TaskNotesWorkflowsPlugin): voi
 	}, 100);
 
 	plugin.registerMarkdownPostProcessor((_el, ctx) => {
-		if (!isWorkflowFrontmatter(ctx.frontmatter) && !plugin.workflows.some((loaded) => loaded.file.path === ctx.sourcePath)) return;
+		if (!isWorkflowFrontmatter(ctx.frontmatter, plugin.collectionTypeKeys) && !plugin.workflows.some((loaded) => loaded.file.path === ctx.sourcePath)) return;
 		scheduleReadingModeWorkflowCards(plugin, ctx.sourcePath);
 	}, -10);
 
@@ -169,7 +169,7 @@ async function loadWorkflow(
 	if (cached) return cached;
 
 	const metadata = plugin.app.metadataCache.getFileCache(file);
-	if (!isWorkflowFrontmatter(metadata?.frontmatter)) return null;
+	if (!isWorkflowFrontmatter(metadata?.frontmatter, plugin.collectionTypeKeys)) return null;
 	return await plugin.repository.loadFile(file);
 }
 
@@ -289,11 +289,13 @@ function debounce(callback: () => void, delayMs: number): () => void {
 	};
 }
 
-function isWorkflowFrontmatter(frontmatter: unknown): boolean {
-	return (
-		frontmatter !== null &&
-		typeof frontmatter === "object" &&
-		"type" in frontmatter &&
-		[WORKFLOW_TYPE, "runtime_workflow", "tasknotes-workflow"].includes(String((frontmatter as { type?: unknown }).type))
-	);
+function isWorkflowFrontmatter(frontmatter: unknown, typeKeys: readonly string[]): boolean {
+	if (frontmatter === null || typeof frontmatter !== "object") return false;
+	const record = frontmatter as Record<string, unknown>;
+	// Earlier formats always used `type`; runtime workflows use the collection's type keys.
+	if ([WORKFLOW_TYPE, "runtime_workflow", "tasknotes-workflow"].includes(String(record.type))) return true;
+	return typeKeys.some((key) => {
+		const value = record[key];
+		return value === "runtime_workflow" || Array.isArray(value) && value.includes("runtime_workflow");
+	});
 }
