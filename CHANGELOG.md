@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-- Automatic triggers whose condition does not match, or that are suppressed by an idempotency key or minimum interval, no longer write a skipped run to history. Manual runs are still recorded.
-- Migrated CEL conditions are strict: reading a field that is missing is an evaluation error and fails the run, where the old Bases expressions treated it as false. Use `has()` or optional selection (`event.data.?after.?status.orValue("")`) when a field may be absent.
 
 ### Changed
 
+- Automatic triggers whose condition does not match, or that are suppressed by an idempotency key or minimum interval, no longer write a skipped run to history. Manual runs are still recorded.
+- Migrated CEL conditions are strict: reading a field that is missing is an evaluation error and fails the run, where the old Bases expressions treated it as false. Use `has()` or optional selection (`event.data.?after.?status.orValue("")`) when a field may be absent.
 - Execute Runtime 0.2 workflow records directly with CEL expressions, trigger guards, ordered variables/iteration, persistent seven-day idempotency reservations, concurrency policies, debounce/minimum intervals, deadlines and item limits. Missed cron/interval schedules fire once after downtime; cron respects its timezone.
 - Migrate Bases expressions, templates and structured conditions through the reviewed backup/apply/rollback flow. Unsupported conversions disable the workflow with an explanation. Unmigrated v1 files keep the original evaluator; CEL notes open directly for YAML editing.
 - Store runtime run and action-attempt evidence in plugin configuration storage while retaining the history UI and read-only compatibility with old history. Interrupted work is not replayed.
