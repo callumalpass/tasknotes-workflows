@@ -102,8 +102,9 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	override async onload(): Promise<void> {
 		await this.loadSettings();
-		const deviceSetting = this.app.loadLocalStorage("tasknotes-workflows:run-on-this-device") as boolean | null;
-		this.runOnThisDevice = deviceSetting ?? !Platform.isMobile;
+		// Obsidian drops falsy local-storage values, so the setting is stored as "on"/"off".
+		const deviceSetting: unknown = this.app.loadLocalStorage("tasknotes-workflows:run-on-this-device");
+		this.runOnThisDevice = deviceSetting === "on" || deviceSetting === true ? true : deviceSetting === "off" ? false : !Platform.isMobile;
 		this.runtimeTypeHintShown = this.app.loadLocalStorage("tasknotes-workflows:runtime-type-hint") === true;
 
 		this.i18n = createI18nService({
@@ -184,7 +185,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 
 	async setRunOnThisDevice(value: boolean): Promise<void> {
 		this.runOnThisDevice = value;
-		this.app.saveLocalStorage("tasknotes-workflows:run-on-this-device", value);
+		this.app.saveLocalStorage("tasknotes-workflows:run-on-this-device", value ? "on" : "off");
 		await this.reloadWorkflows();
 	}
 
