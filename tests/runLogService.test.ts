@@ -102,6 +102,21 @@ describe("RunLogService", () => {
 		expect(await adapter.exists(`${RUNS_ROOT}/workflows/wf/run-1.json`)).toBe(true);
 	});
 
+	it("marks interrupted runtime work indeterminate without replay and retains the history UI", async () => {
+		const { service, adapter } = createService();
+		const detail = runDetail("run:interrupted");
+		detail.runtime = { type: "runtime_run", id: detail.runId, workflow_id: "wf", status: "running" } as never;
+		detail.attempts = [{ type: "runtime_action_attempt", status: "dispatching" }] as never;
+		await service.checkpoint(detail);
+		expect(await service.recentRuns()).toEqual([]);
+		await service.recoverInterrupted();
+		expect(await service.recentRuns()).toHaveLength(1);
+		expect((await service.readRunDetail("wf", detail.runId))?.runtime?.status).toBe("indeterminate");
+		expect((await service.readRunDetail("wf", detail.runId))?.attempts?.[0]?.status).toBe("indeterminate");
+		expect([...adapter.files.values()].some(({ content }) => content.includes('"type": "runtime_run"'))).toBe(true);
+		await service.recoverInterrupted();
+		expect(await service.recentRuns()).toHaveLength(1);
+	});
 	it("prunes the oldest runs by mtime, not by file name", async () => {
 		const { adapter, service } = createService({ maxRunsPerWorkflow: 2 });
 		// Written oldest to newest; lexicographic order would keep the wrong files.

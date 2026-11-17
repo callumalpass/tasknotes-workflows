@@ -1,7 +1,10 @@
+import { collectionSettings, normalizeWorkflowType, runtimeFrontmatter } from "./collection";
+import { workflowToRuntimeRecord } from "./workflowFormat";
+import type { RuntimeWorkflow } from "@callumalpass/mdbase-runtime";
 import { normalizePath, TFile, type App } from "obsidian";
 import { parseMarkdownFrontmatter, replaceMarkdownFrontmatter } from "./frontmatter";
 import { isMarkdownFile, isWorkflowPath, safePathSegment } from "./path";
-import { parseWorkflowDefinition, workflowToFrontmatter } from "./workflowParser";
+import { parseWorkflowDefinition } from "./workflowParser";
 import type {
 	LoadedWorkflow,
 	TaskNotesWorkflowsSettings,
@@ -46,9 +49,9 @@ export class WorkflowRepository {
 		const parseDiagnostics: WorkflowDiagnostic[] = parsed.error
 			? [{ severity: "error", path: "$frontmatter", message: parsed.error }]
 			: [];
-		const { workflow, diagnostics, sourceFormat } = parsed.error
+		const { workflow, runtime, diagnostics, sourceFormat } = parsed.error
 			? { workflow: null, diagnostics: [], sourceFormat: "unknown" as const }
-			: parseWorkflowDefinition(parsed.data, source);
+			: parseWorkflowDefinition(normalizeWorkflowType(parsed.data, await collectionSettings(this.app)), source);
 
 		return {
 			file,
@@ -56,13 +59,16 @@ export class WorkflowRepository {
 			source,
 			sourceFormat,
 			workflow,
+			runtime,
 			diagnostics: [...parseDiagnostics, ...diagnostics],
 		};
 	}
 
+	async runtimeFrontmatter(record: RuntimeWorkflow): Promise<string> { return runtimeFrontmatter(this.app, record); }
+
 	async saveWorkflow(file: TFile, workflow: WorkflowDefinition): Promise<void> {
 		const source = await this.app.vault.read(file);
-		const updated = replaceMarkdownFrontmatter(source, workflowToFrontmatter(workflow));
+		const updated = replaceMarkdownFrontmatter(source, await this.runtimeFrontmatter(workflowToRuntimeRecord(workflow)));
 		await this.app.vault.modify(file, updated);
 		await this.reload();
 	}
@@ -71,7 +77,7 @@ export class WorkflowRepository {
 		const folder = normalizePath(this.getSettings().workflowFolder);
 		await this.ensureFolder(folder);
 		const path = await this.uniqueWorkflowPath(folder, workflow.id);
-		const content = `---\n${workflowToFrontmatter(workflow)}---\n\n${body.trim()}\n`;
+		const content = `---\n${await this.runtimeFrontmatter(workflowToRuntimeRecord(workflow))}---\n\n${body.trim()}\n`;
 		const file = await this.app.vault.create(path, content);
 		await this.reload();
 		return await this.loadFile(file);

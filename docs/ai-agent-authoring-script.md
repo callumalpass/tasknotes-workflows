@@ -17,12 +17,14 @@ safe testing steps.
    `maxItems`, or `onError` in a new file.
 4. Put TaskNotes-only trigger configuration under `x-tasknotes`.
 5. Prefer `enabled: false` for workflows that mutate tasks or vault files.
-6. Use `$expr` objects for computed values. Plain strings are literals.
+6. Set `x-tasknotes.format_version: 2`. Use CEL `$expr` objects for computed values. Plain strings, including `{{...}}`, are literals. Runtime payloads are under `event.data`.
 7. Give every trigger and step a stable runtime identifier.
 8. Keep `run.limits.max_items` bounded.
 9. Do not use arbitrary JavaScript, shell commands, or unrestricted HTTP.
 10. Use the TaskNotes action catalog rather than editing task frontmatter.
 11. Explain dry-run checks and mutations in the Markdown body.
+
+In an mdbase 0.3 collection, use the first configured `settings.explicit_type_keys` key (for example `mdbase_type`) instead of `type`. Cross-application actions require `mdbase-sync` and **Allow plugin integrations**. Run automatic workflows on one device using the device-local executor setting.
 
 TaskNotes-specific trigger metadata is a runtime extension:
 
@@ -34,7 +36,8 @@ triggers:
       version: 1.0.0
     x-tasknotes:
       type: tasknotes.event
-      to: active
+    if:
+      $expr: 'event.data.after.status == "active"'
 ```
 
 Scheduled triggers use a canonical event ID plus executor metadata:
@@ -87,13 +90,14 @@ steps:
       message: Workflow is wired.
 run:
   concurrency:
-    group: workflow
+    group:
+      $expr: workflow.id
     policy: skip
   limits:
     max_items: 25
   on_error: stop
 x-tasknotes:
-  format_version: 1
+  format_version: 2
   source: tasknotes-workflows
 ---
 

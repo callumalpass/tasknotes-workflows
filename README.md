@@ -13,9 +13,9 @@ Use it for things like:
 
 ## Requirements
 
-- Obsidian 1.8.0 or newer
+- Obsidian 1.8.7 or newer
 - TaskNotes installed and enabled
-- `mdbase-obsidian` is optional for local TaskNotes-only workflows and required
+- `mdbase-sync` is optional for local TaskNotes-only workflows and required
   for cross-application contract events and contract actions
 
 ## Install
@@ -36,6 +36,12 @@ Useful commands:
 - **Maintain default workflow files**
 - **Migrate workflow files to the mdbase runtime format**
 - `Run: <workflow name>` for enabled workflows that include a manual trigger
+
+Automatic execution is controlled by **Run workflows on this device**, a device-local setting that defaults on for desktop and off for mobile. Manual runs remain available when it is off. Keep automatic execution enabled on one device for a synced vault.
+
+Run idempotency reservations persist for seven days; cron/interval downtime coalesces into one firing. Concurrency supports skip, queue, replace, and allow. This client does not provide distributed leases, a transactional event journal, or interrupted-run replay; see the [schema and execution limits](docs/workflow-schema.md).
+
+In an mdbase 0.3 collection, new/migrated notes use its configured explicit type key (including TaskNotes v5's `mdbase_type`). If the runtime type is missing, the plugin suggests installing the **mdbase runtime standard** pack.
 
 ## Included Workflows
 
@@ -60,7 +66,8 @@ triggers:
       version: 1.0.0
     x-tasknotes:
       type: tasknotes.event
-      to: active
+    if:
+      $expr: 'event.data.after.status == "active"'
 
 steps:
   - id: start-time
@@ -69,17 +76,18 @@ steps:
       version: 1.0.0
     input:
       task:
-        $expr: event.after.path
+        $expr: event.data.after.path
 
 run:
   concurrency:
-    group: workflow
+    group:
+      $expr: workflow.id
     policy: skip
   limits:
     max_items: 25
   on_error: stop
 x-tasknotes:
-  format_version: 1
+  format_version: 2
   source: tasknotes-workflows
 ---
 ```
@@ -102,7 +110,7 @@ New files and editor saves validate against the canonical mdbase runtime
 `runtime_workflow` schema from Runtime profile 0.2. Files created by TaskNotes Workflows 0.1.x continue to
 run through the compatibility reader. The migration command shows a per-file
 diff, checks for changes after analysis, and creates a backup before rewriting
-legacy frontmatter; it never runs automatically during plugin startup.
+legacy frontmatter; it never runs automatically during plugin startup. It also converts format v1 expressions to CEL. Unsupported conversions disable the workflow and explain the required manual work.
 
 ## Contract Events And Actions
 
@@ -131,16 +139,15 @@ steps:
       canvas_path: TaskNotes/Canvases/Completed tasks.canvas
       card:
         kind: file
-        file: "{{event.data.task_path}}"
+        file:
+          $expr: event.data.task_path
 ```
 
 The included **Add completed tasks to a canvas** workflow demonstrates this
-flow and is disabled by default. Enable **Allow local application
-interoperability** in mdbase settings before enabling it.
+flow and is disabled by default. Enable **Allow plugin integrations** in mdbase settings before enabling it.
 
 Contract events use CloudEvents and are multicast. Action execution requires
-exactly one compatible provider. Run details preserve the exact contract,
-source, provider, request, attempt, and outcome evidence. Compatibility never
+exactly one compatible provider. Run details preserve contract, provider, request, attempt, and outcome evidence. Compatibility never
 acts as authorization; the mdbase host grant remains default-deny.
 
 ## Editing Workflows
@@ -149,7 +156,7 @@ Use the workflow Base as the primary UI. Workflow cards open a modal editor for 
 
 The Markdown note remains the source of truth. Use the card's note action when direct YAML editing is useful.
 
-Workflows are typed YAML pipelines. Advanced guards and computed input values use Obsidian Bases formulas via the same expression engine as Bases. Date fields in the editor include fixed, workflow value, relative date, and formula modes, and run history shows both the source input and resolved input for dry-run review.
+Workflows execute in this client using Runtime 0.2 records and CEL expressions. CEL workflows open their YAML note for editing; v1 workflows keep the original visual editor and Bases evaluator until migrated. Plain strings are literals in CEL workflows. Run history keeps its existing interface and stores runtime run/action-attempt evidence.
 
 See [Workflow Schema](docs/workflow-schema.md) and [AI Agent Authoring Script](docs/ai-agent-authoring-script.md) for the full format.
 

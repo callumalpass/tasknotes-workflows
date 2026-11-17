@@ -28,6 +28,7 @@ export function createWorkflowDefinition(input: {
 	return {
 		type: "workflow",
 		schemaVersion: 1,
+		expressionLanguage: "cel",
 		id: input.id,
 		name: input.name,
 		description: input.description,
@@ -147,7 +148,7 @@ export function defaultInputForStep(type: string): Record<string, unknown> {
 	if (type === "task.removeDependency") return { task: "{{event.after.path}}", uid: "dependency-id" };
 	if (type === "time.start") return { task: "{{event.after.path}}", options: { description: "Started by {{workflow.name}}" } };
 	if (type === "time.stop") return { task: "{{event.after.path}}" };
-	if (type === "time.appendEntry") return { task: "{{event.after.path}}", entry: { minutes: 25, date: "{{today}}" } };
+	if (type === "time.appendEntry") return { task: "{{event.after.path}}", entry: { startTime: "{{now}}", description: "Workflow time entry" } };
 	if (type === "obsidian.openFile") return { path: "{{event.path}}", newLeaf: "tab" };
 	if (type === "obsidian.createNote") return { path: "Notes/new-note.md", content: "" };
 	if (type === "obsidian.appendNote") return { path: "{{event.path}}", text: "\n- Workflow ran at {{now}}\n" };

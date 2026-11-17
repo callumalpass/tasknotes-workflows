@@ -1,3 +1,4 @@
+import { historyDetail, historyRecord } from "./runtimeHistory";
 import type { App } from "obsidian";
 import { PLUGIN_ID } from "./constants";
 import { safePathSegment } from "./path";
@@ -11,6 +12,37 @@ export class RunLogService {
 		private readonly app: App,
 		private readonly getSettings: () => TaskNotesWorkflowsSettings
 	) {}
+
+	async recoverInterrupted(): Promise<void> {
+		const root = `${this.rootPath()}/workflows`;
+		if (!await this.exists(root)) return;
+		const interrupted: WorkflowRunDetail[] = [];
+		for (const folder of (await this.app.vault.adapter.list(root)).folders) {
+			for (const file of (await this.app.vault.adapter.list(folder)).files.filter((path) => path.endsWith(".json"))) {
+				const detail = historyDetail(JSON.parse(await this.app.vault.adapter.read(file)));
+				if (!detail.runtime || !["queued", "running", "waiting"].includes(detail.runtime.status)) continue;
+				const now = new Date().toISOString();
+				detail.runtime.status = detail.runtime.status === "queued" ? "cancelled" : "indeterminate";
+				detail.runtime.updated_at = now;
+				detail.runtime.finished_at = now;
+				detail.status = "failed";
+				detail.error = "Interrupted client execution; no actions were replayed.";
+				detail.endedAt = now;
+				for (const attempt of detail.attempts ?? []) {
+					if (attempt.status !== "admitted" && attempt.status !== "dispatching") continue;
+					attempt.status = attempt.status === "admitted" ? "cancelled" : "indeterminate";
+					attempt.updated_at = now;
+					attempt.completed_at = now;
+				}
+				interrupted.push(detail);
+			}
+		}
+		for (const detail of interrupted) await this.recordRun(detail);
+	}
+
+	async checkpoint(detail: WorkflowRunDetail): Promise<void> {
+		await this.enqueueWrite(() => this.writeDetail(detail));
+	}
 
 	async recordRun(detail: WorkflowRunDetail): Promise<RunSummary> {
 		const summary: RunSummary = {
@@ -60,7 +92,7 @@ export class RunLogService {
 		const path = this.detailPath(workflowId, runId);
 		try {
 			if (!(await this.exists(path))) return null;
-			return JSON.parse(await this.app.vault.adapter.read(path)) as WorkflowRunDetail;
+			return historyDetail(JSON.parse(await this.app.vault.adapter.read(path)));
 		} catch {
 			return null;
 		}
@@ -99,7 +131,7 @@ export class RunLogService {
 		await this.ensureFolder(folder);
 		await this.app.vault.adapter.write(
 			this.detailPath(detail.workflowId, detail.runId),
-			stringifyWorkflowData(detail, 2)
+			stringifyWorkflowData(historyRecord(detail), 2)
 		);
 	}
 

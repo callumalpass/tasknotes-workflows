@@ -73,7 +73,7 @@ describe("WorkflowScheduler task events", () => {
 		scheduler.start();
 
 		handlers.get("task.created")?.({ task: { path: "Tasks/a.md" } });
-		await Promise.resolve();
+		await vi.waitFor(() => expect(runWorkflow).toHaveBeenCalledTimes(1));
 
 		expect(runWorkflow).toHaveBeenCalledTimes(1);
 	});
@@ -86,7 +86,7 @@ describe("WorkflowScheduler task events", () => {
 		scheduler.start();
 
 		handlers.get("task.created")?.({ task: { path: "Tasks/a.md" } });
-		await Promise.resolve();
+		await vi.waitFor(() => expect(runWorkflow).toHaveBeenCalledTimes(1));
 
 		expect(runWorkflow).toHaveBeenCalledTimes(1);
 		expect(runWorkflow.mock.calls[0][0].workflow?.id).toBe("active");

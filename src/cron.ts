@@ -1,14 +1,20 @@
-export function cronMatches(schedule: string, date: Date): boolean {
+export function cronMatches(schedule: string, date: Date, timezone?: string): boolean {
 	const fields = schedule.trim().split(/\s+/u);
 	if (fields.length !== 5) return false;
 
 	const [minute, hour, dayOfMonth, month, dayOfWeek] = fields;
+	let values = [date.getMinutes(), date.getHours(), date.getDate(), date.getMonth() + 1, date.getDay()];
+	if (timezone && timezone !== "local") {
+		const parts = new Intl.DateTimeFormat("en-US", { timeZone: timezone, minute: "numeric", hour: "numeric", day: "numeric", month: "numeric", weekday: "short", hourCycle: "h23" }).formatToParts(date);
+		const get = (type: string): string => parts.find((part) => part.type === type)?.value ?? "";
+		values = [Number(get("minute")), Number(get("hour")), Number(get("day")), Number(get("month")), ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"))];
+	}
 	return (
-		fieldMatches(minute, date.getMinutes(), 0, 59) &&
-		fieldMatches(hour, date.getHours(), 0, 23) &&
-		fieldMatches(dayOfMonth, date.getDate(), 1, 31) &&
-		fieldMatches(month, date.getMonth() + 1, 1, 12) &&
-		fieldMatches(dayOfWeek, date.getDay(), 0, 7)
+		fieldMatches(minute, values[0] ?? 0, 0, 59) &&
+		fieldMatches(hour, values[1] ?? 0, 0, 23) &&
+		fieldMatches(dayOfMonth, values[2] ?? 1, 1, 31) &&
+		fieldMatches(month, values[3] ?? 1, 1, 12) &&
+		fieldMatches(dayOfWeek, values[4] ?? 0, 0, 7)
 	);
 }
 
