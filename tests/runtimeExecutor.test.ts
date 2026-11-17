@@ -54,6 +54,18 @@ describe("CEL runtime", () => {
 		expect(evaluateVariables({ b: { $expr: 'vars.a + "!"' }, a: "hello" }, {})).toEqual({ a: "hello", b: "hello!" });
 		expect(() => evaluateVariables({ a: { $expr: "vars.b" }, b: { $expr: "vars.a" } }, {})).toThrow(/Cyclic/);
 	});
+	it("does not record automatic runs whose trigger condition does not match", async () => {
+		const run = vi.fn(async (input) => input);
+		const { executor, evidence } = setup(run);
+		const workflow = loaded({ triggers: [{ id: "event", event: { id: "task.updated", version: "1.0.0" }, if: { $expr: 'event.data.after.status == "done"' } }] });
+		const result = await executor.run(workflow, event());
+		expect(result.notAdmitted).toBe(true);
+		expect(evidence).toEqual([]);
+		expect(run).not.toHaveBeenCalled();
+		const manual = await executor.run(workflow, { ...event("two"), manual: true });
+		expect(manual.notAdmitted).toBe(false);
+		expect(evidence).toHaveLength(1);
+	});
 	it("executes runtime fields directly and writes schema-valid run and attempt evidence before dispatch", async () => {
 		const run = vi.fn(async (input) => input);
 		const { executor, evidence } = setup(run);

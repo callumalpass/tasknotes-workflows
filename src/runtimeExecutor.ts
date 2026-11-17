@@ -49,8 +49,12 @@ export class RuntimeWorkflowExecutor {
 				detail.runtime.updated_at = detail.endedAt;
 				detail.runtime.finished_at = detail.endedAt;
 			}
-			await this.persist(detail);
+			if (!detail.notAdmitted) await this.persist(detail);
 			return detail;
+		};
+		const notAdmitted = async (reason: string): Promise<WorkflowRunDetail> => {
+			detail.notAdmitted = !options.manual;
+			return await finish("cancelled", reason);
 		};
 		let active: ActiveRun | undefined;
 		let group = "";
@@ -101,12 +105,12 @@ export class RuntimeWorkflowExecutor {
 				trigger_id: trigger?.id ?? "manual", idempotency_key: key, concurrency_group: group,
 				status: "queued", created_at: now.toISOString(), updated_at: now.toISOString(),
 			};
-			if (!matched) return await finish("cancelled", "Trigger condition did not match.");
+			if (!matched) return await notAdmitted("Trigger condition did not match.");
 			const bindings = await Promise.all(workflow.steps.map((step) => this.binding(step)));
 			detail.runtime.admitted_plan.steps = bindings;
 			this.checkCapabilities(workflow.requires?.capabilities);
 			const minimumInterval = !options.manual && trigger?.minimum_interval ? { key: `${workflow.id}:${trigger.id}`, minimumIntervalMs: parseDurationMs(trigger.minimum_interval, 0) } : undefined;
-			if (!options.dryRun && !await this.state.reserve(key, Date.now(), minimumInterval)) return await finish("cancelled", "Duplicate idempotency key or minimum interval has not elapsed.");
+			if (!options.dryRun && !await this.state.reserve(key, Date.now(), minimumInterval)) return await notAdmitted("Duplicate idempotency key or minimum interval has not elapsed.");
 			const policy = workflow.run?.concurrency?.policy ?? "skip";
 			const existing = [...this.groups.get(group) ?? []];
 			if (policy === "skip" && existing.length) return await finish("cancelled", "Concurrency group is active.");

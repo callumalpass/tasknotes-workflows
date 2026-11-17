@@ -308,6 +308,7 @@ export default class TaskNotesWorkflowsPlugin extends Plugin {
 		options: WorkflowRunOptions
 	): Promise<WorkflowRunDetail> {
 		const detail = await this.engine.runWorkflow(workflow, options);
+		if (detail.notAdmitted) return detail;
 		await this.runLogs.recordRun(this.redactRunDetail(detail));
 		await this.refreshWorkflowLastRun(detail.workflowId);
 		await this.renderWorkflowBaseViews();

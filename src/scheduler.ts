@@ -31,6 +31,7 @@ export class WorkflowScheduler {
 	private cleanupCallbacks: Array<() => void> = [];
 	private debounceTimers = new Map<string, { timer: number; resolve: () => void }>();
 	private metadataSnapshots = new Map<string, Record<string, unknown>>();
+	private typeKeys: Promise<string[]> | null = null;
 	private registrationEpoch = 0;
 
 	constructor(
@@ -170,8 +171,12 @@ export class WorkflowScheduler {
 		});
 		this.cleanupCallbacks.push(() => this.plugin.app.workspace.offref(layoutChangeRef));
 
-		for (const file of this.plugin.app.vault.getMarkdownFiles()) {
-			this.metadataSnapshots.set(file.path, structuredClone(this.plugin.app.metadataCache.getFileCache(file)?.frontmatter ?? {}));
+		this.metadataSnapshots.clear();
+		this.typeKeys = null;
+		if (this.hasMetadataTrigger("changed")) {
+			for (const file of this.plugin.app.vault.getMarkdownFiles()) {
+				this.metadataSnapshots.set(file.path, structuredClone(this.plugin.app.metadataCache.getFileCache(file)?.frontmatter ?? {}));
+			}
 		}
 		const metadataChangedRef = this.plugin.app.metadataCache.on("changed", (file, _data, cache) => {
 			void this.handleMetadataEvent("changed", file, { cache }).catch(showError);
@@ -322,6 +327,7 @@ export class WorkflowScheduler {
 		file: TFile | null,
 		data?: unknown
 	): Promise<void> {
+		if (!this.hasMetadataTrigger(event)) return;
 		let cloudEvent: CloudEvent | undefined;
 		if (event === "changed" && file) {
 			const before = this.metadataSnapshots.get(file.path) ?? {};
@@ -331,7 +337,8 @@ export class WorkflowScheduler {
 			delete before.position;
 			this.metadataSnapshots.set(file.path, after);
 			const changed_fields = [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((key) => JSON.stringify(before[key]) !== JSON.stringify(after[key]));
-			const keys = (await collectionSettings(this.plugin.app))?.typeKeys ?? ["type", "types"];
+			this.typeKeys ??= collectionSettings(this.plugin.app).then((config) => config?.typeKeys ?? ["type", "types"]);
+			const keys = await this.typeKeys;
 			const types = (record: Record<string, unknown>): string[] => [...new Set(keys.flatMap((key) => typeof record[key] === "string" ? [record[key]] : Array.isArray(record[key]) ? record[key] as unknown[] : []).filter((value): value is string => typeof value === "string"))];
 			data = { path: file.path, before, after, changed_fields, previous_revision: await digest(before), revision: await digest(after), previous_types: types(before), types: types(after) };
 			cloudEvent = await localCloudEvent({ trigger: { type: event, data, path: file.path } }, "mdbase.record.modified");
@@ -357,6 +364,11 @@ export class WorkflowScheduler {
 				});
 			}
 		}
+	}
+
+	private hasMetadataTrigger(event: ObsidianMetadataTrigger["event"]): boolean {
+		return this.getWorkflows().some((workflow) => workflow.workflow?.enabled
+			&& workflow.workflow.triggers.some((trigger) => trigger.type === "obsidian.metadata" && trigger.event === event));
 	}
 
 	private taskNotesTriggerMatches(trigger: TaskNotesEventTrigger, payload: WorkflowTriggerPayload): boolean {

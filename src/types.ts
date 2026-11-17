@@ -286,6 +286,8 @@ export interface WorkflowRunDetail {
 	trigger: WorkflowTriggerPayload;
 	steps: StepRunDetail[];
 	error?: string;
+	/** Set when an automatic trigger did not admit a run (condition, duplicate key or minimum interval); such runs are not recorded. */
+	notAdmitted?: boolean;
 }
 
 export type WorkflowRunStatus = "success" | "failed" | "skipped" | "stopped";

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Automatic triggers whose condition does not match, or that are suppressed by an idempotency key or minimum interval, no longer write a skipped run to history. Manual runs are still recorded.
+- Migrated CEL conditions are strict: reading a field that is missing is an evaluation error and fails the run, where the old Bases expressions treated it as false. Use `has()` or optional selection (`event.data.?after.?status.orValue("")`) when a field may be absent.
+
 ### Changed
 
 - Execute Runtime 0.2 workflow records directly with CEL expressions, trigger guards, ordered variables/iteration, persistent seven-day idempotency reservations, concurrency policies, debounce/minimum intervals, deadlines and item limits. Missed cron/interval schedules fire once after downtime; cron respects its timezone.
